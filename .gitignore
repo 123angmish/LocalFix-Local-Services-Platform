@@ -1,0 +1,24 @@
+# Compiled Java & Maven output
+backend/target/
+backend/.mvn_bin/
+*.class
+*.jar
+*.war
+
+# Node & Frontend dependencies & build output
+frontend/node_modules/
+frontend/dist/
+node_modules/
+dist/
+
+# IDE & OS files
+.idea/
+.vscode/
+*.swp
+*.DS_Store
+Thumbs.db
+
+# Environment variables & secrets
+.env
+backend/.env
+frontend/.env

@@ -1,0 +1,7 @@
+#!/bin/sh
+# ----------------------------------------------------------------------------
+# Maven Start Up Batch script
+# ----------------------------------------------------------------------------
+
+export JVM_CONFIG_FILE="$MAVEN_PROJECTBASEDIR/.mvn/jvm.config"
+exec mvn "$@"

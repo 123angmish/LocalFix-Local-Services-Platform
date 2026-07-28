@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: localfix-backend
+    env: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    region: singapore
+    plan: free
+    envVars:
+      - key: SPRING_DATASOURCE_URL
+        fromDatabase:
+          name: localfix-db
+          property: connectionString
+      - key: SPRING_JPA_DATABASE_PLATFORM
+        value: org.hibernate.dialect.PostgreSQLDialect
+      - key: FLYWAY_ENABLED
+        value: "true"
+      - key: ALLOWED_ORIGINS
+        value: "https://*.netlify.app,http://localhost:5173"
+
+databases:
+  - name: localfix-db
+    databaseName: localfixdb
+    user: postgres
+    region: singapore
+    plan: free
