@@ -21,6 +21,5 @@ services:
 databases:
   - name: localfix-db
     databaseName: localfixdb
-    user: postgres
     region: singapore
     plan: free
