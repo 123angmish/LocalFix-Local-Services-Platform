@@ -1,7 +1,5 @@
 package com.localfix.config;
 
-import org.slf.Logger;
-import org.slf.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
@@ -12,8 +10,6 @@ import javax.sql.DataSource;
 
 @Configuration
 public class DatabaseConfig {
-
-    private static final Logger logger = LoggerFactory.getLogger(DatabaseConfig.class);
 
     @Value("${spring.datasource.url}")
     private String dbUrl;
@@ -37,7 +33,7 @@ public class DatabaseConfig {
         if (dbUrl != null && dbUrl.startsWith("postgresql://")) {
             formattedUrl = "jdbc:" + dbUrl;
             driverClass = "org.postgresql.Driver";
-            logger.info("Transformed Render postgresql:// URL to JDBC format: {}", formattedUrl);
+            System.out.println("Transformed Render postgresql:// URL to JDBC format: " + formattedUrl);
         } else if (dbUrl != null && dbUrl.contains("postgresql")) {
             driverClass = "org.postgresql.Driver";
         }
