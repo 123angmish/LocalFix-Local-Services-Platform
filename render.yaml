@@ -7,16 +7,26 @@ services:
     region: singapore
     plan: free
     envVars:
-      - key: SPRING_DATASOURCE_URL
-        fromDatabase:
-          name: localfix-db
-          property: connectionString
+      - key: SPRING_DATASOURCE_DRIVER
+        value: org.postgresql.Driver
       - key: SPRING_JPA_DATABASE_PLATFORM
         value: org.hibernate.dialect.PostgreSQLDialect
       - key: FLYWAY_ENABLED
         value: "true"
       - key: ALLOWED_ORIGINS
         value: "https://*.netlify.app,http://localhost:5173"
+      - key: SPRING_DATASOURCE_URL
+        fromDatabase:
+          name: localfix-db
+          property: connectionString
+      - key: SPRING_DATASOURCE_USERNAME
+        fromDatabase:
+          name: localfix-db
+          property: user
+      - key: SPRING_DATASOURCE_PASSWORD
+        fromDatabase:
+          name: localfix-db
+          property: password
 
 databases:
   - name: localfix-db
