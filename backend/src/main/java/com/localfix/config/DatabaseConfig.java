@@ -28,20 +28,41 @@ public class DatabaseConfig {
     public DataSource dataSource() {
         String formattedUrl = dbUrl;
         String driverClass = defaultDriver;
+        String finalUsername = username;
+        String finalPassword = password;
 
-        // Auto-fix Render/Heroku postgresql:// connection strings
-        if (dbUrl != null && dbUrl.startsWith("postgresql://")) {
-            formattedUrl = "jdbc:" + dbUrl;
+        if (dbUrl != null && (dbUrl.startsWith("postgresql://") || dbUrl.startsWith("jdbc:postgresql://"))) {
             driverClass = "org.postgresql.Driver";
-            System.out.println("Transformed Render postgresql:// URL to JDBC format: " + formattedUrl);
-        } else if (dbUrl != null && dbUrl.contains("postgresql")) {
-            driverClass = "org.postgresql.Driver";
+
+            if (dbUrl.contains("@")) {
+                try {
+                    String clean = dbUrl.replace("jdbc:postgresql://", "").replace("postgresql://", "");
+                    String[] parts = clean.split("@");
+                    String userPass = parts[0];
+                    String hostDb = parts[1];
+
+                    if (userPass.contains(":")) {
+                        String[] creds = userPass.split(":");
+                        finalUsername = creds[0];
+                        finalPassword = creds[1];
+                    } else {
+                        finalUsername = userPass;
+                    }
+
+                    formattedUrl = "jdbc:postgresql://" + hostDb;
+                    System.out.println("Parsed Render Database URL: " + formattedUrl + " (User: " + finalUsername + ")");
+                } catch (Exception e) {
+                    System.err.println("Failed to parse postgresql URL: " + e.getMessage());
+                }
+            } else if (!dbUrl.startsWith("jdbc:")) {
+                formattedUrl = "jdbc:" + dbUrl;
+            }
         }
 
         return DataSourceBuilder.create()
                 .url(formattedUrl)
-                .username(username)
-                .password(password)
+                .username(finalUsername)
+                .password(finalPassword)
                 .driverClassName(driverClass)
                 .build();
     }
