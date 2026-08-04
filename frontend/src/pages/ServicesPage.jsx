@@ -21,9 +21,10 @@ export const ServicesPage = () => {
   const fetchCategories = async () => {
     try {
       const res = await api.get('/categories');
-      setCategories(res.data);
+      setCategories(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error(err);
+      setCategories([]);
     }
   };
 
@@ -38,7 +39,7 @@ export const ServicesPage = () => {
       if (maxPrice) params.append('maxPrice', maxPrice);
 
       const res = await api.get(`/services?${params.toString()}`);
-      let result = res.data;
+      let result = Array.isArray(res.data) ? res.data : [];
 
       // Sorting
       if (sortBy === 'rating') {

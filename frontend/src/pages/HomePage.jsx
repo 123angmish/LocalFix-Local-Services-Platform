@@ -18,10 +18,12 @@ export const HomePage = () => {
           api.get('/categories'),
           api.get('/services')
         ]);
-        setCategories(catRes.data);
-        setTopServices(srvRes.data.slice(0, 6));
+        setCategories(Array.isArray(catRes.data) ? catRes.data : []);
+        setTopServices(Array.isArray(srvRes.data) ? srvRes.data.slice(0, 6) : []);
       } catch (err) {
         console.error("Failed to load home data", err);
+        setCategories([]);
+        setTopServices([]);
       } finally {
         setLoading(false);
       }
