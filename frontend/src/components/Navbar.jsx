@@ -95,12 +95,12 @@ export const Navbar = () => {
 
                 <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
                   <div className="w-9 h-9 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-sm">
-                    {user.name.charAt(0).toUpperCase()}
+                    {(user?.name || user?.email || 'U').charAt(0).toUpperCase()}
                   </div>
                   <div className="text-left leading-tight hidden lg:block">
-                    <div className="text-xs font-semibold text-slate-900">{user.name}</div>
+                    <div className="text-xs font-semibold text-slate-900">{user?.name || user?.email || 'User'}</div>
                     <span className="text-[10px] uppercase font-bold text-indigo-600 tracking-wider">
-                      {user.role}
+                      {user?.role}
                     </span>
                   </div>
                   <button
