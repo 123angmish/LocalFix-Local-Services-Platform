@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.UUID;
 
 @Component
 public class JwtTokenProvider {
@@ -33,6 +34,8 @@ public class JwtTokenProvider {
         Date expiryDate = new Date(now.getTime() + jwtExpirationInMs);
 
         return Jwts.builder()
+                .id(UUID.randomUUID().toString())
+                .issuer("localfix-enterprise-security")
                 .subject(Long.toString(userPrincipal.getId()))
                 .issuedAt(now)
                 .expiration(expiryDate)
