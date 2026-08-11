@@ -107,6 +107,7 @@ public class ServiceItemService {
                 .price(dto.getPrice())
                 .city(dto.getCity())
                 .durationMinutes(dto.getDurationMinutes() != null ? dto.getDurationMinutes() : 60)
+                .imageUrl(dto.getImageUrl())
                 .active(dto.getActive() != null ? dto.getActive() : true)
                 .build();
 
@@ -131,6 +132,9 @@ public class ServiceItemService {
         item.setPrice(dto.getPrice());
         item.setCity(dto.getCity());
         item.setDurationMinutes(dto.getDurationMinutes());
+        if (dto.getImageUrl() != null) {
+            item.setImageUrl(dto.getImageUrl());
+        }
         if (dto.getActive() != null) {
             item.setActive(dto.getActive());
         }
@@ -184,6 +188,7 @@ public class ServiceItemService {
                 .price(item.getPrice())
                 .city(item.getCity())
                 .durationMinutes(item.getDurationMinutes())
+                .imageUrl(item.getImageUrl())
                 .active(item.isActive())
                 .createdAt(item.getCreatedAt())
                 .build();

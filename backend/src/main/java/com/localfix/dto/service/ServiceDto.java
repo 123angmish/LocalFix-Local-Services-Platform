@@ -20,12 +20,13 @@ public class ServiceDto {
     private BigDecimal price;
     private String city;
     private Integer durationMinutes;
+    private String imageUrl;
     private boolean active;
     private LocalDateTime createdAt;
 
     public ServiceDto() {}
 
-    public ServiceDto(Long id, Long vendorId, String vendorBusinessName, String vendorCity, String vendorPhone, String vendorEmail, Double vendorRating, Integer vendorTotalReviews, Long categoryId, String categoryName, String categoryIcon, String title, String description, BigDecimal price, String city, Integer durationMinutes, boolean active, LocalDateTime createdAt) {
+    public ServiceDto(Long id, Long vendorId, String vendorBusinessName, String vendorCity, String vendorPhone, String vendorEmail, Double vendorRating, Integer vendorTotalReviews, Long categoryId, String categoryName, String categoryIcon, String title, String description, BigDecimal price, String city, Integer durationMinutes, String imageUrl, boolean active, LocalDateTime createdAt) {
         this.id = id;
         this.vendorId = vendorId;
         this.vendorBusinessName = vendorBusinessName;
@@ -42,6 +43,7 @@ public class ServiceDto {
         this.price = price;
         this.city = city;
         this.durationMinutes = durationMinutes;
+        this.imageUrl = imageUrl;
         this.active = active;
         this.createdAt = createdAt;
     }
@@ -94,6 +96,9 @@ public class ServiceDto {
     public Integer getDurationMinutes() { return durationMinutes; }
     public void setDurationMinutes(Integer durationMinutes) { this.durationMinutes = durationMinutes; }
 
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+
     public boolean isActive() { return active; }
     public void setActive(boolean active) { this.active = active; }
 
@@ -119,6 +124,7 @@ public class ServiceDto {
         private BigDecimal price;
         private String city;
         private Integer durationMinutes;
+        private String imageUrl;
         private boolean active;
         private LocalDateTime createdAt;
 
@@ -138,11 +144,12 @@ public class ServiceDto {
         public Builder price(BigDecimal price) { this.price = price; return this; }
         public Builder city(String city) { this.city = city; return this; }
         public Builder durationMinutes(Integer durationMinutes) { this.durationMinutes = durationMinutes; return this; }
+        public Builder imageUrl(String imageUrl) { this.imageUrl = imageUrl; return this; }
         public Builder active(boolean active) { this.active = active; return this; }
         public Builder createdAt(LocalDateTime createdAt) { this.createdAt = createdAt; return this; }
 
         public ServiceDto build() {
-            return new ServiceDto(id, vendorId, vendorBusinessName, vendorCity, vendorPhone, vendorEmail, vendorRating, vendorTotalReviews, categoryId, categoryName, categoryIcon, title, description, price, city, durationMinutes, active, createdAt);
+            return new ServiceDto(id, vendorId, vendorBusinessName, vendorCity, vendorPhone, vendorEmail, vendorRating, vendorTotalReviews, categoryId, categoryName, categoryIcon, title, description, price, city, durationMinutes, imageUrl, active, createdAt);
         }
     }
 }

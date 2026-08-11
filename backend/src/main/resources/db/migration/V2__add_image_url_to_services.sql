@@ -1,0 +1,2 @@
+ALTER TABLE service_items ADD COLUMN IF NOT EXISTS image_url TEXT;
+ALTER TABLE services ADD COLUMN IF NOT EXISTS image_url TEXT;

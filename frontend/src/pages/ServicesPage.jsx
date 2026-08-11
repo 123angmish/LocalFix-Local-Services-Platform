@@ -233,15 +233,27 @@ export const ServicesPage = () => {
                   key={srv.id}
                   className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition overflow-hidden flex flex-col justify-between"
                 >
+                  {srv.imageUrl && (
+                    <div className="h-40 bg-slate-100 relative overflow-hidden">
+                      <img src={srv.imageUrl} alt={srv.title} className="w-full h-full object-cover" />
+                      <div className="absolute top-3 right-3 flex items-center gap-1 text-xs font-bold text-amber-500 bg-white/90 backdrop-blur-md px-2.5 py-1 rounded-md shadow-sm">
+                        <Star className="w-3.5 h-3.5 fill-current" />
+                        <span>{srv.vendorRating || 5.0}</span>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="p-6 space-y-4">
                     <div className="flex justify-between items-start">
                       <span className="px-3 py-1 bg-indigo-50 text-indigo-700 text-xs font-semibold rounded-full border border-indigo-100">
                         {srv.categoryName}
                       </span>
-                      <div className="flex items-center gap-1 text-xs font-bold text-amber-500 bg-amber-50 px-2.5 py-1 rounded-md">
-                        <Star className="w-3.5 h-3.5 fill-current" />
-                        <span>{srv.vendorRating || 5.0}</span>
-                      </div>
+                      {!srv.imageUrl && (
+                        <div className="flex items-center gap-1 text-xs font-bold text-amber-500 bg-amber-50 px-2.5 py-1 rounded-md">
+                          <Star className="w-3.5 h-3.5 fill-current" />
+                          <span>{srv.vendorRating || 5.0}</span>
+                        </div>
+                      )}
                     </div>
 
                     <div>

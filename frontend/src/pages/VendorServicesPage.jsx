@@ -1,7 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import api from '../api/axios';
 import toast from 'react-hot-toast';
-import { Plus, Edit, Trash2, X, Wrench, Clock, MapPin, RefreshCw, AlertTriangle } from 'lucide-react';
+import { Plus, Edit, Trash2, X, Wrench, Clock, MapPin, RefreshCw, Upload, Image as ImageIcon, Camera } from 'lucide-react';
+
+const PRESET_SAMPLE_PHOTOS = [
+  { name: 'Plumber Work', url: 'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=600&auto=format&fit=crop&q=80' },
+  { name: 'Electrician Work', url: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=600&auto=format&fit=crop&q=80' },
+  { name: 'Salon & Grooming', url: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=600&auto=format&fit=crop&q=80' },
+  { name: 'Home Cleaning', url: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=600&auto=format&fit=crop&q=80' },
+  { name: 'AC & Appliance Repair', url: 'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=600&auto=format&fit=crop&q=80' },
+  { name: 'Painting & Carpentry', url: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=600&auto=format&fit=crop&q=80' }
+];
 
 export const VendorServicesPage = () => {
   const [services, setServices] = useState([]);
@@ -19,6 +28,7 @@ export const VendorServicesPage = () => {
     price: '',
     city: 'Mumbai',
     durationMinutes: 60,
+    imageUrl: '',
     active: true
   });
 
@@ -53,6 +63,7 @@ export const VendorServicesPage = () => {
       price: '',
       city: 'Mumbai',
       durationMinutes: 60,
+      imageUrl: PRESET_SAMPLE_PHOTOS[0].url,
       active: true
     });
     setIsModalOpen(true);
@@ -67,9 +78,26 @@ export const VendorServicesPage = () => {
       price: srv.price,
       city: srv.city,
       durationMinutes: srv.durationMinutes || 60,
+      imageUrl: srv.imageUrl || '',
       active: srv.active
     });
     setIsModalOpen(true);
+  };
+
+  const handleImageFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        toast.error("Image file size should be less than 2MB");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData(prev => ({ ...prev, imageUrl: reader.result }));
+        toast.success("Picture attached successfully!");
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleDelete = async (id) => {
@@ -84,12 +112,12 @@ export const VendorServicesPage = () => {
   };
 
   const handleResetProfession = async () => {
-    if (!window.confirm("⚠️ WARNING: This will permanently DELETE your current registered job/profession data from the SQL Database so you can register a completely new job (e.g. Barber -> Postman). Do you want to proceed?")) {
+    if (!window.confirm("⚠️ WARNING: This will permanently DELETE your current registered job/profession data from the SQL Database so you can register a completely new job. Proceed?")) {
       return;
     }
     try {
       await api.delete('/vendor/profession/reset');
-      toast.success("Previous profession data permanently deleted from database. Enter your new job!");
+      toast.success("Previous profession data reset successfully!");
       setServices([]);
       handleOpenAdd();
     } catch (err) {
@@ -102,10 +130,10 @@ export const VendorServicesPage = () => {
     try {
       if (editingService) {
         await api.put(`/vendor/services/${editingService.id}`, formData);
-        toast.success("Service updated successfully");
+        toast.success("Service and picture updated successfully!");
       } else {
         await api.post('/vendor/services', formData);
-        toast.success("New job/profession registered and pushed to SQL database!");
+        toast.success("New job/profession with picture saved to SQL database!");
       }
       setIsModalOpen(false);
       fetchData();
@@ -118,14 +146,13 @@ export const VendorServicesPage = () => {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Manage My Profession & Services</h1>
-          <p className="text-sm text-slate-600">Register new job, set prices, or delete old profession data to switch jobs</p>
+          <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Manage My Profession & Work Pictures</h1>
+          <p className="text-sm text-slate-600">Register services, upload real work photos, set pricing, or update your portfolio</p>
         </div>
         <div className="flex gap-3">
           <button
             onClick={handleResetProfession}
             className="px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center gap-2"
-            title="Delete current job data from SQL DB and register a new profession"
           >
             <RefreshCw className="w-4 h-4" />
             Switch / Reset Profession
@@ -143,7 +170,7 @@ export const VendorServicesPage = () => {
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[...Array(3)].map((_, i) => (
-            <div key={i} className="h-48 bg-slate-200 rounded-2xl animate-pulse"></div>
+            <div key={i} className="h-64 bg-slate-200 rounded-2xl animate-pulse"></div>
           ))}
         </div>
       ) : services.length === 0 ? (
@@ -151,55 +178,74 @@ export const VendorServicesPage = () => {
           <Wrench className="w-12 h-12 text-slate-300 mx-auto" />
           <h3 className="text-lg font-bold text-slate-900">No Active Profession Registered</h3>
           <p className="text-xs text-slate-500 max-w-md mx-auto">
-            You currently have no registered job entries in the database. Click **Add New Job Package** above to enter your job title (e.g., Barber, Postman, Electrician) and price limit!
+            You currently have no registered job entries in the database. Click **Add New Job Package** above to enter your job title, upload pictures, and set prices!
           </p>
           <button
             onClick={handleOpenAdd}
             className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-md transition inline-flex items-center gap-2"
           >
             <Plus className="w-4 h-4" />
-            Register Job & Price Now
+            Register Job & Add Pictures
           </button>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {services.map((srv) => (
-            <div key={srv.id} className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4 flex flex-col justify-between hover:shadow-md transition">
-              <div className="space-y-2">
-                <div className="flex justify-between items-start">
-                  <span className="px-3 py-1 bg-indigo-50 text-indigo-700 text-xs font-bold rounded-full border border-indigo-100">
+            <div key={srv.id} className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col justify-between hover:shadow-md transition">
+              {/* Picture Banner */}
+              <div className="relative h-44 bg-slate-100 overflow-hidden">
+                {srv.imageUrl ? (
+                  <img
+                    src={srv.imageUrl}
+                    alt={srv.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                  />
+                ) : (
+                  <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 bg-slate-100">
+                    <Camera className="w-8 h-8 mb-1" />
+                    <span className="text-[10px] font-semibold">No Picture Attached</span>
+                  </div>
+                )}
+                <div className="absolute top-3 left-3">
+                  <span className="px-3 py-1 bg-white/90 backdrop-blur-md text-indigo-700 text-xs font-bold rounded-full shadow-sm">
                     {srv.categoryName}
                   </span>
-                  <span className={`text-[10px] uppercase font-extrabold px-2 py-0.5 rounded ${srv.active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
-                    {srv.active ? 'Active on Database' : 'Disabled'}
+                </div>
+                <div className="absolute top-3 right-3">
+                  <span className={`text-[10px] uppercase font-extrabold px-2 py-0.5 rounded backdrop-blur-md shadow-sm ${srv.active ? 'bg-emerald-500 text-white' : 'bg-slate-700 text-white'}`}>
+                    {srv.active ? 'Active' : 'Disabled'}
                   </span>
                 </div>
-
-                <h3 className="font-bold text-slate-900 text-base">{srv.title}</h3>
-                <p className="text-xs text-slate-600 line-clamp-2">{srv.description}</p>
               </div>
 
-              <div className="space-y-3 pt-3 border-t border-slate-100">
-                <div className="flex justify-between items-center text-xs text-slate-500">
-                  <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-indigo-500" /> {srv.city}</span>
-                  <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5 text-slate-400" /> {srv.durationMinutes} mins</span>
-                  <strong className="text-base text-slate-900 font-extrabold">₹{srv.price}</strong>
+              <div className="p-5 space-y-4 flex-grow flex flex-col justify-between">
+                <div className="space-y-1.5">
+                  <h3 className="font-bold text-slate-900 text-base">{srv.title}</h3>
+                  <p className="text-xs text-slate-600 line-clamp-2">{srv.description}</p>
                 </div>
 
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleOpenEdit(srv)}
-                    className="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl flex items-center justify-center gap-1 transition"
-                  >
-                    <Edit className="w-3.5 h-3.5" /> Edit Job Details
-                  </button>
-                  <button
-                    onClick={() => handleDelete(srv.id)}
-                    className="p-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl transition"
-                    title="Delete Job Entry from SQL Database"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                <div className="space-y-3 pt-3 border-t border-slate-100">
+                  <div className="flex justify-between items-center text-xs text-slate-500">
+                    <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-indigo-500" /> {srv.city}</span>
+                    <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5 text-slate-400" /> {srv.durationMinutes} mins</span>
+                    <strong className="text-base text-slate-900 font-extrabold">₹{srv.price}</strong>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleOpenEdit(srv)}
+                      className="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl flex items-center justify-center gap-1.5 transition"
+                    >
+                      <Edit className="w-3.5 h-3.5" /> Edit Details & Photo
+                    </button>
+                    <button
+                      onClick={() => handleDelete(srv.id)}
+                      className="p-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl transition"
+                      title="Delete Job Entry from SQL Database"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -209,11 +255,11 @@ export const VendorServicesPage = () => {
 
       {/* Add / Edit Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white max-w-lg w-full p-6 rounded-3xl shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white max-w-lg w-full p-6 rounded-3xl shadow-2xl space-y-4 my-8">
             <div className="flex justify-between items-center border-b border-slate-100 pb-3">
               <h3 className="font-bold text-slate-900 text-base">
-                {editingService ? 'Edit Job Entry' : 'Register New Profession / Job'}
+                {editingService ? 'Edit Job & Work Photo' : 'Register New Job & Upload Work Photo'}
               </h3>
               <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600">
                 <X className="w-5 h-5" />
@@ -221,6 +267,72 @@ export const VendorServicesPage = () => {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Picture Upload & Sample Selector */}
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                  <Camera className="w-3.5 h-3.5 text-indigo-600" />
+                  Work Picture / Service Photo
+                </label>
+
+                {/* Preview Box */}
+                {formData.imageUrl && (
+                  <div className="relative h-32 rounded-2xl overflow-hidden border border-slate-200 group bg-slate-100">
+                    <img src={formData.imageUrl} alt="Work preview" className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, imageUrl: '' })}
+                      className="absolute top-2 right-2 p-1.5 bg-rose-600 text-white rounded-full hover:bg-rose-700 shadow-md transition text-xs"
+                      title="Remove picture"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                )}
+
+                {/* Option 1: File Upload */}
+                <div className="flex items-center gap-2">
+                  <label className="flex-1 cursor-pointer flex items-center justify-center gap-2 px-3 py-2 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 rounded-xl text-xs font-semibold transition">
+                    <Upload className="w-4 h-4" />
+                    Upload Image File from Device
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageFileUpload}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+
+                {/* Option 2: Image URL Input */}
+                <div className="space-y-1">
+                  <span className="text-[11px] text-slate-500 font-medium">Or paste image URL:</span>
+                  <input
+                    type="url"
+                    value={formData.imageUrl}
+                    onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                    placeholder="https://images.unsplash.com/photo-..."
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+
+                {/* Option 3: Sample Photos Quick Pick */}
+                <div className="space-y-1">
+                  <span className="text-[11px] text-slate-500 font-medium">Or pick sample work photo:</span>
+                  <div className="grid grid-cols-3 gap-2">
+                    {PRESET_SAMPLE_PHOTOS.map((p, idx) => (
+                      <button
+                        type="button"
+                        key={idx}
+                        onClick={() => setFormData({ ...formData, imageUrl: p.url })}
+                        className={`text-[10px] p-1.5 rounded-lg border text-left truncate transition ${formData.imageUrl === p.url ? 'border-indigo-600 bg-indigo-50 text-indigo-700 font-bold' : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100'}`}
+                      >
+                        {p.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
               <div className="space-y-1">
                 <label className="text-xs font-semibold text-slate-700">Category</label>
                 <select
@@ -307,7 +419,7 @@ export const VendorServicesPage = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-indigo-600 text-white font-bold text-xs rounded-xl shadow-md"
+                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-md transition"
                 >
                   Save to SQL Database
                 </button>

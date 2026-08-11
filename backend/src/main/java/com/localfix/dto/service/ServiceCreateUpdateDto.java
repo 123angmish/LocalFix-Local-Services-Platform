@@ -24,17 +24,20 @@ public class ServiceCreateUpdateDto {
 
     private Integer durationMinutes;
 
+    private String imageUrl;
+
     private Boolean active = true;
 
     public ServiceCreateUpdateDto() {}
 
-    public ServiceCreateUpdateDto(Long categoryId, String title, String description, BigDecimal price, String city, Integer durationMinutes, Boolean active) {
+    public ServiceCreateUpdateDto(Long categoryId, String title, String description, BigDecimal price, String city, Integer durationMinutes, String imageUrl, Boolean active) {
         this.categoryId = categoryId;
         this.title = title;
         this.description = description;
         this.price = price;
         this.city = city;
         this.durationMinutes = durationMinutes;
+        this.imageUrl = imageUrl;
         this.active = active != null ? active : true;
     }
 
@@ -55,6 +58,9 @@ public class ServiceCreateUpdateDto {
 
     public Integer getDurationMinutes() { return durationMinutes; }
     public void setDurationMinutes(Integer durationMinutes) { this.durationMinutes = durationMinutes; }
+
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 
     public Boolean getActive() { return active; }
     public void setActive(Boolean active) { this.active = active; }

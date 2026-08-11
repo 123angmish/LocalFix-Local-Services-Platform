@@ -34,6 +34,9 @@ public class ServiceItem {
 
     private Integer durationMinutes;
 
+    @Column(columnDefinition = "TEXT")
+    private String imageUrl;
+
     @Column(nullable = false)
     private boolean active = true;
 
@@ -42,7 +45,7 @@ public class ServiceItem {
 
     public ServiceItem() {}
 
-    public ServiceItem(Long id, VendorProfile vendor, ServiceCategory category, String title, String description, BigDecimal price, String city, Integer durationMinutes, boolean active, LocalDateTime createdAt) {
+    public ServiceItem(Long id, VendorProfile vendor, ServiceCategory category, String title, String description, BigDecimal price, String city, Integer durationMinutes, String imageUrl, boolean active, LocalDateTime createdAt) {
         this.id = id;
         this.vendor = vendor;
         this.category = category;
@@ -51,6 +54,7 @@ public class ServiceItem {
         this.price = price;
         this.city = city;
         this.durationMinutes = durationMinutes;
+        this.imageUrl = imageUrl;
         this.active = active;
         this.createdAt = createdAt;
     }
@@ -84,6 +88,9 @@ public class ServiceItem {
     public Integer getDurationMinutes() { return durationMinutes; }
     public void setDurationMinutes(Integer durationMinutes) { this.durationMinutes = durationMinutes; }
 
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+
     public boolean isActive() { return active; }
     public void setActive(boolean active) { this.active = active; }
 
@@ -101,6 +108,7 @@ public class ServiceItem {
         private BigDecimal price;
         private String city;
         private Integer durationMinutes;
+        private String imageUrl;
         private boolean active = true;
         private LocalDateTime createdAt;
 
@@ -112,11 +120,12 @@ public class ServiceItem {
         public Builder price(BigDecimal price) { this.price = price; return this; }
         public Builder city(String city) { this.city = city; return this; }
         public Builder durationMinutes(Integer durationMinutes) { this.durationMinutes = durationMinutes; return this; }
+        public Builder imageUrl(String imageUrl) { this.imageUrl = imageUrl; return this; }
         public Builder active(boolean active) { this.active = active; return this; }
         public Builder createdAt(LocalDateTime createdAt) { this.createdAt = createdAt; return this; }
 
         public ServiceItem build() {
-            return new ServiceItem(id, vendor, category, title, description, price, city, durationMinutes, active, createdAt);
+            return new ServiceItem(id, vendor, category, title, description, price, city, durationMinutes, imageUrl, active, createdAt);
         }
     }
 }

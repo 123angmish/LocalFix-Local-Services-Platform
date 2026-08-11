@@ -5,7 +5,14 @@ import toast from 'react-hot-toast';
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    try {
+      const cached = localStorage.getItem('localfix_user');
+      return cached ? JSON.parse(cached) : null;
+    } catch (e) {
+      return null;
+    }
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -15,11 +22,18 @@ export const AuthProvider = ({ children }) => {
         try {
           const res = await api.get('/auth/me');
           setUser(res.data);
+          localStorage.setItem('localfix_user', JSON.stringify(res.data));
         } catch (err) {
-          console.error("Token verification failed:", err);
-          localStorage.removeItem('token');
-          setUser(null);
+          console.error("Token verification check:", err);
+          if (err.response?.status === 401) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('localfix_user');
+            setUser(null);
+          }
         }
+      } else {
+        localStorage.removeItem('localfix_user');
+        setUser(null);
       }
       setLoading(false);
     };
@@ -31,6 +45,7 @@ export const AuthProvider = ({ children }) => {
       const res = await api.post('/auth/login', { email, password });
       const { token, user: userData } = res.data;
       localStorage.setItem('token', token);
+      localStorage.setItem('localfix_user', JSON.stringify(userData));
       setUser(userData);
       toast.success(`Welcome back, ${userData.name}!`);
       return userData;
@@ -46,6 +61,7 @@ export const AuthProvider = ({ children }) => {
       const res = await api.post('/auth/register/customer', data);
       const { token, user: userData } = res.data;
       localStorage.setItem('token', token);
+      localStorage.setItem('localfix_user', JSON.stringify(userData));
       setUser(userData);
       toast.success('Registration successful! Welcome to LocalFix.');
       return userData;
@@ -61,6 +77,7 @@ export const AuthProvider = ({ children }) => {
       const res = await api.post('/auth/register/vendor', data);
       const { token, user: userData } = res.data;
       localStorage.setItem('token', token);
+      localStorage.setItem('localfix_user', JSON.stringify(userData));
       setUser(userData);
       toast.success('Vendor registration successful!');
       return userData;
@@ -73,6 +90,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('localfix_user');
     setUser(null);
     toast.success('Logged out successfully.');
   };
