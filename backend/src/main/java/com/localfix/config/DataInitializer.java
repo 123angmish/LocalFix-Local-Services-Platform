@@ -8,6 +8,8 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
+
 @Component
 public class DataInitializer implements CommandLineRunner {
 
@@ -15,11 +17,15 @@ public class DataInitializer implements CommandLineRunner {
 
     private final UserRepository userRepository;
     private final ServiceCategoryRepository categoryRepository;
+    private final VendorProfileRepository vendorProfileRepository;
+    private final ServiceRepository serviceRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public DataInitializer(UserRepository userRepository, ServiceCategoryRepository categoryRepository, PasswordEncoder passwordEncoder) {
+    public DataInitializer(UserRepository userRepository, ServiceCategoryRepository categoryRepository, VendorProfileRepository vendorProfileRepository, ServiceRepository serviceRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.categoryRepository = categoryRepository;
+        this.vendorProfileRepository = vendorProfileRepository;
+        this.serviceRepository = serviceRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -118,6 +124,20 @@ public class DataInitializer implements CommandLineRunner {
                     .build());
         }
 
+        VendorProfile vendorProfile1 = vendorProfileRepository.findByUserId(vendorUser1.getId()).orElse(null);
+        if (vendorProfile1 == null) {
+            vendorProfile1 = vendorProfileRepository.save(VendorProfile.builder()
+                    .user(vendorUser1)
+                    .businessName("Verma Plumbing & Hardware Solutions")
+                    .description("Expert plumbing, pipe leakage fixing, and tap replacement in Mumbai & Delhi.")
+                    .city("Mumbai")
+                    .address("Goregaon East, Mumbai")
+                    .approved(true)
+                    .rating(4.9)
+                    .totalReviews(24)
+                    .build());
+        }
+
         User vendorUser2 = userRepository.findByEmail("apex.plumbing@localfix.com").orElse(null);
         if (vendorUser2 == null) {
             vendorUser2 = userRepository.save(User.builder()
@@ -130,6 +150,81 @@ public class DataInitializer implements CommandLineRunner {
                     .build());
         }
 
-        log.info("Database initial setup complete. Ready for real user entries.");
+        VendorProfile vendorProfile2 = vendorProfileRepository.findByUserId(vendorUser2.getId()).orElse(null);
+        if (vendorProfile2 == null) {
+            vendorProfile2 = vendorProfileRepository.save(VendorProfile.builder()
+                    .user(vendorUser2)
+                    .businessName("Apex Home Electricals & Repair")
+                    .description("Certified electrician for house wiring, MCB switches, and ceiling fans.")
+                    .city("Mumbai")
+                    .address("Andheri West, Mumbai")
+                    .approved(true)
+                    .rating(4.8)
+                    .totalReviews(18)
+                    .build());
+        }
+
+        // 5. Initialize Demo Service Items
+        if (serviceRepository.count() == 0) {
+            log.info("Seeding initial demo services...");
+
+            if (plumberCat != null && vendorProfile1 != null) {
+                serviceRepository.save(ServiceItem.builder()
+                        .vendor(vendorProfile1)
+                        .category(plumberCat)
+                        .title("Emergency Tap Leakage & Pipe Repair")
+                        .description("30-min urgent response for water pipe bursts, tap leakages, and bathroom drainage unblocking.")
+                        .price(new BigDecimal("199"))
+                        .city("Mumbai")
+                        .durationMinutes(45)
+                        .imageUrl("https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=600&auto=format&fit=crop&q=80")
+                        .active(true)
+                        .build());
+            }
+
+            if (electricCat != null && vendorProfile2 != null) {
+                serviceRepository.save(ServiceItem.builder()
+                        .vendor(vendorProfile2)
+                        .category(electricCat)
+                        .title("Complete Switchboard & Circuit Breaker Repair")
+                        .description("Fixing short circuits, replacing damaged MCB switches, and installing LED lights.")
+                        .price(new BigDecimal("299"))
+                        .city("Mumbai")
+                        .durationMinutes(60)
+                        .imageUrl("https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=600&auto=format&fit=crop&q=80")
+                        .active(true)
+                        .build());
+            }
+
+            if (cleanerCat != null && vendorProfile1 != null) {
+                serviceRepository.save(ServiceItem.builder()
+                        .vendor(vendorProfile1)
+                        .category(cleanerCat)
+                        .title("Full Kitchen & Bathroom Deep Sanitization")
+                        .description("Professional deep cleaning of tile stains, oil grease, exhaust fans, and bathroom fittings.")
+                        .price(new BigDecimal("499"))
+                        .city("Mumbai")
+                        .durationMinutes(120)
+                        .imageUrl("https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=600&auto=format&fit=crop&q=80")
+                        .active(true)
+                        .build());
+            }
+
+            if (applianceCat != null && vendorProfile2 != null) {
+                serviceRepository.save(ServiceItem.builder()
+                        .vendor(vendorProfile2)
+                        .category(applianceCat)
+                        .title("AC Gas Charging & Foam Jet Servicing")
+                        .description("Split/Window AC deep foam cleaning, filter wash, and gas pressure check.")
+                        .price(new BigDecimal("599"))
+                        .city("Mumbai")
+                        .durationMinutes(90)
+                        .imageUrl("https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=600&auto=format&fit=crop&q=80")
+                        .active(true)
+                        .build());
+            }
+        }
+
+        log.info("Database initial setup complete. Initial demo services ready for instant booking.");
     }
 }
