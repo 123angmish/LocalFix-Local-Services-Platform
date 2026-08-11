@@ -102,4 +102,13 @@ public class BookingController {
             @PathVariable Long id) {
         return ResponseEntity.ok(bookingService.cancelBookingByCustomer(principal.getId(), id));
     }
+
+    @PatchMapping("/customer/bookings/{id}/regenerate-otp")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    @Operation(summary = "Regenerate fresh 4-digit OTP for booking (Customer)")
+    public ResponseEntity<BookingDto> regenerateOtp(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @PathVariable Long id) {
+        return ResponseEntity.ok(bookingService.regenerateCustomerOtp(principal.getId(), id));
+    }
 }

@@ -73,7 +73,7 @@ public class BookingService {
         }
 
         BigDecimal finalPrice = basePrice.subtract(discount);
-        String otpCode = String.format("%04d", (int)(Math.random() * 9000) + 1000);
+        String otpCode = generateSecureOtp();
 
         Booking booking = Booking.builder()
                 .customer(customer)
@@ -202,6 +202,26 @@ public class BookingService {
         }
 
         booking.setStatus(BookingStatus.CANCELLED);
+        return mapToDto(bookingRepository.save(booking));
+    }
+
+    private static final java.security.SecureRandom secureRandom = new java.security.SecureRandom();
+
+    public String generateSecureOtp() {
+        return String.format("%04d", 1000 + secureRandom.nextInt(9000));
+    }
+
+    @Transactional
+    public BookingDto regenerateCustomerOtp(Long customerUserId, Long bookingId) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new ResourceNotFoundException("Booking not found with id: " + bookingId));
+
+        if (!booking.getCustomer().getId().equals(customerUserId)) {
+            throw new BadRequestException("You can only regenerate OTP for your own booking");
+        }
+
+        String freshOtp = generateSecureOtp();
+        booking.setVerificationCode(freshOtp);
         return mapToDto(bookingRepository.save(booking));
     }
 
