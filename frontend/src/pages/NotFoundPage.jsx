@@ -16,7 +16,7 @@ export const NotFoundPage = () => {
         </div>
         <Link
           to="/"
-          className="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-md transition"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md transition"
         >
           <Home className="w-4 h-4" /> Return to Homepage
         </Link>

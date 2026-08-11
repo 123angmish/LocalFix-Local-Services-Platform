@@ -37,7 +37,7 @@ export const AdminDashboardPage = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900 p-8 rounded-3xl text-white shadow-xl">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900 p-8 rounded-3xl text-white shadow-xl border border-emerald-500/20">
         <div className="space-y-1">
           <span className="text-xs font-bold text-amber-400 uppercase tracking-wider">Super Admin Console</span>
           <h1 className="text-3xl font-extrabold tracking-tight">Platform Dashboard</h1>
@@ -46,7 +46,7 @@ export const AdminDashboardPage = () => {
         <div className="flex gap-3">
           <Link
             to="/admin/vendors"
-            className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center gap-1.5"
+            className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center gap-1.5"
           >
             <Store className="w-4 h-4" />
             Vendor Approvals ({stats?.pendingVendorApprovals || 0})
@@ -101,7 +101,7 @@ export const AdminDashboardPage = () => {
             <ShieldAlert className="w-5 h-5 text-amber-500" />
             Pending Vendor Approvals Queue
           </h3>
-          <Link to="/admin/vendors" className="text-xs font-semibold text-indigo-600 hover:underline">
+          <Link to="/admin/vendors" className="text-xs font-semibold text-emerald-600 hover:underline">
             View All Vendors
           </Link>
         </div>
@@ -130,7 +130,7 @@ export const AdminDashboardPage = () => {
                     <td className="p-3 text-right">
                       <Link
                         to="/admin/vendors"
-                        className="px-3 py-1.5 bg-indigo-50 text-indigo-700 font-bold rounded-lg text-[11px]"
+                        className="px-3 py-1.5 bg-emerald-50 text-emerald-700 font-bold rounded-lg text-[11px]"
                       >
                         Review
                       </Link>

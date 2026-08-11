@@ -9,10 +9,10 @@ export const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="space-y-4">
             <div className="flex items-center gap-2 font-bold text-2xl text-white">
-              <div className="p-2 bg-indigo-600 text-white rounded-xl">
+              <div className="p-2 bg-emerald-600 text-white rounded-xl">
                 <Wrench className="w-5 h-5" />
               </div>
-              <span>Local<span className="text-indigo-400">Fix</span></span>
+              <span>Local<span className="text-emerald-400">Fix</span></span>
             </div>
             <p className="text-sm text-slate-400 leading-relaxed">
               Your trusted platform for booking verified local experts including plumbers, electricians, salon professionals, and home appliance technicians.

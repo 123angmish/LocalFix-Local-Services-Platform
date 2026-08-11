@@ -30,7 +30,7 @@ export const LoginPage = () => {
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-3xl border border-slate-200 shadow-xl">
         <div className="text-center space-y-2">
-          <div className="inline-flex p-3 bg-indigo-600 text-white rounded-2xl shadow-lg shadow-indigo-200">
+          <div className="inline-flex p-3 bg-emerald-600 text-white rounded-2xl shadow-lg shadow-emerald-200">
             <Wrench className="w-6 h-6" />
           </div>
           <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">Sign in to LocalFix</h2>
@@ -44,7 +44,7 @@ export const LoginPage = () => {
             onClick={() => setRoleType('CUSTOMER')}
             className={`py-2.5 rounded-xl font-semibold text-xs transition flex items-center justify-center gap-1.5 ${
               roleType === 'CUSTOMER'
-                ? 'bg-white text-indigo-600 shadow-sm'
+                ? 'bg-white text-emerald-700 shadow-sm font-bold'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
@@ -56,7 +56,7 @@ export const LoginPage = () => {
             onClick={() => setRoleType('VENDOR')}
             className={`py-2.5 rounded-xl font-semibold text-xs transition flex items-center justify-center gap-1.5 ${
               roleType === 'VENDOR'
-                ? 'bg-white text-indigo-600 shadow-sm'
+                ? 'bg-white text-emerald-700 shadow-sm font-bold'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
@@ -77,7 +77,7 @@ export const LoginPage = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium"
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium"
               />
             </div>
           </div>
@@ -93,7 +93,7 @@ export const LoginPage = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium"
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium"
               />
             </div>
           </div>
@@ -101,7 +101,7 @@ export const LoginPage = () => {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-md transition flex items-center justify-center gap-2 text-sm shadow-indigo-200 disabled:opacity-50"
+            className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl shadow-md transition flex items-center justify-center gap-2 text-sm shadow-emerald-200 disabled:opacity-50"
           >
             {submitting ? 'Signing in...' : `Sign in as ${roleType === 'CUSTOMER' ? 'Customer' : 'Vendor'}`}
             <ArrowRight className="w-4 h-4" />
@@ -110,7 +110,7 @@ export const LoginPage = () => {
 
         <div className="text-center text-xs text-slate-600">
           Don't have an account?{' '}
-          <Link to={`/register?type=${roleType.toLowerCase()}`} className="font-bold text-indigo-600 hover:underline">
+          <Link to={`/register?type=${roleType.toLowerCase()}`} className="font-bold text-emerald-600 hover:underline">
             Register Here
           </Link>
         </div>

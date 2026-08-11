@@ -42,7 +42,7 @@ export const ServiceDetailPage = () => {
     return (
       <div className="max-w-md mx-auto px-4 py-20 text-center space-y-4">
         <h2 className="text-xl font-bold text-slate-900">Service Not Found</h2>
-        <Link to="/services" className="text-indigo-600 font-semibold text-sm">
+        <Link to="/services" className="text-emerald-600 font-semibold text-sm">
           ← Back to all services
         </Link>
       </div>
@@ -51,7 +51,7 @@ export const ServiceDetailPage = () => {
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      <Link to="/services" className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 hover:underline">
+      <Link to="/services" className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600 hover:underline">
         <ArrowLeft className="w-4 h-4" />
         Back to Services
       </Link>
@@ -60,12 +60,12 @@ export const ServiceDetailPage = () => {
       <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
         <div className="flex flex-col md:flex-row justify-between md:items-start gap-4">
           <div className="space-y-2">
-            <span className="px-3 py-1 bg-indigo-50 text-indigo-700 text-xs font-bold rounded-full border border-indigo-100 uppercase tracking-wider">
+            <span className="px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-full border border-emerald-100 uppercase tracking-wider">
               {service.categoryName}
             </span>
             <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">{service.title}</h1>
             <p className="text-sm font-medium text-slate-500">
-              Offered by <span className="text-indigo-600 font-bold">{service.vendorBusinessName}</span>
+              Offered by <span className="text-emerald-600 font-bold">{service.vendorBusinessName}</span>
             </p>
           </div>
 
@@ -74,7 +74,7 @@ export const ServiceDetailPage = () => {
             <div className="text-3xl font-extrabold text-slate-900">₹{service.price}</div>
             <Link
               to={`/book/${service.id}`}
-              className="mt-3 block w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-sm text-center shadow-indigo-200 transition"
+              className="mt-3 block w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-sm text-center shadow-emerald-200 transition"
             >
               Book Service Now
             </Link>
@@ -83,11 +83,11 @@ export const ServiceDetailPage = () => {
 
         <div className="flex flex-wrap gap-6 pt-4 border-t border-slate-100 text-xs font-medium text-slate-600">
           <div className="flex items-center gap-2">
-            <MapPin className="w-4 h-4 text-indigo-500" />
+            <MapPin className="w-4 h-4 text-emerald-500" />
             <span>Location: <strong>{service.city}</strong></span>
           </div>
           <div className="flex items-center gap-2">
-            <Clock className="w-4 h-4 text-indigo-500" />
+            <Clock className="w-4 h-4 text-emerald-500" />
             <span>Estimated Time: <strong>{service.durationMinutes || 60} mins</strong></span>
           </div>
           <div className="flex items-center gap-2">
@@ -133,7 +133,7 @@ export const ServiceDetailPage = () => {
           <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-6">
             <div className="flex justify-between items-center border-b border-slate-100 pb-4">
               <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                <MessageSquare className="w-5 h-5 text-indigo-600" />
+                <MessageSquare className="w-5 h-5 text-emerald-600" />
                 Customer Reviews ({reviews.length})
               </h3>
             </div>
@@ -146,7 +146,7 @@ export const ServiceDetailPage = () => {
                   <div key={rev.id} className="p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-2">
                     <div className="flex justify-between items-center">
                       <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs">
+                        <div className="w-7 h-7 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-xs">
                           {rev.customerName?.charAt(0) || 'C'}
                         </div>
                         <span className="text-xs font-bold text-slate-900">{rev.customerName}</span>
@@ -171,7 +171,7 @@ export const ServiceDetailPage = () => {
             <h3 className="text-base font-bold text-slate-900 border-b border-slate-100 pb-3">Vendor Contact Info</h3>
             
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-bold text-lg">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-bold text-lg">
                 {service.vendorBusinessName?.charAt(0) || 'V'}
               </div>
               <div>
@@ -182,7 +182,7 @@ export const ServiceDetailPage = () => {
 
             <div className="space-y-2.5 pt-2 text-xs">
               <div className="flex items-center gap-2.5 text-slate-700 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                <Phone className="w-4 h-4 text-indigo-600 shrink-0" />
+                <Phone className="w-4 h-4 text-emerald-600 shrink-0" />
                 <div>
                   <span className="text-[10px] text-slate-400 block font-semibold uppercase">Phone Number</span>
                   <span className="font-bold text-slate-900">{service.vendorPhone || '+91 9876543210'}</span>
@@ -191,7 +191,7 @@ export const ServiceDetailPage = () => {
 
               {service.vendorEmail && (
                 <div className="flex items-center gap-2.5 text-slate-700 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                  <Mail className="w-4 h-4 text-indigo-600 shrink-0" />
+                  <Mail className="w-4 h-4 text-emerald-600 shrink-0" />
                   <div>
                     <span className="text-[10px] text-slate-400 block font-semibold uppercase">Email</span>
                     <span className="font-bold text-slate-900">{service.vendorEmail}</span>
@@ -213,7 +213,7 @@ export const ServiceDetailPage = () => {
 
             <Link
               to={`/book/${service.id}`}
-              className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-md text-center block shadow-indigo-200 transition"
+              className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md text-center block shadow-emerald-200 transition"
             >
               Proceed to Booking
             </Link>

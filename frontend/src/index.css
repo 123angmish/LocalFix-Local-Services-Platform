@@ -7,7 +7,7 @@
 @layer base {
   body {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    @apply bg-slate-50 text-slate-900 antialiased selection:bg-blue-500 selection:text-white;
+    @apply bg-slate-50 text-slate-900 antialiased selection:bg-emerald-500 selection:text-white;
   }
 }
 
@@ -19,9 +19,9 @@
 }
 
 .hero-gradient {
-  background: radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.12) 0%, rgba(248, 250, 252, 0) 75%);
+  background: radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.12) 0%, rgba(248, 250, 252, 0) 75%);
 }
 
 .glow-effect {
-  box-shadow: 0 0 25px -5px rgba(59, 130, 246, 0.25);
+  box-shadow: 0 0 25px -5px rgba(16, 185, 129, 0.25);
 }

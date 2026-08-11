@@ -80,7 +80,7 @@ export const AdminCategoriesPage = () => {
         </div>
         <button
           onClick={handleOpenAdd}
-          className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center gap-2"
+          className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center gap-2"
         >
           <Plus className="w-4 h-4" /> Add Category
         </button>
@@ -98,11 +98,11 @@ export const AdminCategoriesPage = () => {
             <div key={cat.id} className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between space-y-4">
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
-                  <span className="text-[10px] uppercase font-bold text-indigo-600 tracking-wider">ID #{cat.id}</span>
+                  <span className="text-[10px] uppercase font-bold text-emerald-700 tracking-wider">ID #{cat.id}</span>
                   <div className="flex gap-1">
                     <button
                       onClick={() => handleOpenEdit(cat)}
-                      className="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-slate-100 rounded-lg"
+                      className="p-1.5 text-slate-500 hover:text-emerald-600 hover:bg-slate-100 rounded-lg"
                     >
                       <Edit className="w-4 h-4" />
                     </button>
@@ -144,7 +144,7 @@ export const AdminCategoriesPage = () => {
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="e.g. Plumber, Electrician"
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
 
@@ -155,7 +155,7 @@ export const AdminCategoriesPage = () => {
                   value={formData.icon}
                   onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
                   placeholder="Wrench, Zap, Scissors, Sparkles"
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
 
@@ -166,7 +166,7 @@ export const AdminCategoriesPage = () => {
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder="Brief description of services in this category..."
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
 
@@ -180,7 +180,7 @@ export const AdminCategoriesPage = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-indigo-600 text-white font-bold text-xs rounded-xl shadow-md"
+                  className="px-4 py-2 bg-emerald-600 text-white font-bold text-xs rounded-xl shadow-md"
                 >
                   Save Category
                 </button>

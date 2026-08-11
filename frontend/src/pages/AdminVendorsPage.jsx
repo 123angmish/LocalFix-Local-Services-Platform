@@ -64,7 +64,7 @@ export const AdminVendorsPage = () => {
               onClick={() => setFilterApproved(f)}
               className={`px-3 py-1.5 rounded-xl transition ${
                 filterApproved === f
-                  ? 'bg-indigo-600 text-white shadow-sm'
+                  ? 'bg-emerald-600 text-white shadow-sm font-bold'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -91,7 +91,7 @@ export const AdminVendorsPage = () => {
               <div className="space-y-3">
                 <div className="flex justify-between items-start">
                   <div>
-                    <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-wider">Vendor ID #{v.id}</span>
+                    <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">Vendor ID #{v.id}</span>
                     <h3 className="font-extrabold text-slate-900 text-lg">{v.businessName}</h3>
                   </div>
                   <span className={`text-xs font-bold px-3 py-1 rounded-full ${

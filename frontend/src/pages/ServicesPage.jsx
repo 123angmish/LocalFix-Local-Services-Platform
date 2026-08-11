@@ -93,12 +93,12 @@ export const ServicesPage = () => {
         <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm h-fit space-y-6">
           <div className="flex items-center justify-between border-b border-slate-100 pb-4">
             <h3 className="font-bold text-slate-900 flex items-center gap-2 text-base">
-              <Filter className="w-4 h-4 text-indigo-600" />
+              <Filter className="w-4 h-4 text-emerald-600" />
               Filter Services
             </h3>
             <button
               onClick={handleReset}
-              className="text-xs font-semibold text-indigo-600 hover:underline flex items-center gap-1"
+              className="text-xs font-semibold text-emerald-600 hover:underline flex items-center gap-1"
             >
               <RefreshCw className="w-3 h-3" />
               Reset
@@ -115,7 +115,7 @@ export const ServicesPage = () => {
                   placeholder="e.g. leak, facial, fan"
                   value={keyword}
                   onChange={(e) => setKeyword(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500"
+                  className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
             </div>
@@ -125,7 +125,7 @@ export const ServicesPage = () => {
               <select
                 value={categoryId}
                 onChange={(e) => setCategoryId(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500"
               >
                 <option value="">All Categories</option>
                 {categories.map((cat) => (
@@ -143,7 +143,7 @@ export const ServicesPage = () => {
                   placeholder="Mumbai, Delhi"
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500"
+                  className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
             </div>
@@ -153,7 +153,7 @@ export const ServicesPage = () => {
               <select
                 value={minRating}
                 onChange={(e) => setMinRating(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500"
               >
                 <option value="">Any Rating</option>
                 <option value="4.5">4.5★ & Above</option>
@@ -169,13 +169,13 @@ export const ServicesPage = () => {
                 placeholder="e.g. 1000"
                 value={maxPrice}
                 onChange={(e) => setMaxPrice(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500"
               />
             </div>
 
             <button
               type="submit"
-              className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs rounded-xl shadow-sm transition"
+              className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-xl shadow-sm transition"
             >
               Apply Filters
             </button>
@@ -186,7 +186,7 @@ export const ServicesPage = () => {
         <div className="lg:col-span-3 space-y-6">
           <div className="flex justify-between items-center bg-white p-4 rounded-2xl border border-slate-200 text-xs">
             <span className="font-semibold text-slate-700">
-              Showing <span className="text-indigo-600 font-bold">{services.length}</span> active services
+              Showing <span className="text-emerald-600 font-bold">{services.length}</span> active services
             </span>
 
             <div className="flex items-center gap-2">
@@ -221,7 +221,7 @@ export const ServicesPage = () => {
               </p>
               <button
                 onClick={handleReset}
-                className="px-4 py-2 bg-indigo-600 text-white font-semibold text-xs rounded-xl shadow-sm"
+                className="px-4 py-2 bg-emerald-600 text-white font-semibold text-xs rounded-xl shadow-sm"
               >
                 Clear All Filters
               </button>
@@ -245,7 +245,7 @@ export const ServicesPage = () => {
 
                   <div className="p-6 space-y-4">
                     <div className="flex justify-between items-start">
-                      <span className="px-3 py-1 bg-indigo-50 text-indigo-700 text-xs font-semibold rounded-full border border-indigo-100">
+                      <span className="px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-semibold rounded-full border border-emerald-100">
                         {srv.categoryName}
                       </span>
                       {!srv.imageUrl && (
@@ -257,7 +257,7 @@ export const ServicesPage = () => {
                     </div>
 
                     <div>
-                      <h3 className="font-bold text-slate-900 text-lg hover:text-indigo-600 transition">
+                      <h3 className="font-bold text-slate-900 text-lg hover:text-emerald-600 transition">
                         <Link to={`/services/${srv.id}`}>{srv.title}</Link>
                       </h3>
                       <p className="text-xs font-medium text-slate-500 mt-1">Provided by <strong className="text-slate-800">{srv.vendorBusinessName}</strong></p>
@@ -266,7 +266,7 @@ export const ServicesPage = () => {
 
                     <div className="pt-2 flex items-center justify-between text-xs text-slate-500 border-t border-slate-100">
                       <div className="flex items-center gap-1">
-                        <MapPin className="w-3.5 h-3.5 text-indigo-500" />
+                        <MapPin className="w-3.5 h-3.5 text-emerald-500" />
                         <span>{srv.city}</span>
                       </div>
                       <div className="flex items-center gap-1">
@@ -283,7 +283,7 @@ export const ServicesPage = () => {
                     </div>
                     <Link
                       to={`/services/${srv.id}`}
-                      className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs rounded-xl shadow-sm transition"
+                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-xl shadow-sm transition"
                     >
                       View & Book
                     </Link>

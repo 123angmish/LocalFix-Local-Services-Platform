@@ -133,7 +133,7 @@ export const CustomerBookingsPage = () => {
               <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2 border-b border-slate-100 pb-3">
                 <div className="flex items-center gap-3">
                   <span className="font-extrabold text-slate-900 text-base">Booking #{b.id}</span>
-                  <span className="px-3 py-0.5 bg-indigo-50 text-indigo-700 text-xs font-bold rounded-full border border-indigo-100">
+                  <span className="px-3 py-0.5 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-full border border-emerald-100">
                     {b.categoryName}
                   </span>
                 </div>
@@ -141,8 +141,8 @@ export const CustomerBookingsPage = () => {
                 <div className="flex items-center gap-3">
                   <span className={`text-xs font-bold px-3 py-1 rounded-full ${
                     b.status === 'COMPLETED' ? 'bg-emerald-100 text-emerald-800' :
-                    b.status === 'IN_PROGRESS' ? 'bg-indigo-100 text-indigo-800' :
-                    b.status === 'ACCEPTED' ? 'bg-blue-100 text-blue-800' :
+                    b.status === 'IN_PROGRESS' ? 'bg-teal-100 text-teal-800' :
+                    b.status === 'ACCEPTED' ? 'bg-emerald-100 text-emerald-800' :
                     b.status === 'PENDING' ? 'bg-amber-100 text-amber-800' :
                     'bg-red-100 text-red-800'
                   }`}>
@@ -156,16 +156,16 @@ export const CustomerBookingsPage = () => {
               <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-3">
                 <div className="flex justify-between items-center text-[11px] font-bold">
                   <span className={b.status === 'PENDING' ? 'text-amber-600' : 'text-slate-400'}>1. Placed</span>
-                  <span className={b.status === 'ACCEPTED' ? 'text-blue-600 font-extrabold' : 'text-slate-400'}>2. Accepted by Vendor</span>
-                  <span className={b.status === 'IN_PROGRESS' ? 'text-indigo-600 font-extrabold animate-pulse' : 'text-slate-400'}>3. Work In Progress</span>
+                  <span className={b.status === 'ACCEPTED' ? 'text-emerald-600 font-extrabold' : 'text-slate-400'}>2. Accepted by Vendor</span>
+                  <span className={b.status === 'IN_PROGRESS' ? 'text-teal-600 font-extrabold animate-pulse' : 'text-slate-400'}>3. Work In Progress</span>
                   <span className={b.status === 'COMPLETED' ? 'text-emerald-600 font-extrabold' : 'text-slate-400'}>4. Completed</span>
                 </div>
 
                 <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden flex">
                   <div className={`h-full transition-all duration-500 ${
                     b.status === 'COMPLETED' ? 'w-full bg-emerald-500' :
-                    b.status === 'IN_PROGRESS' ? 'w-3/4 bg-indigo-600' :
-                    b.status === 'ACCEPTED' ? 'w-1/2 bg-blue-500' :
+                    b.status === 'IN_PROGRESS' ? 'w-3/4 bg-teal-600' :
+                    b.status === 'ACCEPTED' ? 'w-1/2 bg-emerald-500' :
                     b.status === 'PENDING' ? 'w-1/4 bg-amber-500' :
                     'w-full bg-rose-500'
                   }`}></div>
@@ -173,21 +173,21 @@ export const CustomerBookingsPage = () => {
 
                 {/* Unique 4-Digit Security OTP Box */}
                 {b.verificationCode && (b.status === 'ACCEPTED' || b.status === 'IN_PROGRESS' || b.status === 'PENDING') && (
-                  <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-3 rounded-xl border border-indigo-200 flex items-center justify-between">
+                  <div className="bg-gradient-to-r from-emerald-50 to-teal-50 p-3 rounded-xl border border-emerald-200 flex items-center justify-between">
                     <div>
-                      <span className="text-[10px] font-extrabold uppercase text-indigo-700 tracking-wider flex items-center gap-1">
-                        <Lock className="w-3 h-3 text-indigo-600" />
+                      <span className="text-[10px] font-extrabold uppercase text-emerald-800 tracking-wider flex items-center gap-1">
+                        <Lock className="w-3 h-3 text-emerald-600" />
                         Unique 4-Digit Security OTP
                       </span>
                       <p className="text-xs text-slate-600">Share this code with technician upon arrival</p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-xl font-mono font-black tracking-widest bg-white px-3.5 py-1 rounded-lg border border-indigo-300 text-indigo-900 shadow-sm">
+                      <span className="text-xl font-mono font-black tracking-widest bg-white px-3.5 py-1 rounded-lg border border-emerald-300 text-emerald-950 shadow-sm">
                         {b.verificationCode}
                       </span>
                       <button
                         onClick={() => handleRegenerateOtp(b.id)}
-                        className="p-2 bg-white text-indigo-600 hover:bg-indigo-100 rounded-lg border border-indigo-200 shadow-sm transition"
+                        className="p-2 bg-white text-emerald-600 hover:bg-emerald-100 rounded-lg border border-emerald-200 shadow-sm transition"
                         title="Generate Fresh Unique 4-Digit OTP"
                       >
                         <RefreshCw className="w-3.5 h-3.5" />
@@ -252,7 +252,7 @@ export const CustomerBookingsPage = () => {
                   {b.status === 'COMPLETED' && !b.reviewed && (
                     <button
                       onClick={() => setSelectedBooking(b)}
-                      className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center gap-1.5"
+                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center gap-1.5"
                     >
                       <Star className="w-3.5 h-3.5 fill-current text-amber-300" />
                       Write Review
@@ -307,7 +307,7 @@ export const CustomerBookingsPage = () => {
                     onClick={() => setPaymentMethod('UPI')}
                     className={`py-2.5 px-1 rounded-xl border text-center font-extrabold text-xs transition flex flex-col items-center gap-1 ${
                       paymentMethod === 'UPI'
-                        ? 'border-indigo-600 bg-indigo-50 text-indigo-700 shadow-sm'
+                        ? 'border-emerald-600 bg-emerald-50 text-emerald-800 shadow-sm'
                         : 'border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300'
                     }`}
                   >
@@ -320,7 +320,7 @@ export const CustomerBookingsPage = () => {
                     onClick={() => setPaymentMethod('CASH')}
                     className={`py-2.5 px-1 rounded-xl border text-center font-extrabold text-xs transition flex flex-col items-center gap-1 ${
                       paymentMethod === 'CASH'
-                        ? 'border-emerald-600 bg-emerald-50 text-emerald-700 shadow-sm'
+                        ? 'border-emerald-600 bg-emerald-50 text-emerald-800 shadow-sm'
                         : 'border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300'
                     }`}
                   >
@@ -333,7 +333,7 @@ export const CustomerBookingsPage = () => {
                     onClick={() => setPaymentMethod('CARD')}
                     className={`py-2.5 px-1 rounded-xl border text-center font-extrabold text-xs transition flex flex-col items-center gap-1 ${
                       paymentMethod === 'CARD'
-                        ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-sm'
+                        ? 'border-teal-600 bg-teal-50 text-teal-800 shadow-sm'
                         : 'border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300'
                     }`}
                   >
@@ -346,7 +346,7 @@ export const CustomerBookingsPage = () => {
                     onClick={() => setPaymentMethod('NETBANKING')}
                     className={`py-2.5 px-1 rounded-xl border text-center font-extrabold text-xs transition flex flex-col items-center gap-1 ${
                       paymentMethod === 'NETBANKING'
-                        ? 'border-purple-600 bg-purple-50 text-purple-700 shadow-sm'
+                        ? 'border-emerald-600 bg-emerald-50 text-emerald-800 shadow-sm'
                         : 'border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300'
                     }`}
                   >
@@ -358,7 +358,7 @@ export const CustomerBookingsPage = () => {
 
               {/* UPI Tab Content */}
               {paymentMethod === 'UPI' && (
-                <div className="bg-indigo-50/50 p-4 rounded-2xl border border-indigo-100 space-y-3">
+                <div className="bg-emerald-50/50 p-4 rounded-2xl border border-emerald-100 space-y-3">
                   <div className="flex gap-2">
                     {['GPay', 'PhonePe', 'Paytm', 'VPA'].map((app) => (
                       <button
@@ -367,7 +367,7 @@ export const CustomerBookingsPage = () => {
                         onClick={() => setUpiApp(app)}
                         className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition border ${
                           upiApp === app
-                            ? 'bg-indigo-600 text-white border-indigo-600 shadow'
+                            ? 'bg-emerald-600 text-white border-emerald-600 shadow'
                             : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
                         }`}
                       >
@@ -384,11 +384,11 @@ export const CustomerBookingsPage = () => {
                         placeholder="e.g. mobileNumber@okaxis or name@paytm"
                         value={upiId}
                         onChange={(e) => setUpiId(e.target.value)}
-                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500 font-mono"
+                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 font-mono"
                       />
                     </div>
                   ) : (
-                    <div className="bg-white p-4 rounded-xl border border-indigo-100 text-center space-y-2">
+                    <div className="bg-white p-4 rounded-xl border border-emerald-100 text-center space-y-2">
                       <div className="inline-block p-2 bg-slate-50 rounded-xl border border-slate-200 shadow-inner">
                         <img
                           src={`https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=upi://pay?pa=localfix@okaxis&pn=LocalFixServices&am=${paymentBooking.totalAmount}`}
@@ -517,7 +517,7 @@ export const CustomerBookingsPage = () => {
           <div className="bg-white max-w-md w-full p-6 rounded-3xl shadow-2xl space-y-4">
             <div className="flex justify-between items-center border-b border-slate-100 pb-3">
               <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
-                <MessageSquare className="w-4 h-4 text-indigo-600" />
+                <MessageSquare className="w-4 h-4 text-emerald-600" />
                 Review Service #{selectedBooking.id}
               </h3>
               <button onClick={() => setSelectedBooking(null)} className="text-slate-400 hover:text-slate-600">
@@ -552,7 +552,7 @@ export const CustomerBookingsPage = () => {
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
                   placeholder="Share details of your experience with the service provider..."
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
 
@@ -567,7 +567,7 @@ export const CustomerBookingsPage = () => {
                 <button
                   type="submit"
                   disabled={submittingReview}
-                  className="px-4 py-2 bg-indigo-600 text-white font-bold text-xs rounded-xl shadow-md"
+                  className="px-4 py-2 bg-emerald-600 text-white font-bold text-xs rounded-xl shadow-md"
                 >
                   {submittingReview ? 'Submitting...' : 'Submit Review'}
                 </button>

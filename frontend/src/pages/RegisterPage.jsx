@@ -66,7 +66,7 @@ export const RegisterPage = () => {
     <div className="min-h-[85vh] flex items-center justify-center px-4 py-12">
       <div className="max-w-xl w-full bg-white p-8 rounded-3xl border border-slate-200 shadow-xl space-y-6">
         <div className="text-center space-y-2">
-          <div className="inline-flex p-3 bg-indigo-600 text-white rounded-2xl shadow-lg shadow-indigo-200">
+          <div className="inline-flex p-3 bg-emerald-600 text-white rounded-2xl shadow-lg shadow-emerald-200">
             <Wrench className="w-6 h-6" />
           </div>
           <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">Create LocalFix Account</h2>
@@ -80,7 +80,7 @@ export const RegisterPage = () => {
             onClick={() => setRoleType('CUSTOMER')}
             className={`py-2.5 rounded-xl font-semibold text-xs transition ${
               roleType === 'CUSTOMER'
-                ? 'bg-white text-indigo-600 shadow-sm'
+                ? 'bg-white text-emerald-700 shadow-sm font-bold'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
@@ -91,7 +91,7 @@ export const RegisterPage = () => {
             onClick={() => setRoleType('VENDOR')}
             className={`py-2.5 rounded-xl font-semibold text-xs transition ${
               roleType === 'VENDOR'
-                ? 'bg-white text-indigo-600 shadow-sm'
+                ? 'bg-white text-emerald-700 shadow-sm font-bold'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
@@ -113,7 +113,7 @@ export const RegisterPage = () => {
                   value={formData.name}
                   onChange={handleChange}
                   placeholder="Enter full name"
-                  className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-indigo-500"
+                  className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
             </div>
@@ -130,7 +130,7 @@ export const RegisterPage = () => {
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="Enter email address"
-                  className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-indigo-500"
+                  className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
             </div>
@@ -150,7 +150,7 @@ export const RegisterPage = () => {
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="Create password"
-                  className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-indigo-500"
+                  className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
             </div>
@@ -167,7 +167,7 @@ export const RegisterPage = () => {
                   value={formData.phone}
                   onChange={handleChange}
                   placeholder="Enter phone number"
-                  className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-indigo-500"
+                  className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
             </div>
@@ -175,7 +175,7 @@ export const RegisterPage = () => {
 
           {roleType === 'VENDOR' && (
             <div className="space-y-4 pt-2 border-t border-slate-100">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-600">Vendor Job & Pricing Profile</h4>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-600">Vendor Job & Pricing Profile</h4>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1">
@@ -190,7 +190,7 @@ export const RegisterPage = () => {
                       value={formData.professionTitle}
                       onChange={handleChange}
                       placeholder="e.g. Barber, Plumber, Postman"
-                      className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-indigo-500"
+                      className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-emerald-500"
                     />
                   </div>
                 </div>
@@ -208,7 +208,7 @@ export const RegisterPage = () => {
                       value={formData.price}
                       onChange={handleChange}
                       placeholder="e.g. 200"
-                      className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-indigo-500"
+                      className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-emerald-500"
                     />
                   </div>
                 </div>
@@ -226,7 +226,7 @@ export const RegisterPage = () => {
                       value={formData.businessName}
                       onChange={handleChange}
                       placeholder="e.g. Apex Barber & Salon"
-                      className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-indigo-500"
+                      className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-emerald-500"
                     />
                   </div>
                 </div>
@@ -243,7 +243,7 @@ export const RegisterPage = () => {
                       value={formData.city}
                       onChange={handleChange}
                       placeholder="e.g. Mumbai, Delhi"
-                      className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-indigo-500"
+                      className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-emerald-500"
                     />
                   </div>
                 </div>
@@ -258,7 +258,7 @@ export const RegisterPage = () => {
                   value={formData.address}
                   onChange={handleChange}
                   placeholder="Street / Area / Shop No."
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
             </div>
@@ -267,7 +267,7 @@ export const RegisterPage = () => {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-md transition flex items-center justify-center gap-2 text-sm shadow-indigo-200 disabled:opacity-50"
+            className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl shadow-md transition flex items-center justify-center gap-2 text-sm shadow-emerald-200 disabled:opacity-50"
           >
             {submitting ? 'Creating Account...' : `Register as ${roleType === 'CUSTOMER' ? 'Customer' : 'Vendor'}`}
             <ArrowRight className="w-4 h-4" />
@@ -276,7 +276,7 @@ export const RegisterPage = () => {
 
         <div className="text-center text-xs text-slate-600">
           Already registered?{' '}
-          <Link to="/login" className="font-bold text-indigo-600 hover:underline">
+          <Link to="/login" className="font-bold text-emerald-600 hover:underline">
             Sign In Here
           </Link>
         </div>

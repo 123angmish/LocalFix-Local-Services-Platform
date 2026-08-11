@@ -50,16 +50,16 @@ export const VendorDashboardPage = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-8 rounded-3xl text-white shadow-xl">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-gradient-to-r from-slate-900 via-emerald-950 to-slate-900 p-8 rounded-3xl text-white shadow-xl border border-emerald-500/20">
         <div className="space-y-1">
-          <span className="text-xs font-semibold text-indigo-400 uppercase tracking-wider">Vendor Management Portal</span>
+          <span className="text-xs font-semibold text-emerald-400 uppercase tracking-wider">Vendor Management Portal</span>
           <h1 className="text-3xl font-extrabold tracking-tight">{user?.businessName || user?.name}</h1>
           <p className="text-xs text-slate-300">Manage incoming service bookings, service offerings, and track revenue</p>
         </div>
         <div className="flex gap-3">
           <Link
             to="/vendor/services"
-            className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center gap-1.5"
+            className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center gap-1.5"
           >
             <Wrench className="w-4 h-4" />
             Manage Services
@@ -116,7 +116,7 @@ export const VendorDashboardPage = () => {
                 <XAxis dataKey="name" stroke="#64748b" fontSize={12} />
                 <YAxis stroke="#64748b" fontSize={12} />
                 <Tooltip formatter={(val) => `₹${val}`} />
-                <Bar dataKey="earnings" fill="#4f46e5" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="earnings" fill="#059669" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -125,7 +125,7 @@ export const VendorDashboardPage = () => {
         <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
           <div className="flex justify-between items-center border-b border-slate-100 pb-3">
             <h3 className="font-bold text-slate-900 text-base">Recent Incoming Bookings</h3>
-            <Link to="/vendor/bookings" className="text-xs text-indigo-600 font-semibold hover:underline">
+            <Link to="/vendor/bookings" className="text-xs text-emerald-600 font-semibold hover:underline">
               View All
             </Link>
           </div>
@@ -138,12 +138,12 @@ export const VendorDashboardPage = () => {
                 <div key={b.id} className="p-3 bg-slate-50 rounded-2xl border border-slate-100 space-y-1">
                   <div className="flex justify-between items-center text-xs">
                     <strong className="text-slate-900 font-bold">{b.serviceTitle}</strong>
-                    <span className="text-indigo-600 font-extrabold">₹{b.totalAmount}</span>
+                    <span className="text-emerald-600 font-extrabold">₹{b.totalAmount}</span>
                   </div>
                   <p className="text-[11px] text-slate-500">Customer: {b.customerName} ({b.customerPhone || b.customerEmail})</p>
                   <div className="flex justify-between items-center text-[10px] pt-1">
                     <span className="text-slate-400">{b.bookingDate} • {b.timeSlot}</span>
-                    <span className="font-bold text-indigo-600">{b.status}</span>
+                    <span className="font-bold text-emerald-600">{b.status}</span>
                   </div>
                 </div>
               ))}

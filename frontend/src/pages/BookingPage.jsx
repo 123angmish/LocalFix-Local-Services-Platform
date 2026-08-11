@@ -135,7 +135,7 @@ export const BookingPage = () => {
         <form onSubmit={handleSubmit} className="lg:col-span-2 space-y-6">
           <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-5">
             <h3 className="font-bold text-slate-900 text-base border-b border-slate-100 pb-3 flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-indigo-600" />
+              <Calendar className="w-4 h-4 text-emerald-600" />
               1. Select Date & Time Slot
             </h3>
 
@@ -148,7 +148,7 @@ export const BookingPage = () => {
                   min={new Date().toISOString().split('T')[0]}
                   value={bookingDate}
                   onChange={(e) => setBookingDate(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
 
@@ -157,7 +157,7 @@ export const BookingPage = () => {
                 <select
                   value={timeSlot}
                   onChange={(e) => setTimeSlot(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-emerald-500"
                 >
                   {timeSlots.map((slot) => (
                     <option key={slot} value={slot}>{slot}</option>
@@ -169,7 +169,7 @@ export const BookingPage = () => {
 
           <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
             <h3 className="font-bold text-slate-900 text-base border-b border-slate-100 pb-3 flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-indigo-600" />
+              <MapPin className="w-4 h-4 text-emerald-600" />
               2. Address & Special Instructions
             </h3>
 
@@ -181,7 +181,7 @@ export const BookingPage = () => {
                 placeholder="House/Flat No., Building Name, Street, Landmark, Area..."
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-emerald-500"
               />
             </div>
 
@@ -192,14 +192,14 @@ export const BookingPage = () => {
                 placeholder="e.g. Please bring a 15-inch pipe wrench"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-emerald-500"
               />
             </div>
           </div>
 
           <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
             <h3 className="font-bold text-slate-900 text-base border-b border-slate-100 pb-3 flex items-center gap-2">
-              <CreditCard className="w-4 h-4 text-indigo-600" />
+              <CreditCard className="w-4 h-4 text-emerald-600" />
               3. Payment Selection (Dummy Payment)
             </h3>
 
@@ -211,7 +211,7 @@ export const BookingPage = () => {
                   onClick={() => setPaymentMethod(m)}
                   className={`py-3 rounded-2xl border text-center font-bold text-xs transition ${
                     paymentMethod === m
-                      ? 'border-indigo-600 bg-indigo-50 text-indigo-700 shadow-sm'
+                      ? 'border-emerald-600 bg-emerald-50 text-emerald-700 shadow-sm'
                       : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300'
                   }`}
                 >
@@ -224,7 +224,7 @@ export const BookingPage = () => {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm rounded-2xl shadow-lg transition flex items-center justify-center gap-2 shadow-indigo-200 disabled:opacity-50"
+            className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-2xl shadow-lg transition flex items-center justify-center gap-2 shadow-emerald-200 disabled:opacity-50"
           >
             {submitting ? 'Confirming Booking...' : `Confirm & Pay ₹${finalTotal}`}
             <ArrowRight className="w-4 h-4" />
@@ -237,7 +237,7 @@ export const BookingPage = () => {
             <h3 className="font-bold text-slate-900 text-base border-b border-slate-100 pb-3">Order Summary</h3>
 
             <div className="space-y-2">
-              <span className="text-[10px] uppercase font-bold text-indigo-600 tracking-wider px-2 py-0.5 bg-indigo-50 rounded">
+              <span className="text-[10px] uppercase font-bold text-emerald-700 tracking-wider px-2 py-0.5 bg-emerald-50 rounded border border-emerald-100">
                 {service.categoryName}
               </span>
               <h4 className="font-bold text-slate-900 text-base">{service.title}</h4>
@@ -264,7 +264,7 @@ export const BookingPage = () => {
                   <button
                     type="button"
                     onClick={applyPromo}
-                    className="px-3 py-1.5 bg-indigo-600 text-white font-bold text-xs rounded-xl hover:bg-indigo-700"
+                    className="px-3 py-1.5 bg-emerald-600 text-white font-bold text-xs rounded-xl hover:bg-emerald-700"
                   >
                     Apply
                   </button>
@@ -293,7 +293,7 @@ export const BookingPage = () => {
               </div>
               <div className="border-t border-slate-200 pt-2 flex justify-between font-extrabold text-slate-900 text-sm">
                 <span>Total Amount:</span>
-                <span className="text-indigo-600">₹{finalTotal}</span>
+                <span className="text-emerald-600">₹{finalTotal}</span>
               </div>
             </div>
 

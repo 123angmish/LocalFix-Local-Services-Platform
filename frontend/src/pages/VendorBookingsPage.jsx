@@ -68,7 +68,7 @@ export const VendorBookingsPage = () => {
               onClick={() => setStatusFilter(st)}
               className={`px-3 py-1.5 rounded-xl transition ${
                 statusFilter === st
-                  ? 'bg-indigo-600 text-white shadow-sm'
+                  ? 'bg-emerald-600 text-white shadow-sm font-bold'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -95,7 +95,7 @@ export const VendorBookingsPage = () => {
               <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2 border-b border-slate-100 pb-3">
                 <div className="flex items-center gap-3">
                   <span className="font-extrabold text-slate-900 text-base">Booking #{b.id}</span>
-                  <span className="px-3 py-0.5 bg-indigo-50 text-indigo-700 text-xs font-bold rounded-full border border-indigo-100">
+                  <span className="px-3 py-0.5 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-full border border-emerald-100">
                     {b.categoryName}
                   </span>
                 </div>
@@ -103,8 +103,8 @@ export const VendorBookingsPage = () => {
                 <div className="flex items-center gap-3">
                   <span className={`text-xs font-bold px-3 py-1 rounded-full ${
                     b.status === 'COMPLETED' ? 'bg-emerald-100 text-emerald-800' :
-                    b.status === 'IN_PROGRESS' ? 'bg-indigo-100 text-indigo-800' :
-                    b.status === 'ACCEPTED' ? 'bg-blue-100 text-blue-800' :
+                    b.status === 'IN_PROGRESS' ? 'bg-teal-100 text-teal-800' :
+                    b.status === 'ACCEPTED' ? 'bg-emerald-100 text-emerald-800' :
                     b.status === 'PENDING' ? 'bg-amber-100 text-amber-800' :
                     'bg-red-100 text-red-800'
                   }`}>
@@ -119,7 +119,7 @@ export const VendorBookingsPage = () => {
                   <span className="text-slate-400 font-medium">Customer Details:</span>
                   <p className="font-bold text-slate-900 text-sm mt-0.5">{b.customerName}</p>
                   <p className="text-slate-500 flex items-center gap-1 mt-0.5">
-                    <Phone className="w-3.5 h-3.5 text-indigo-500" /> {b.customerPhone || b.customerEmail}
+                    <Phone className="w-3.5 h-3.5 text-emerald-500" /> {b.customerPhone || b.customerEmail}
                   </p>
                 </div>
 
@@ -127,7 +127,7 @@ export const VendorBookingsPage = () => {
                   <span className="text-slate-400 font-medium">Schedule & Location:</span>
                   <p className="font-semibold text-slate-800 mt-0.5">{b.bookingDate} ({b.timeSlot})</p>
                   <p className="text-slate-500 flex items-center gap-1 mt-0.5 truncate">
-                    <MapPin className="w-3.5 h-3.5 text-indigo-500 shrink-0" /> {b.address}
+                    <MapPin className="w-3.5 h-3.5 text-emerald-500 shrink-0" /> {b.address}
                   </p>
                 </div>
 
@@ -160,7 +160,7 @@ export const VendorBookingsPage = () => {
                 {b.status === 'ACCEPTED' && (
                   <button
                     onClick={() => openOtpModal(b.id, 'in-progress')}
-                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center gap-1"
+                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center gap-1"
                   >
                     <Play className="w-3.5 h-3.5 fill-current" /> Start Job (Enter OTP)
                   </button>
@@ -203,7 +203,7 @@ export const VendorBookingsPage = () => {
               placeholder="e.g. 4829"
               value={inputOtp}
               onChange={(e) => setInputOtp(e.target.value)}
-              className="w-full text-center text-2xl font-mono tracking-widest py-3 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:ring-2 focus:ring-indigo-500"
+              className="w-full text-center text-2xl font-mono tracking-widest py-3 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:ring-2 focus:ring-emerald-500"
             />
 
             <div className="flex justify-end gap-2 pt-2">
@@ -217,7 +217,7 @@ export const VendorBookingsPage = () => {
               <button
                 type="button"
                 onClick={() => handleStatusChange(otpModal.bookingId, otpModal.targetAction, inputOtp)}
-                className="px-4 py-2 bg-indigo-600 text-white font-bold text-xs rounded-xl shadow-md"
+                className="px-4 py-2 bg-emerald-600 text-white font-bold text-xs rounded-xl shadow-md"
               >
                 Verify & Proceed
               </button>
