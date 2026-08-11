@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
-import { Calendar, Clock, CheckCircle2, IndianRupee, ArrowRight, Wrench, Sparkles } from 'lucide-react';
+import { Calendar, Clock, CheckCircle2, IndianRupee, ArrowRight, Wrench, Sparkles, ShieldCheck, FileText, AlertTriangle } from 'lucide-react';
 
 export const CustomerDashboardPage = () => {
   const { user } = useAuth();
@@ -103,6 +103,36 @@ export const CustomerDashboardPage = () => {
             <div className="text-2xl font-extrabold text-slate-900">₹{stats?.totalSpent || 0}</div>
           </div>
         </div>
+      </div>
+
+      {/* Flagship Startup Features Navigation */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Link to="/repair-passport" className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm hover:border-emerald-500 transition space-y-2 group">
+          <div className="flex justify-between items-center">
+            <ShieldCheck className="w-6 h-6 text-emerald-600" />
+            <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-emerald-600 transition" />
+          </div>
+          <h3 className="font-extrabold text-slate-900 text-base">Repair Passport</h3>
+          <p className="text-xs text-slate-500">View lifetime asset maintenance records, parts replaced, and costs.</p>
+        </Link>
+
+        <Link to="/warranties" className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm hover:border-emerald-500 transition space-y-2 group">
+          <div className="flex justify-between items-center">
+            <CheckCircle2 className="w-6 h-6 text-emerald-600" />
+            <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-emerald-600 transition" />
+          </div>
+          <h3 className="font-extrabold text-slate-900 text-base">30-Day Warranties</h3>
+          <p className="text-xs text-slate-500">Track active service protection and file one-click warranty claims.</p>
+        </Link>
+
+        <Link to="/disputes" className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm hover:border-emerald-500 transition space-y-2 group">
+          <div className="flex justify-between items-center">
+            <AlertTriangle className="w-6 h-6 text-amber-500" />
+            <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-emerald-600 transition" />
+          </div>
+          <h3 className="font-extrabold text-slate-900 text-base">Dispute Center</h3>
+          <p className="text-xs text-slate-500">Raise or track resolution for incomplete work or pricing issues.</p>
+        </Link>
       </div>
 
       {/* Recent Bookings Section */}

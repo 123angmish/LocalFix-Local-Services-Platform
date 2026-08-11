@@ -57,6 +57,8 @@ public class SecurityConfig {
                                 "/api/",
                                 "/api/auth/**",
                                 "/api/v1/auth/**",
+                                "/api/uploads/**",
+                                "/api/pricing/**",
                                 "/ws-localfix/**",
                                 "/h2-console/**",
                                 "/swagger-ui/**",
@@ -65,10 +67,10 @@ public class SecurityConfig {
                                 "/api/ai/recommend-service",
                                 "/api/v1/ai/**"
                         ).permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/categories/**", "/api/v1/categories/**", "/api/services/**", "/api/v1/services/**", "/api/reviews/**", "/api/v1/reviews/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/categories/**", "/api/v1/categories/**", "/api/services/**", "/api/v1/services/**", "/api/reviews/**", "/api/v1/reviews/**", "/api/bookings/*/work-proof").permitAll()
                         .requestMatchers("/api/admin/**", "/api/v1/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/vendor/**", "/api/v1/vendor/**", "/api/v1/professionals/**").hasAnyRole("VENDOR", "ADMIN")
-                        .requestMatchers("/api/customer/**", "/api/v1/customer/**", "/api/bookings/**", "/api/v1/bookings/**", "/api/payments/**", "/api/v1/payments/**", "/api/reviews", "/api/v1/quotes/**", "/api/v1/subscriptions/**", "/api/v1/properties/**", "/api/v1/group-bookings/**", "/api/v1/wallet/**", "/api/v1/sos/**").hasAnyRole("CUSTOMER", "ADMIN", "VENDOR")
+                        .requestMatchers("/api/vendor/**", "/api/v1/vendor/**", "/api/v1/professionals/**").hasAnyRole("VENDOR", "PROVIDER", "ADMIN")
+                        .requestMatchers("/api/customer/**", "/api/v1/customer/**", "/api/bookings/**", "/api/v1/bookings/**", "/api/payments/**", "/api/v1/payments/**", "/api/reviews", "/api/disputes", "/api/user/disputes", "/api/v1/quotes/**", "/api/v1/subscriptions/**", "/api/v1/properties/**", "/api/v1/group-bookings/**", "/api/v1/wallet/**", "/api/v1/sos/**").hasAnyRole("CUSTOMER", "ADMIN", "VENDOR", "PROVIDER")
                         .anyRequest().authenticated()
                 );
 

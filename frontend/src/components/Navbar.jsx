@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Wrench, Sparkles, User, LogOut, LayoutDashboard, Menu, X, ShieldAlert, Calendar, MapPin } from 'lucide-react';
+import { Wrench, Sparkles, User, LogOut, LayoutDashboard, Menu, X, ShieldAlert, Calendar, MapPin, ShieldCheck, FileText } from 'lucide-react';
 
 export const Navbar = () => {
   const { user, logout } = useAuth();
@@ -66,15 +66,24 @@ export const Navbar = () => {
             {user ? (
               <div className="flex items-center space-x-3">
                 {user.role === 'CUSTOMER' && (
-                  <Link
-                    to="/customer/dashboard"
-                    className="px-3.5 py-2 text-sm font-medium text-slate-700 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg flex items-center gap-1.5 transition"
-                  >
-                    <LayoutDashboard className="w-4 h-4" />
-                    Dashboard
-                  </Link>
+                  <>
+                    <Link
+                      to="/customer/dashboard"
+                      className="px-3 py-2 text-sm font-medium text-slate-700 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg flex items-center gap-1.5 transition"
+                    >
+                      <LayoutDashboard className="w-4 h-4" />
+                      Dashboard
+                    </Link>
+                    <Link
+                      to="/repair-passport"
+                      className="px-3 py-2 text-sm font-medium text-slate-700 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg flex items-center gap-1.5 transition"
+                    >
+                      <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                      Repair Passport
+                    </Link>
+                  </>
                 )}
-                {user.role === 'VENDOR' && (
+                {(user.role === 'VENDOR' || user.role === 'PROVIDER') && (
                   <Link
                     to="/vendor/dashboard"
                     className="px-3.5 py-2 text-sm font-medium text-slate-700 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg flex items-center gap-1.5 transition"
@@ -160,15 +169,31 @@ export const Navbar = () => {
           {user ? (
             <>
               {user.role === 'CUSTOMER' && (
-                <Link
-                  to="/customer/dashboard"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block py-2 text-sm font-medium text-slate-700"
-                >
-                  Customer Dashboard
-                </Link>
+                <>
+                  <Link
+                    to="/customer/dashboard"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block py-2 text-sm font-medium text-slate-700"
+                  >
+                    Customer Dashboard
+                  </Link>
+                  <Link
+                    to="/repair-passport"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block py-2 text-sm font-medium text-slate-700"
+                  >
+                    Repair Passport
+                  </Link>
+                  <Link
+                    to="/warranties"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block py-2 text-sm font-medium text-slate-700"
+                  >
+                    Active Warranties
+                  </Link>
+                </>
               )}
-              {user.role === 'VENDOR' && (
+              {(user.role === 'VENDOR' || user.role === 'PROVIDER') && (
                 <Link
                   to="/vendor/dashboard"
                   onClick={() => setMobileMenuOpen(false)}

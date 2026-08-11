@@ -20,6 +20,9 @@ import { AdminDashboardPage } from './pages/AdminDashboardPage';
 import { AdminVendorsPage } from './pages/AdminVendorsPage';
 import { AdminCategoriesPage } from './pages/AdminCategoriesPage';
 import { AIRecommenderPage } from './pages/AIRecommenderPage';
+import { RepairPassportPage } from './pages/RepairPassportPage';
+import { WarrantyPage } from './pages/WarrantyPage';
+import { DisputePage } from './pages/DisputePage';
 import { NotFoundPage } from './pages/NotFoundPage';
 
 export function App() {
@@ -43,10 +46,13 @@ export function App() {
             <Route path="/book/:serviceId" element={<BookingPage />} />
             <Route path="/customer/dashboard" element={<CustomerDashboardPage />} />
             <Route path="/customer/bookings" element={<CustomerBookingsPage />} />
+            <Route path="/repair-passport" element={<RepairPassportPage />} />
+            <Route path="/warranties" element={<WarrantyPage />} />
+            <Route path="/disputes" element={<DisputePage />} />
           </Route>
 
           {/* Vendor Routes */}
-          <Route element={<ProtectedRoute allowedRoles={['VENDOR', 'ADMIN']} />}>
+          <Route element={<ProtectedRoute allowedRoles={['VENDOR', 'PROVIDER', 'ADMIN']} />}>
             <Route path="/vendor/dashboard" element={<VendorDashboardPage />} />
             <Route path="/vendor/services" element={<VendorServicesPage />} />
             <Route path="/vendor/bookings" element={<VendorBookingsPage />} />
