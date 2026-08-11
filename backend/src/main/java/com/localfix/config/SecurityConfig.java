@@ -53,6 +53,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/",
+                                "/api",
+                                "/api/",
                                 "/api/auth/**",
                                 "/api/v1/auth/**",
                                 "/ws-localfix/**",
