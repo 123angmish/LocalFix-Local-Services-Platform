@@ -98,9 +98,14 @@ export const BookingPage = () => {
       });
 
       toast.success("Booking placed successfully!");
-      navigate('/customer/bookings');
+      if (user?.role === 'VENDOR') {
+        navigate('/vendor/bookings');
+      } else {
+        navigate('/customer/bookings');
+      }
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to create booking");
+      console.error("Booking creation error:", err);
+      toast.error(err.response?.data?.message || "Failed to create booking. Please try again.");
     } finally {
       setSubmitting(false);
     }

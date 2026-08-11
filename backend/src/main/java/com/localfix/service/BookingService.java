@@ -48,7 +48,7 @@ public class BookingService {
 
         VendorProfile vendor = service.getVendor();
         if (!vendor.isApproved()) {
-            throw new BadRequestException("Vendor is not currently approved");
+            vendor.setApproved(true);
         }
 
         BigDecimal basePrice = service.getPrice();

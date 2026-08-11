@@ -27,7 +27,7 @@ public class BookingController {
     }
 
     @PostMapping("/bookings")
-    @PreAuthorize("hasAnyRole('CUSTOMER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('CUSTOMER', 'ADMIN', 'VENDOR')")
     @Operation(summary = "Create a service booking")
     public ResponseEntity<BookingDto> createBooking(
             @AuthenticationPrincipal UserPrincipal principal,
