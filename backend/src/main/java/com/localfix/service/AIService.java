@@ -7,7 +7,6 @@ import com.localfix.dto.ai.AIRecommendResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
@@ -36,38 +35,37 @@ public class AIService {
                     .build();
         }
 
-        // 2. Try Primary Gemini API Call
-        try {
-            String endpoint = "https://generativelanguage.googleapis.com/v1beta/models/" + modelName + ":generateContent?key=" + cleanKey;
+        // 2. Try Gemini API Endpoints with multiple model fallbacks
+        List<String> modelsToTry = List.of(modelName, "gemini-1.5-flash", "gemini-1.5-pro", "gemini-pro");
 
-            String systemPrompt = "You are LocalFix AI repair diagnosis engine. Analyze the repair problem description and return a strictly formatted JSON object with fields: "
-                    + "\"recommendedCategory\" (AC Repair, Electrician, Plumber, Cleaner, Appliance Repair, Salon, or Tutor), "
-                    + "\"likelyIssue\", \"possibleCauses\" (array of strings), \"severity\" (LOW, MEDIUM, HIGH, URGENT), "
-                    + "\"urgency\" (LOW, MEDIUM, HIGH, URGENT), \"recommendedTechnician\", \"estimatedDuration\", \"estimatedPriceRange\", \"reason\".";
+        for (String model : modelsToTry) {
+            try {
+                String endpoint = "https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent?key=" + cleanKey;
 
-            Map<String, Object> textPart = new HashMap<>();
-            textPart.put("text", systemPrompt + "\nCustomer Problem: " + request.getProblem() + (request.getCategory() != null ? " (Category hint: " + request.getCategory() + ")" : ""));
+                String systemPrompt = "You are LocalFix AI repair diagnosis engine. Analyze the repair problem description and return a strictly formatted JSON object with fields: "
+                        + "\"recommendedCategory\" (AC Repair, Electrician, Plumber, Cleaner, Appliance Repair, Salon, or Tutor), "
+                        + "\"likelyIssue\", \"possibleCauses\" (array of strings), \"severity\" (LOW, MEDIUM, HIGH, URGENT), "
+                        + "\"urgency\" (LOW, MEDIUM, HIGH, URGENT), \"recommendedTechnician\", \"estimatedDuration\", \"estimatedPriceRange\", \"reason\".";
 
-            List<Map<String, Object>> parts = new ArrayList<>();
-            parts.add(textPart);
+                Map<String, Object> textPart = Map.of("text", systemPrompt + "\nCustomer Problem: " + request.getProblem() + (request.getCategory() != null ? " (Category hint: " + request.getCategory() + ")" : ""));
+                Map<String, Object> contentNode = Map.of("parts", List.of(textPart));
+                Map<String, Object> requestBody = Map.of("contents", List.of(contentNode));
 
-            Map<String, Object> contentNode = new HashMap<>();
-            contentNode.put("parts", parts);
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_JSON);
 
-            Map<String, Object> requestBody = new HashMap<>();
-            requestBody.put("contents", Collections.singletonList(contentNode));
+                HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
+                ResponseEntity<String> response = restTemplate.postForEntity(endpoint, entity, String.class);
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-
-            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
-            ResponseEntity<String> response = restTemplate.postForEntity(endpoint, entity, String.class);
-
-            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                return parseAndBuildResponse(response.getBody());
+                if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                    AIRecommendResponse parsed = parseAndBuildResponse(response.getBody());
+                    if (parsed != null && parsed.getRecommendedCategory() != null) {
+                        return parsed;
+                    }
+                }
+            } catch (Exception ex) {
+                System.err.println("Gemini model " + model + " failed: " + ex.getMessage());
             }
-        } catch (Exception ex) {
-            System.err.println("Gemini API call failed: " + ex.getMessage());
         }
 
         // 3. Try Secondary OpenAI / OpenRouter Compatible API Call
@@ -99,7 +97,7 @@ public class AIService {
             System.err.println("OpenAI API call failed: " + ex.getMessage());
         }
 
-        // 4. Intelligent NLP Symptom Diagnosis Engine (Runs when AI_API_KEY is configured)
+        // 4. Guaranteed Dynamic NLP Symptom Diagnosis Engine (Runs whenever AI_API_KEY is configured)
         return generateNlpDiagnosis(request.getProblem());
     }
 
@@ -109,7 +107,7 @@ public class AIService {
             String responseText = root.path("candidates").get(0).path("content").path("parts").get(0).path("text").asText();
             return parseJsonString(responseText);
         } catch (Exception e) {
-            return generateNlpDiagnosis("Service Inspection Required");
+            return null;
         }
     }
 
@@ -147,10 +145,10 @@ public class AIService {
                     .recommendedTechnician(parsedJson.path("recommendedTechnician").asText("Certified Specialist"))
                     .estimatedDuration(parsedJson.path("estimatedDuration").asText("1-2 hours"))
                     .estimatedPriceRange(parsedJson.path("estimatedPriceRange").asText("₹399 - ₹899"))
-                    .reason(parsedJson.path("reason").asText("AI analysis based on provided symptoms."))
+                    .reason(parsedJson.path("reason").asText("AI analysis based on symptoms."))
                     .build();
         } catch (Exception e) {
-            return generateNlpDiagnosis(responseText);
+            return null;
         }
     }
 
