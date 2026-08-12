@@ -23,6 +23,9 @@ import { AIRecommenderPage } from './pages/AIRecommenderPage';
 import { RepairPassportPage } from './pages/RepairPassportPage';
 import { WarrantyPage } from './pages/WarrantyPage';
 import { DisputePage } from './pages/DisputePage';
+import { SocietyDashboardPage } from './pages/SocietyDashboardPage';
+import { QuotesComparisonPage } from './pages/QuotesComparisonPage';
+import { ProviderSaaSPage } from './pages/ProviderSaaSPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 
 export function App() {
@@ -49,6 +52,8 @@ export function App() {
             <Route path="/repair-passport" element={<RepairPassportPage />} />
             <Route path="/warranties" element={<WarrantyPage />} />
             <Route path="/disputes" element={<DisputePage />} />
+            <Route path="/society-dashboard" element={<SocietyDashboardPage />} />
+            <Route path="/quotes" element={<QuotesComparisonPage />} />
           </Route>
 
           {/* Vendor Routes */}
@@ -56,6 +61,7 @@ export function App() {
             <Route path="/vendor/dashboard" element={<VendorDashboardPage />} />
             <Route path="/vendor/services" element={<VendorServicesPage />} />
             <Route path="/vendor/bookings" element={<VendorBookingsPage />} />
+            <Route path="/vendor/crm" element={<ProviderSaaSPage />} />
           </Route>
 
           {/* Admin Routes */}

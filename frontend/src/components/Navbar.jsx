@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Wrench, Sparkles, User, LogOut, LayoutDashboard, Menu, X, ShieldAlert, Calendar, MapPin, ShieldCheck, FileText } from 'lucide-react';
+import { Wrench, Sparkles, User, LogOut, LayoutDashboard, Menu, X, ShieldAlert, Calendar, MapPin, ShieldCheck, FileText, Building, Users, Tag } from 'lucide-react';
 
 export const Navbar = () => {
   const { user, logout } = useAuth();
@@ -28,7 +28,7 @@ export const Navbar = () => {
               <span>Local<span className="text-slate-900">Fix</span></span>
             </Link>
 
-            <div className="hidden md:flex ml-8 space-x-5 items-center">
+            <div className="hidden md:flex ml-8 space-x-4 items-center text-xs font-semibold">
               {/* City Location Selector */}
               <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50/70 rounded-full border border-emerald-200 text-xs font-semibold text-emerald-900">
                 <MapPin className="w-3.5 h-3.5 text-emerald-600" />
@@ -44,39 +44,53 @@ export const Navbar = () => {
 
               <Link
                 to="/services"
-                className={`inline-flex items-center px-1 pt-1 text-sm font-medium border-b-2 ${
-                  isActive('/services')
-                    ? 'border-emerald-600 text-emerald-600'
-                    : 'border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300'
+                className={`px-3 py-2 rounded-lg ${
+                  isActive('/services') ? 'bg-emerald-50 text-emerald-700 font-bold' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
                 Browse Services
               </Link>
               <Link
                 to="/ai-recommender"
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-sm hover:opacity-90 transition my-auto`}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-sm hover:opacity-90 transition`}
               >
-                <Sparkles className="w-3.5 h-3.5" />
+                <Sparkles className="w-3.5 h-3.5 text-amber-300" />
                 AI Assistant
+              </Link>
+              <Link
+                to="/quotes"
+                className={`px-3 py-2 rounded-lg ${
+                  isActive('/quotes') ? 'bg-emerald-50 text-emerald-700 font-bold' : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                Quotes
+              </Link>
+              <Link
+                to="/society-dashboard"
+                className={`px-3 py-2 rounded-lg ${
+                  isActive('/society-dashboard') ? 'bg-emerald-50 text-emerald-700 font-bold' : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                Society / PG Mode
               </Link>
             </div>
           </div>
 
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden md:flex items-center space-x-3">
             {user ? (
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-2">
                 {user.role === 'CUSTOMER' && (
                   <>
                     <Link
                       to="/customer/dashboard"
-                      className="px-3 py-2 text-sm font-medium text-slate-700 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg flex items-center gap-1.5 transition"
+                      className="px-3 py-2 text-xs font-semibold text-slate-700 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg flex items-center gap-1.5 transition"
                     >
                       <LayoutDashboard className="w-4 h-4" />
                       Dashboard
                     </Link>
                     <Link
                       to="/repair-passport"
-                      className="px-3 py-2 text-sm font-medium text-slate-700 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg flex items-center gap-1.5 transition"
+                      className="px-3 py-2 text-xs font-semibold text-slate-700 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg flex items-center gap-1.5 transition"
                     >
                       <ShieldCheck className="w-4 h-4 text-emerald-600" />
                       Repair Passport
@@ -84,18 +98,27 @@ export const Navbar = () => {
                   </>
                 )}
                 {(user.role === 'VENDOR' || user.role === 'PROVIDER') && (
-                  <Link
-                    to="/vendor/dashboard"
-                    className="px-3.5 py-2 text-sm font-medium text-slate-700 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg flex items-center gap-1.5 transition"
-                  >
-                    <LayoutDashboard className="w-4 h-4" />
-                    Vendor Portal
-                  </Link>
+                  <>
+                    <Link
+                      to="/vendor/dashboard"
+                      className="px-3 py-2 text-xs font-semibold text-slate-700 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg flex items-center gap-1.5 transition"
+                    >
+                      <LayoutDashboard className="w-4 h-4" />
+                      Vendor Portal
+                    </Link>
+                    <Link
+                      to="/vendor/crm"
+                      className="px-3 py-2 text-xs font-bold text-emerald-700 bg-emerald-50 rounded-lg flex items-center gap-1.5 border border-emerald-200 transition"
+                    >
+                      <Users className="w-4 h-4 text-emerald-600" />
+                      Technician SaaS CRM
+                    </Link>
+                  </>
                 )}
                 {user.role === 'ADMIN' && (
                   <Link
                     to="/admin/dashboard"
-                    className="px-3.5 py-2 text-sm font-medium text-slate-700 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg flex items-center gap-1.5 transition"
+                    className="px-3 py-2 text-xs font-semibold text-slate-700 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg flex items-center gap-1.5 transition"
                   >
                     <ShieldAlert className="w-4 h-4" />
                     Admin Portal
@@ -103,14 +126,8 @@ export const Navbar = () => {
                 )}
 
                 <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
-                  <div className="w-9 h-9 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-sm">
+                  <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-xs">
                     {(user?.name || user?.email || 'U').charAt(0).toUpperCase()}
-                  </div>
-                  <div className="text-left leading-tight hidden lg:block">
-                    <div className="text-xs font-semibold text-slate-900">{user?.name || user?.email || 'User'}</div>
-                    <span className="text-[10px] uppercase font-bold text-emerald-600 tracking-wider">
-                      {user?.role}
-                    </span>
                   </div>
                   <button
                     onClick={handleLogout}
@@ -125,13 +142,13 @@ export const Navbar = () => {
               <div className="flex items-center space-x-3">
                 <Link
                   to="/login"
-                  className="px-4 py-2 text-sm font-medium text-slate-700 hover:text-slate-900 transition"
+                  className="px-4 py-2 text-xs font-semibold text-slate-700 hover:text-slate-900 transition"
                 >
                   Sign In
                 </Link>
                 <Link
                   to="/register"
-                  className="px-4 py-2 text-sm font-medium bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg shadow-sm transition shadow-emerald-200"
+                  className="px-4 py-2 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg shadow-sm transition shadow-emerald-200"
                 >
                   Get Started
                 </Link>
@@ -152,62 +169,46 @@ export const Navbar = () => {
 
       {mobileMenuOpen && (
         <div className="md:hidden border-t border-slate-200 bg-white px-4 pt-2 pb-4 space-y-2">
-          <Link
-            to="/services"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block py-2 text-sm font-medium text-slate-700"
-          >
+          <Link to="/services" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-sm font-medium text-slate-700">
             Browse Services
           </Link>
-          <Link
-            to="/ai-recommender"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block py-2 text-sm font-medium text-emerald-600 font-semibold"
-          >
+          <Link to="/ai-recommender" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-sm font-medium text-emerald-600 font-semibold">
             ✨ AI Assistant
           </Link>
+          <Link to="/quotes" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-sm font-medium text-slate-700">
+            Quotes Marketplace
+          </Link>
+          <Link to="/society-dashboard" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-sm font-medium text-slate-700">
+            Society / PG Mode
+          </Link>
+
           {user ? (
             <>
               {user.role === 'CUSTOMER' && (
                 <>
-                  <Link
-                    to="/customer/dashboard"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="block py-2 text-sm font-medium text-slate-700"
-                  >
+                  <Link to="/customer/dashboard" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-sm font-medium text-slate-700">
                     Customer Dashboard
                   </Link>
-                  <Link
-                    to="/repair-passport"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="block py-2 text-sm font-medium text-slate-700"
-                  >
+                  <Link to="/repair-passport" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-sm font-medium text-slate-700">
                     Repair Passport
                   </Link>
-                  <Link
-                    to="/warranties"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="block py-2 text-sm font-medium text-slate-700"
-                  >
+                  <Link to="/warranties" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-sm font-medium text-slate-700">
                     Active Warranties
                   </Link>
                 </>
               )}
               {(user.role === 'VENDOR' || user.role === 'PROVIDER') && (
-                <Link
-                  to="/vendor/dashboard"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block py-2 text-sm font-medium text-slate-700"
-                >
-                  Vendor Portal
-                </Link>
+                <>
+                  <Link to="/vendor/dashboard" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-sm font-medium text-slate-700">
+                    Vendor Portal
+                  </Link>
+                  <Link to="/vendor/crm" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-sm font-medium text-emerald-700 font-bold">
+                    Technician SaaS CRM
+                  </Link>
+                </>
               )}
               {user.role === 'ADMIN' && (
-                <Link
-                  to="/admin/dashboard"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block py-2 text-sm font-medium text-slate-700"
-                >
+                <Link to="/admin/dashboard" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-sm font-medium text-slate-700">
                   Admin Portal
                 </Link>
               )}
@@ -223,18 +224,10 @@ export const Navbar = () => {
             </>
           ) : (
             <div className="pt-2 border-t border-slate-100 flex flex-col space-y-2">
-              <Link
-                to="/login"
-                onClick={() => setMobileMenuOpen(false)}
-                className="w-full text-center py-2 text-sm font-medium text-slate-700 border border-slate-200 rounded-lg"
-              >
+              <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="w-full text-center py-2 text-sm font-medium text-slate-700 border border-slate-200 rounded-lg">
                 Sign In
               </Link>
-              <Link
-                to="/register"
-                onClick={() => setMobileMenuOpen(false)}
-                className="w-full text-center py-2 text-sm font-medium bg-emerald-600 text-white rounded-lg"
-              >
+              <Link to="/register" onClick={() => setMobileMenuOpen(false)} className="w-full text-center py-2 text-sm font-medium bg-emerald-600 text-white rounded-lg">
                 Get Started
               </Link>
             </div>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
-import { Calendar, Clock, CheckCircle2, IndianRupee, ArrowRight, Wrench, Sparkles, ShieldCheck, FileText, AlertTriangle } from 'lucide-react';
+import { Calendar, Clock, CheckCircle2, IndianRupee, ArrowRight, Wrench, Sparkles, ShieldCheck, FileText, AlertTriangle, Building, Tag, ShieldAlert } from 'lucide-react';
 
 export const CustomerDashboardPage = () => {
   const { user } = useAuth();
@@ -38,7 +38,7 @@ export const CustomerDashboardPage = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 bg-slate-50 font-sans">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-gradient-to-r from-emerald-950 via-teal-900 to-slate-900 p-8 rounded-3xl text-white shadow-xl border border-emerald-500/20">
         <div className="space-y-1">
           <span className="text-xs font-semibold text-emerald-400 uppercase tracking-wider">Customer Portal</span>
@@ -50,8 +50,8 @@ export const CustomerDashboardPage = () => {
             to="/ai-recommender"
             className="px-4 py-2.5 bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold text-xs rounded-xl shadow-md flex items-center gap-1.5 transition"
           >
-            <Sparkles className="w-4 h-4" />
-            AI Service Recommender
+            <Sparkles className="w-4 h-4 text-slate-900" />
+            AI Service Diagnosis
           </Link>
           <Link
             to="/services"
@@ -105,34 +105,56 @@ export const CustomerDashboardPage = () => {
         </div>
       </div>
 
-      {/* Flagship Startup Features Navigation */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Link to="/repair-passport" className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm hover:border-emerald-500 transition space-y-2 group">
-          <div className="flex justify-between items-center">
-            <ShieldCheck className="w-6 h-6 text-emerald-600" />
-            <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-emerald-600 transition" />
-          </div>
-          <h3 className="font-extrabold text-slate-900 text-base">Repair Passport</h3>
-          <p className="text-xs text-slate-500">View lifetime asset maintenance records, parts replaced, and costs.</p>
-        </Link>
+      {/* Startup MVP Core Features Navigation Grid */}
+      <div className="space-y-4">
+        <h3 className="font-extrabold text-slate-900 text-lg">Marketplace Hub & Retention Modules</h3>
 
-        <Link to="/warranties" className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm hover:border-emerald-500 transition space-y-2 group">
-          <div className="flex justify-between items-center">
-            <CheckCircle2 className="w-6 h-6 text-emerald-600" />
-            <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-emerald-600 transition" />
-          </div>
-          <h3 className="font-extrabold text-slate-900 text-base">30-Day Warranties</h3>
-          <p className="text-xs text-slate-500">Track active service protection and file one-click warranty claims.</p>
-        </Link>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Link to="/repair-passport" className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm hover:border-emerald-500 transition space-y-2 group">
+            <div className="flex justify-between items-center">
+              <ShieldCheck className="w-6 h-6 text-emerald-600" />
+              <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-emerald-600 transition" />
+            </div>
+            <h4 className="font-extrabold text-slate-900 text-base">Digital Repair Passport</h4>
+            <p className="text-xs text-slate-500">View lifetime asset maintenance records, parts replaced, and costs.</p>
+          </Link>
 
-        <Link to="/disputes" className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm hover:border-emerald-500 transition space-y-2 group">
-          <div className="flex justify-between items-center">
-            <AlertTriangle className="w-6 h-6 text-amber-500" />
-            <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-emerald-600 transition" />
-          </div>
-          <h3 className="font-extrabold text-slate-900 text-base">Dispute Center</h3>
-          <p className="text-xs text-slate-500">Raise or track resolution for incomplete work or pricing issues.</p>
-        </Link>
+          <Link to="/quotes" className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm hover:border-emerald-500 transition space-y-2 group">
+            <div className="flex justify-between items-center">
+              <Tag className="w-6 h-6 text-emerald-600" />
+              <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-emerald-600 transition" />
+            </div>
+            <h4 className="font-extrabold text-slate-900 text-base">Quotes & AI Overcharging Protection</h4>
+            <p className="text-xs text-slate-500">Compare 2-3 provider quotes with AI market range warnings.</p>
+          </Link>
+
+          <Link to="/society-dashboard" className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm hover:border-emerald-500 transition space-y-2 group">
+            <div className="flex justify-between items-center">
+              <Building className="w-6 h-6 text-emerald-600" />
+              <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-emerald-600 transition" />
+            </div>
+            <h4 className="font-extrabold text-slate-900 text-base">Apartment / Hostel Mode</h4>
+            <p className="text-xs text-slate-500">Manage society/PG housing maintenance tickets & dedicated pros.</p>
+          </Link>
+
+          <Link to="/warranties" className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm hover:border-emerald-500 transition space-y-2 group">
+            <div className="flex justify-between items-center">
+              <CheckCircle2 className="w-6 h-6 text-emerald-600" />
+              <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-emerald-600 transition" />
+            </div>
+            <h4 className="font-extrabold text-slate-900 text-base">30-Day Fix Guarantee Warranties</h4>
+            <p className="text-xs text-slate-500">Track active service protection and file one-click warranty claims.</p>
+          </Link>
+
+          <Link to="/disputes" className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm hover:border-emerald-500 transition space-y-2 group">
+            <div className="flex justify-between items-center">
+              <AlertTriangle className="w-6 h-6 text-amber-500" />
+              <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-emerald-600 transition" />
+            </div>
+            <h4 className="font-extrabold text-slate-900 text-base">Dispute Center</h4>
+            <p className="text-xs text-slate-500">Raise or track resolution for incomplete work or pricing issues.</p>
+          </Link>
+        </div>
       </div>
 
       {/* Recent Bookings Section */}
