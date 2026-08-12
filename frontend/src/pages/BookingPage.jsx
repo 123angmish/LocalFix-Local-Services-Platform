@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
-import { Calendar, Clock, MapPin, CreditCard, ShieldCheck, CheckCircle, ArrowRight } from 'lucide-react';
+import { Calendar, Clock, MapPin, CreditCard, ShieldCheck, CheckCircle, ArrowRight, QrCode, Banknote } from 'lucide-react';
 
 export const BookingPage = () => {
   const { serviceId } = useParams();
@@ -18,7 +18,8 @@ export const BookingPage = () => {
   const [timeSlot, setTimeSlot] = useState('10:00 AM - 11:30 AM');
   const [address, setAddress] = useState('');
   const [notes, setNotes] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState('UPI');
+  const [paymentMethod, setPaymentMethod] = useState('UPI'); // UPI, CASH, CARD
+  const [upiId, setUpiId] = useState('user@upi');
 
   const timeSlots = [
     '09:00 AM - 10:30 AM',
@@ -97,7 +98,7 @@ export const BookingPage = () => {
         promoCode: appliedCode || null
       });
 
-      toast.success("Booking placed successfully!");
+      toast.success(`Booking confirmed via ${paymentMethod === 'UPI' ? 'Instant UPI Payment' : paymentMethod === 'CASH' ? 'Cash on Service Delivery' : 'Credit Card'}!`);
       if (user?.role === 'VENDOR') {
         navigate('/vendor/bookings');
       } else {
@@ -124,10 +125,10 @@ export const BookingPage = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-sans">
       <div>
-        <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Complete Your Service Booking</h1>
-        <p className="text-sm text-slate-600">Select date, time slot, address, and promo discounts</p>
+        <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Complete Your Service Booking</h1>
+        <p className="text-sm text-slate-600">Select date, time slot, address, and choose direct UPI or Cash on Service Delivery</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -197,36 +198,95 @@ export const BookingPage = () => {
             </div>
           </div>
 
+          {/* Payment Selection Box */}
           <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
             <h3 className="font-bold text-slate-900 text-base border-b border-slate-100 pb-3 flex items-center gap-2">
               <CreditCard className="w-4 h-4 text-emerald-600" />
-              3. Payment Selection (Dummy Payment)
+              3. Payment Method Selection
             </h3>
 
-            <div className="grid grid-cols-3 gap-3">
-              {['UPI', 'CASH', 'CARD'].map((m) => (
-                <button
-                  type="button"
-                  key={m}
-                  onClick={() => setPaymentMethod(m)}
-                  className={`py-3 rounded-2xl border text-center font-bold text-xs transition ${
-                    paymentMethod === m
-                      ? 'border-emerald-600 bg-emerald-50 text-emerald-700 shadow-sm'
-                      : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300'
-                  }`}
-                >
-                  {m === 'UPI' ? '⚡ UPI / GPay' : m === 'CASH' ? '💵 Cash on Service' : '💳 Credit/Debit Card'}
-                </button>
-              ))}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <button
+                type="button"
+                onClick={() => setPaymentMethod('UPI')}
+                className={`py-3.5 px-3 rounded-2xl border text-center font-extrabold text-xs transition flex flex-col items-center justify-center gap-1 ${
+                  paymentMethod === 'UPI'
+                    ? 'border-emerald-600 bg-emerald-50 text-emerald-800 shadow-sm ring-2 ring-emerald-500/20'
+                    : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300'
+                }`}
+              >
+                <QrCode className="w-5 h-5 text-emerald-600" />
+                <span>Direct UPI / GPay</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setPaymentMethod('CASH')}
+                className={`py-3.5 px-3 rounded-2xl border text-center font-extrabold text-xs transition flex flex-col items-center justify-center gap-1 ${
+                  paymentMethod === 'CASH'
+                    ? 'border-emerald-600 bg-emerald-50 text-emerald-800 shadow-sm ring-2 ring-emerald-500/20'
+                    : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300'
+                }`}
+              >
+                <Banknote className="w-5 h-5 text-emerald-600" />
+                <span>Cash on Service</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setPaymentMethod('CARD')}
+                className={`py-3.5 px-3 rounded-2xl border text-center font-extrabold text-xs transition flex flex-col items-center justify-center gap-1 col-span-2 sm:col-span-1 ${
+                  paymentMethod === 'CARD'
+                    ? 'border-emerald-600 bg-emerald-50 text-emerald-800 shadow-sm ring-2 ring-emerald-500/20'
+                    : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300'
+                }`}
+              >
+                <CreditCard className="w-5 h-5 text-emerald-600" />
+                <span>Credit / Debit Card</span>
+              </button>
             </div>
+
+            {/* UPI Option Sub-View */}
+            {paymentMethod === 'UPI' && (
+              <div className="p-4 bg-emerald-50/60 rounded-2xl border border-emerald-200 text-xs space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="font-bold text-emerald-950">Scan QR Code or enter UPI Virtual Payment Address (VPA):</span>
+                  <span className="text-[10px] bg-emerald-200 text-emerald-900 font-extrabold px-2 py-0.5 rounded">
+                    Instant Zero-Fee Transfer
+                  </span>
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={upiId}
+                    onChange={(e) => setUpiId(e.target.value)}
+                    placeholder="mobile@paytm or name@okaxis"
+                    className="w-full p-2.5 bg-white border border-emerald-300 rounded-xl text-xs font-semibold text-slate-800"
+                  />
+                  <span className="px-3 py-2 bg-emerald-600 text-white font-bold text-xs rounded-xl my-auto">
+                    Verified
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Cash Option Sub-View */}
+            {paymentMethod === 'CASH' && (
+              <div className="p-4 bg-amber-50/70 rounded-2xl border border-amber-200 text-xs space-y-1 text-amber-950">
+                <p className="font-bold">💵 Cash on Service Delivery (COD)</p>
+                <p className="text-[11px] text-amber-800">
+                  Pay ₹{finalTotal} directly to the verified technician upon successful completion of service and inspection.
+                </p>
+              </div>
+            )}
           </div>
 
           <button
             type="submit"
             disabled={submitting}
-            className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-2xl shadow-lg transition flex items-center justify-center gap-2 shadow-emerald-200 disabled:opacity-50"
+            className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm rounded-2xl shadow-lg transition flex items-center justify-center gap-2 shadow-emerald-200 disabled:opacity-50"
           >
-            {submitting ? 'Confirming Booking...' : `Confirm & Pay ₹${finalTotal}`}
+            {submitting ? 'Confirming Booking...' : `Confirm & Pay ₹${finalTotal} (${paymentMethod === 'UPI' ? 'UPI' : paymentMethod === 'CASH' ? 'Cash' : 'Card'})`}
             <ArrowRight className="w-4 h-4" />
           </button>
         </form>
