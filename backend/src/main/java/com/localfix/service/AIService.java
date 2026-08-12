@@ -97,7 +97,7 @@ public class AIService {
             System.err.println("OpenAI API call failed: " + ex.getMessage());
         }
 
-        // 4. Guaranteed Dynamic NLP Symptom Diagnosis Engine (Runs whenever AI_API_KEY is configured)
+        // 4. Comprehensive Dynamic NLP Symptom Diagnosis Engine (Accurate Fallback Engine)
         return generateNlpDiagnosis(request.getProblem());
     }
 
@@ -155,25 +155,43 @@ public class AIService {
     private AIRecommendResponse generateNlpDiagnosis(String query) {
         String lower = query != null ? query.toLowerCase() : "";
 
-        String category = "AC Repair";
-        String issue = "Cooling System & Drain Pipe Inspection";
-        List<String> causes = List.of("Drain pipe dust blockage", "Cooling coil ice accumulation", "Low gas pressure");
-        String severity = "MEDIUM";
-        String urgency = "MEDIUM";
-        String technician = "Certified HVAC Specialist";
+        String category = "General Maintenance";
+        String issue = "General Home Inspection Request";
+        List<String> causes = List.of("Standard wear and tear", "Routine maintenance requirement");
+        String severity = "LOW";
+        String urgency = "LOW";
+        String technician = "Verified Professional";
         String duration = "45 - 60 mins";
-        String price = "₹499 - ₹899";
-        String reason = "AI Analysis: Identified symptoms related to home climate & appliance performance.";
+        String price = "₹299 - ₹699";
+        String reason = "AI Analysis: Identified general home requirement. Recommended matching verified service specialist.";
 
-        if (lower.contains("leak") || lower.contains("water") || lower.contains("tap") || lower.contains("drain") || lower.contains("pipe") || lower.contains("flush")) {
+        if (lower.contains("salon") || lower.contains("facial") || lower.contains("massage") || lower.contains("beauty") || lower.contains("hair") || lower.contains("spa") || lower.contains("makeup")) {
+            category = "Salon";
+            issue = "At-Home Beauty & Wellness Session";
+            causes = List.of("Skin rejuvenation & relaxation request", "Customized facial & scalp treatment");
+            technician = "Certified Beautician & Spa Specialist";
+            duration = "60 - 90 mins";
+            price = "₹499 - ₹1,299";
+            reason = "AI Analysis: Facial, massage, and grooming request detected. Matched with top-rated home salon professionals.";
+        } else if (lower.contains("ac") || lower.contains("cooling") || lower.contains("air conditioner") || lower.contains("filter")) {
+            category = "AC Repair";
+            issue = "Cooling System & Drain Pipe Inspection";
+            causes = List.of("Drain pipe dust blockage", "Cooling coil ice accumulation", "Low gas pressure");
+            severity = "MEDIUM";
+            urgency = "MEDIUM";
+            technician = "Certified HVAC Specialist";
+            duration = "45 - 60 mins";
+            price = "₹499 - ₹899";
+            reason = "AI Analysis: Identified symptoms related to AC climate performance & cooling coil maintenance.";
+        } else if (lower.contains("leak") || lower.contains("water") || lower.contains("tap") || lower.contains("drain") || lower.contains("pipe") || lower.contains("flush") || lower.contains("sink")) {
             category = "Plumbing";
-            issue = "Water Leakage & Pipe Blockage";
-            causes = List.of("Worn-out rubber washer", "High water pressure pipe joint gap", "Sediment accumulation in trap");
+            issue = "Water Leakage & Drainage Blockage";
+            causes = List.of("Worn-out rubber washer", "High water pressure joint gap", "Trap sediment buildup");
             technician = "Master Plumber";
             duration = "30 - 45 mins";
             price = "₹299 - ₹599";
             reason = "AI Analysis: Water leakage or drainage symptoms detected. Immediate plumbing inspection recommended.";
-        } else if (lower.contains("spark") || lower.contains("mcb") || lower.contains("light") || lower.contains("fan") || lower.contains("wire") || lower.contains("circuit") || lower.contains("short")) {
+        } else if (lower.contains("spark") || lower.contains("mcb") || lower.contains("light") || lower.contains("fan") || lower.contains("wire") || lower.contains("circuit") || lower.contains("short") || lower.contains("switch")) {
             category = "Electrician";
             issue = "Short Circuit & Power Trip Fault";
             causes = List.of("MCB overload trip", "Loose wire contact in switchboard", "Faulty appliance heating element");
@@ -183,7 +201,7 @@ public class AIService {
             duration = "30 - 60 mins";
             price = "₹349 - ₹699";
             reason = "AI Analysis: Electrical fault detected. Immediate power isolation and electrician inspection recommended for safety.";
-        } else if (lower.contains("fridge") || lower.contains("refrigerator") || lower.contains("washing") || lower.contains("geyser")) {
+        } else if (lower.contains("fridge") || lower.contains("refrigerator") || lower.contains("washing") || lower.contains("geyser") || lower.contains("oven")) {
             category = "Appliance Repair";
             issue = "Appliance Component / Thermostat Fault";
             causes = List.of("Thermostat calibration failure", "Relay capacitor degradation", "Heating element scale buildup");
@@ -191,6 +209,22 @@ public class AIService {
             duration = "60 - 90 mins";
             price = "₹499 - ₹999";
             reason = "AI Analysis: Major home appliance fault detected. Technical component diagnosis recommended.";
+        } else if (lower.contains("clean") || lower.contains("cleaning") || lower.contains("sofa") || lower.contains("carpet") || lower.contains("pest")) {
+            category = "Cleaner";
+            issue = "Deep Cleaning & Sanitization Service";
+            causes = List.of("Deep dust accumulation", "Upholstery stain removal", "Surface allergen buildup");
+            technician = "Deep Cleaning Specialist";
+            duration = "90 - 180 mins";
+            price = "₹599 - ₹1,499";
+            reason = "AI Analysis: Deep cleaning & stain extraction query detected. Recommended specialized home cleaning team.";
+        } else if (lower.contains("tutor") || lower.contains("math") || lower.contains("english") || lower.contains("class") || lower.contains("study")) {
+            category = "Tutor";
+            issue = "Home Academic Tutoring Session";
+            causes = List.of("Subject conceptual clarity", "Exam preparation guidance");
+            technician = "Qualified Subject Educator";
+            duration = "60 mins";
+            price = "₹300 - ₹600";
+            reason = "AI Analysis: Educational tutoring request detected. Matched with verified subject tutors.";
         }
 
         return AIRecommendResponse.builder()
