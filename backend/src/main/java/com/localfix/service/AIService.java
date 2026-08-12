@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
+import java.util.regex.Pattern;
 
 @Service
 public class AIService {
@@ -49,7 +50,7 @@ public class AIService {
 
                 Map<String, Object> textPart = Map.of("text", systemPrompt + "\nCustomer Problem: " + request.getProblem() + (request.getCategory() != null ? " (Category hint: " + request.getCategory() + ")" : ""));
                 Map<String, Object> contentNode = Map.of("parts", List.of(textPart));
-                Map<String, Object> requestBody = Map.of("contents", List.of(contentNode));
+                Map<String, Object> requestBody = Map.of("contents", List.of(requestBodyNode(textPart)));
 
                 HttpHeaders headers = new HttpHeaders();
                 headers.setContentType(MediaType.APPLICATION_JSON);
@@ -99,6 +100,10 @@ public class AIService {
 
         // 4. Comprehensive Dynamic NLP Symptom Diagnosis Engine (Accurate Fallback Engine)
         return generateNlpDiagnosis(request.getProblem());
+    }
+
+    private Map<String, Object> requestBodyNode(Map<String, Object> textPart) {
+        return Map.of("parts", List.of(textPart));
     }
 
     private AIRecommendResponse parseAndBuildResponse(String rawResponseBody) {
@@ -173,7 +178,7 @@ public class AIService {
             duration = "60 - 90 mins";
             price = "₹499 - ₹1,299";
             reason = "AI Analysis: Facial, massage, and grooming request detected. Matched with top-rated home salon professionals.";
-        } else if (lower.contains("ac") || lower.contains("cooling") || lower.contains("air conditioner") || lower.contains("filter")) {
+        } else if (lower.matches(".*\\b(ac|a/c|cooling|air conditioner|aircon)\\b.*")) {
             category = "AC Repair";
             issue = "Cooling System & Drain Pipe Inspection";
             causes = List.of("Drain pipe dust blockage", "Cooling coil ice accumulation", "Low gas pressure");
