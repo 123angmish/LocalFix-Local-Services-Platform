@@ -1,9 +1,11 @@
 package com.localfix.dto.ai;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
 public class AIRecommendResponse {
 
+    @JsonProperty("aiAvailable")
     private boolean aiAvailable = true;
     private String statusMessage;
     private String recommendedCategory;
@@ -34,6 +36,7 @@ public class AIRecommendResponse {
     }
 
     public boolean isAiAvailable() { return aiAvailable; }
+    public boolean getAiAvailable() { return aiAvailable; }
     public void setAiAvailable(boolean aiAvailable) { this.aiAvailable = aiAvailable; }
 
     public String getStatusMessage() { return statusMessage; }

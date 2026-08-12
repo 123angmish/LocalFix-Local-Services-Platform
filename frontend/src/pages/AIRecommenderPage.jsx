@@ -25,7 +25,7 @@ export const AIRecommenderPage = () => {
     try {
       const res = await api.post('/ai/recommend-service', { problem });
       setRecommendation(res.data);
-      if (res.data.aiAvailable) {
+      if (res.data && res.data.aiAvailable && res.data.recommendedCategory) {
         toast.success("AI Diagnosis ready!");
       }
     } catch (err) {
@@ -38,6 +38,8 @@ export const AIRecommenderPage = () => {
       setLoading(false);
     }
   };
+
+  const isAiActive = recommendation && (recommendation.aiAvailable === true || recommendation.aiAvailable === "true") && Boolean(recommendation.recommendedCategory);
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8 bg-slate-50 font-sans">
@@ -105,7 +107,7 @@ export const AIRecommenderPage = () => {
       {/* Recommendation Results Card */}
       {recommendation && (
         <div className="space-y-4">
-          {!recommendation.aiAvailable ? (
+          {!isAiActive ? (
             /* AI Service Unavailable Clean Fallback Card */
             <div className="bg-amber-50 border border-amber-200 text-amber-950 p-6 sm:p-8 rounded-3xl shadow-sm space-y-4">
               <div className="flex items-center gap-3">

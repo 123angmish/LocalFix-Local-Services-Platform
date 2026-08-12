@@ -7,6 +7,7 @@ import com.localfix.dto.ai.AIRecommendResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
@@ -35,7 +36,7 @@ public class AIService {
 
         try {
             // 2. Multimodal / Text LLM API Integration (Gemini Interactions API Endpoint)
-            String endpoint = "https://generativelanguage.googleapis.com/v1beta/models/" + modelName + ":generateContent?key=" + apiKey;
+            String endpoint = "https://generativelanguage.googleapis.com/v1beta/models/" + modelName + ":generateContent?key=" + apiKey.trim();
 
             String systemPrompt = "You are LocalFix AI repair diagnosis engine. Analyze the repair problem description and return a strictly formatted JSON object with fields: "
                     + "\"recommendedCategory\" (AC Repair, Electrician, Plumber, Cleaner, Appliance Repair, Salon, or Tutor), "
@@ -92,9 +93,16 @@ public class AIService {
                         .recommendedTechnician(parsedJson.path("recommendedTechnician").asText("Certified Specialist"))
                         .estimatedDuration(parsedJson.path("estimatedDuration").asText("1-2 hours"))
                         .estimatedPriceRange(parsedJson.path("estimatedPriceRange").asText("₹300 - ₹800"))
-                        .reason(parsedJson.path("reason").asText("AI analysis based on provided symptoms."))
+                        .reason(parsedJson.path("reason").asText("AI analysis based on symptoms."))
                         .build();
             }
+        } catch (HttpStatusCodeException ex) {
+            System.err.println("External AI API HTTP Exception: " + ex.getStatusCode() + " - " + ex.getResponseBodyAsString());
+            return AIRecommendResponse.builder()
+                    .aiAvailable(false)
+                    .statusMessage("AI service unavailable")
+                    .reason("The configured AI_API_KEY was rejected by Google AI service (" + ex.getStatusCode() + "). Please check your Gemini API Key in Render Environment Variables.")
+                    .build();
         } catch (Exception e) {
             System.err.println("External AI API Call Failed: " + e.getMessage());
         }
@@ -103,7 +111,7 @@ public class AIService {
         return AIRecommendResponse.builder()
                 .aiAvailable(false)
                 .statusMessage("AI service unavailable")
-                .reason("Failed to connect to external LLM API service.")
+                .reason("Could not connect to external AI diagnosis service. Please browse verified professionals directly.")
                 .build();
     }
 }
