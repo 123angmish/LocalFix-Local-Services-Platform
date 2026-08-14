@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../api/axios';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
-import { Plus, Edit, Trash2, X, Wrench, Clock, MapPin, RefreshCw, Upload, Image as ImageIcon, Camera, Lock, ShieldCheck } from 'lucide-react';
+import { Plus, Edit, Trash2, X, Wrench, Clock, MapPin, RefreshCw, Upload, Image as ImageIcon, Camera, Lock, ShieldCheck, Globe, Eye, Search, Layers, UserCheck } from 'lucide-react';
 
 const PRESET_SAMPLE_PHOTOS = [
   { name: 'Plumber Work', url: 'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=600&auto=format&fit=crop&q=80' },
@@ -16,8 +16,11 @@ const PRESET_SAMPLE_PHOTOS = [
 export const VendorServicesPage = () => {
   const { user } = useAuth();
   const [services, setServices] = useState([]);
+  const [allMarketServices, setAllMarketServices] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('MY_SERVICES'); // 'MY_SERVICES' or 'ALL_VENDORS'
+  const [searchKeyword, setSearchKeyword] = useState('');
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -36,12 +39,18 @@ export const VendorServicesPage = () => {
 
   const fetchData = async () => {
     try {
-      const [srvRes, catRes] = await Promise.all([
+      const [srvRes, catRes, allRes] = await Promise.all([
         api.get('/vendor/services'),
-        api.get('/categories')
+        api.get('/categories'),
+        api.get('/services')
       ]);
+
       const apiServices = Array.isArray(srvRes.data) ? srvRes.data : [];
       setServices(apiServices);
+
+      const marketServices = Array.isArray(allRes.data) ? allRes.data : [];
+      setAllMarketServices(marketServices);
+
       const validCategories = (Array.isArray(catRes.data) ? catRes.data : []).filter(c => {
         if (!c.name || c.name.trim().length < 3) return false;
         const nameLower = c.name.toLowerCase();
@@ -52,12 +61,14 @@ export const VendorServicesPage = () => {
         setFormData(prev => ({ ...prev, categoryId: validCategories[0].id }));
       }
     } catch (err) {
-      // Load vendor's own isolated services
+      // Load vendor's own isolated services fallback
       try {
         const globalSaved = JSON.parse(localStorage.getItem('localfix_global_vendor_services') || '[]');
         setServices(globalSaved);
+        setAllMarketServices(globalSaved);
       } catch (e) {
         setServices([]);
+        setAllMarketServices([]);
       }
     } finally {
       setLoading(false);
@@ -114,11 +125,9 @@ export const VendorServicesPage = () => {
     }
   };
 
-  // Resilient service deletion (removes from both backend DB and local vendor isolation state)
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this service listing?")) return;
     
-    // Immediately remove from UI state
     setServices(prev => prev.filter(s => s.id !== id));
 
     try {
@@ -127,7 +136,6 @@ export const VendorServicesPage = () => {
       console.warn("Backend service delete fallback:", err);
     }
 
-    // Clean up from local vendor storage
     try {
       const existing = JSON.parse(localStorage.getItem('localfix_global_vendor_services') || '[]');
       const updated = existing.filter(s => s.id !== id);
@@ -169,7 +177,6 @@ export const VendorServicesPage = () => {
       setIsModalOpen(false);
       fetchData();
     } catch (err) {
-      // Fallback service creation for instant local vendor isolation
       const newService = {
         id: editingService ? editingService.id : Date.now(),
         title: formData.title,
@@ -178,58 +185,123 @@ export const VendorServicesPage = () => {
         city: formData.city,
         durationMinutes: parseInt(formData.durationMinutes || 60),
         categoryName: categories.find(c => c.id.toString() === formData.categoryId.toString())?.name || 'General Repair',
-        vendorBusinessName: user?.businessName || user?.name || 'My Vendor Service',
-        vendorRating: 5.0,
-        totalReviews: 1,
-        imageUrl: formData.imageUrl,
-        active: formData.active
+        imageUrl: formData.imageUrl || PRESET_SAMPLE_PHOTOS[0].url,
+        active: formData.active,
+        vendorBusinessName: user?.businessName || user?.name || 'My Service Business'
       };
 
       if (editingService) {
         setServices(prev => prev.map(s => s.id === editingService.id ? newService : s));
       } else {
         setServices(prev => [newService, ...prev]);
-        try {
-          const existing = JSON.parse(localStorage.getItem('localfix_global_vendor_services') || '[]');
-          existing.unshift(newService);
-          localStorage.setItem('localfix_global_vendor_services', JSON.stringify(existing));
-        } catch (e) {}
+        setAllMarketServices(prev => [newService, ...prev]);
+      }
+
+      try {
+        const existing = JSON.parse(localStorage.getItem('localfix_global_vendor_services') || '[]');
+        const filtered = existing.filter(s => s.id !== newService.id);
+        filtered.unshift(newService);
+        localStorage.setItem('localfix_global_vendor_services', JSON.stringify(filtered));
+      } catch (e) {
+        console.error(e);
       }
 
       setIsModalOpen(false);
-      toast.success("Service package saved to your vendor catalog!");
+      toast.success("Service package saved and published!");
     }
   };
 
+  const filteredMarketServices = allMarketServices.filter(s => {
+    if (!searchKeyword) return true;
+    const kw = searchKeyword.toLowerCase();
+    return (
+      (s.title && s.title.toLowerCase().includes(kw)) ||
+      (s.vendorBusinessName && s.vendorBusinessName.toLowerCase().includes(kw)) ||
+      (s.categoryName && s.categoryName.toLowerCase().includes(kw)) ||
+      (s.city && s.city.toLowerCase().includes(kw))
+    );
+  });
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6 font-sans">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200 pb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="px-3 py-1 bg-emerald-100 text-emerald-900 text-xs font-black rounded-full uppercase tracking-wider border border-emerald-300">
-              🔒 Vendor Isolated Workspace
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Service Catalog & Market Directory</h1>
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-200">
+              Vendor Control Center
             </span>
-            <span className="text-xs text-slate-500 font-bold">Account: {user?.email}</span>
           </div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight">Manage My Profession & Work Pictures</h1>
-          <p className="text-xs text-slate-600">Register services, upload real work photos, set pricing, or update your portfolio</p>
+          <p className="text-xs text-slate-500 mt-1">
+            Manage your service offerings, upload work photos, or explore competitor vendor pricing across the market
+          </p>
         </div>
-        <div className="flex gap-3">
+
+        <div className="flex items-center gap-2">
           <button
             onClick={handleResetProfession}
-            className="px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center gap-2"
+            className="px-3.5 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 font-extrabold text-xs rounded-xl border border-rose-200 shadow-xs transition flex items-center gap-1.5 cursor-pointer"
+            title="Reset and register a different job title"
           >
-            <RefreshCw className="w-4 h-4" />
-            Switch / Reset Profession
+            <RefreshCw className="w-4 h-4 text-rose-600" />
+            Reset Profession
           </button>
           <button
             onClick={handleOpenAdd}
-            className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center gap-2"
+            className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl shadow-md transition flex items-center gap-1.5 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
-            Add New Job Package
+            + Register New Service / Job Offering
           </button>
         </div>
+      </div>
+
+      {/* Interactive View Selector Tabs */}
+      <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
+        <div className="grid grid-cols-2 gap-2 flex-1">
+          <button
+            onClick={() => setActiveTab('MY_SERVICES')}
+            className={`py-3 px-4 rounded-xl text-xs font-black transition flex items-center justify-center gap-2 ${
+              activeTab === 'MY_SERVICES'
+                ? 'bg-white text-emerald-900 shadow-md border border-slate-200'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            <Lock className="w-4 h-4 text-emerald-600" />
+            <span>My Registered Services</span>
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+              {services.length}
+            </span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('ALL_VENDORS')}
+            className={`py-3 px-4 rounded-xl text-xs font-black transition flex items-center justify-center gap-2 ${
+              activeTab === 'ALL_VENDORS'
+                ? 'bg-white text-slate-900 shadow-md border border-slate-200'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            <Globe className="w-4 h-4 text-blue-600" />
+            <span>Browse All Market Vendor Services</span>
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800">
+              {allMarketServices.length}
+            </span>
+          </button>
+        </div>
+
+        {activeTab === 'ALL_VENDORS' && (
+          <div className="relative flex-1 max-w-md">
+            <Search className="w-4 h-4 absolute left-3.5 top-3 text-slate-400" />
+            <input
+              type="text"
+              value={searchKeyword}
+              onChange={(e) => setSearchKeyword(e.target.value)}
+              placeholder="Search vendor business or service name..."
+              className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-emerald-500"
+            />
+          </div>
+        )}
       </div>
 
       {loading ? (
@@ -238,90 +310,147 @@ export const VendorServicesPage = () => {
             <div key={i} className="h-64 bg-slate-200 rounded-2xl animate-pulse"></div>
           ))}
         </div>
-      ) : services.length === 0 ? (
-        <div className="bg-white p-12 rounded-3xl border border-slate-200 text-center space-y-4 shadow-sm">
-          <Wrench className="w-12 h-12 text-slate-300 mx-auto" />
-          <h3 className="text-lg font-bold text-slate-900">No Active Profession Registered</h3>
-          <p className="text-xs text-slate-500 max-w-md mx-auto">
-            You currently have no registered job entries in your catalog. Click **Add New Job Package** above to enter your job title, upload pictures, and set prices!
-          </p>
-          <button
-            onClick={handleOpenAdd}
-            className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md transition inline-flex items-center gap-2"
-          >
-            <Plus className="w-4 h-4" />
-            Register Job & Add Pictures
-          </button>
-        </div>
+      ) : activeTab === 'MY_SERVICES' ? (
+        /* MY SERVICES TAB */
+        services.length === 0 ? (
+          <div className="bg-white p-12 rounded-3xl border border-slate-200 text-center space-y-4 shadow-sm">
+            <Wrench className="w-12 h-12 text-slate-300 mx-auto" />
+            <h3 className="text-lg font-bold text-slate-900">No Active Service Registered</h3>
+            <p className="text-xs text-slate-500 max-w-md mx-auto">
+              You currently have no registered job entries in your catalog. Click **Register New Service** above to enter your job title, upload pictures, and set prices!
+            </p>
+            <button
+              onClick={handleOpenAdd}
+              className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md transition inline-flex items-center gap-2 cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              Register Job & Add Pictures
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {services.map((srv) => (
+              <div key={srv.id} className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col justify-between hover:shadow-md transition">
+                {/* Picture Banner */}
+                <div className="relative h-44 bg-slate-100 overflow-hidden">
+                  {srv.imageUrl ? (
+                    <img
+                      src={srv.imageUrl}
+                      alt={srv.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 bg-slate-100">
+                      <Camera className="w-8 h-8 mb-1" />
+                      <span className="text-[10px] font-semibold">No Picture Attached</span>
+                    </div>
+                  )}
+                  <div className="absolute top-3 left-3">
+                    <span className="px-3 py-1 bg-white/90 backdrop-blur-md text-emerald-800 text-xs font-bold rounded-full shadow-sm">
+                      {srv.categoryName || 'General Repair'}
+                    </span>
+                  </div>
+                  <div className="absolute top-3 right-3">
+                    <span className={`text-[10px] uppercase font-extrabold px-2 py-0.5 rounded backdrop-blur-md shadow-sm ${srv.active !== false ? 'bg-emerald-500 text-white' : 'bg-slate-700 text-white'}`}>
+                      {srv.active !== false ? 'Active' : 'Disabled'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="p-5 space-y-4 flex-grow flex flex-col justify-between">
+                  <div className="space-y-1.5">
+                    <h3 className="font-bold text-slate-900 text-base">{srv.title}</h3>
+                    <p className="text-xs text-slate-600 line-clamp-2">{srv.description}</p>
+                  </div>
+
+                  <div className="space-y-3 pt-3 border-t border-slate-100">
+                    <div className="flex justify-between items-center text-xs text-slate-500">
+                      <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-emerald-500" /> {srv.city || 'Mumbai'}</span>
+                      <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5 text-slate-400" /> {srv.durationMinutes || 60} mins</span>
+                      <strong className="text-base text-slate-900 font-extrabold">₹{srv.price}</strong>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleOpenEdit(srv)}
+                        className="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl flex items-center justify-center gap-1.5 transition cursor-pointer"
+                      >
+                        <Edit className="w-3.5 h-3.5" /> Edit Details & Photo
+                      </button>
+                      <button
+                        onClick={() => handleDelete(srv.id)}
+                        className="p-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl transition cursor-pointer"
+                        title="Delete Service Listing"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {services.map((srv) => (
-            <div key={srv.id} className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col justify-between hover:shadow-md transition">
-              {/* Picture Banner */}
-              <div className="relative h-44 bg-slate-100 overflow-hidden">
-                {srv.imageUrl ? (
-                  <img
-                    src={srv.imageUrl}
-                    alt={srv.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                  />
-                ) : (
-                  <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 bg-slate-100">
-                    <Camera className="w-8 h-8 mb-1" />
-                    <span className="text-[10px] font-semibold">No Picture Attached</span>
+        /* ALL MARKET VENDORS TAB */
+        filteredMarketServices.length === 0 ? (
+          <div className="bg-white p-12 rounded-3xl border border-slate-200 text-center space-y-2">
+            <Globe className="w-10 h-10 text-slate-300 mx-auto" />
+            <p className="text-xs text-slate-500">No competitor vendor services found for this search filter.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {filteredMarketServices.map((srv) => (
+              <div key={srv.id} className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col justify-between hover:shadow-md transition border-t-4 border-t-blue-500">
+                <div className="relative h-44 bg-slate-100 overflow-hidden">
+                  {srv.imageUrl ? (
+                    <img src={srv.imageUrl} alt={srv.title} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-slate-400 bg-slate-100">
+                      <Camera className="w-8 h-8" />
+                    </div>
+                  )}
+                  <div className="absolute top-3 left-3">
+                    <span className="px-3 py-1 bg-slate-900/80 backdrop-blur-md text-white text-[11px] font-extrabold rounded-full shadow">
+                      {srv.vendorBusinessName || 'Market Vendor Partner'}
+                    </span>
                   </div>
-                )}
-                <div className="absolute top-3 left-3">
-                  <span className="px-3 py-1 bg-white/90 backdrop-blur-md text-emerald-800 text-xs font-bold rounded-full shadow-sm">
-                    {srv.categoryName || 'General Repair'}
-                  </span>
-                </div>
-                <div className="absolute top-3 right-3">
-                  <span className={`text-[10px] uppercase font-extrabold px-2 py-0.5 rounded backdrop-blur-md shadow-sm ${srv.active !== false ? 'bg-emerald-500 text-white' : 'bg-slate-700 text-white'}`}>
-                    {srv.active !== false ? 'Active' : 'Disabled'}
-                  </span>
-                </div>
-              </div>
-
-              <div className="p-5 space-y-4 flex-grow flex flex-col justify-between">
-                <div className="space-y-1.5">
-                  <h3 className="font-bold text-slate-900 text-base">{srv.title}</h3>
-                  <p className="text-xs text-slate-600 line-clamp-2">{srv.description}</p>
+                  <div className="absolute top-3 right-3">
+                    <span className="px-2.5 py-0.5 bg-blue-600 text-white text-[10px] font-extrabold rounded-full shadow">
+                      Market Listing
+                    </span>
+                  </div>
                 </div>
 
-                <div className="space-y-3 pt-3 border-t border-slate-100">
-                  <div className="flex justify-between items-center text-xs text-slate-500">
-                    <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-emerald-500" /> {srv.city || 'Mumbai'}</span>
-                    <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5 text-slate-400" /> {srv.durationMinutes || 60} mins</span>
-                    <strong className="text-base text-slate-900 font-extrabold">₹{srv.price}</strong>
+                <div className="p-5 space-y-4 flex-grow flex flex-col justify-between">
+                  <div className="space-y-1.5">
+                    <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wider">{srv.categoryName || 'General Service'}</span>
+                    <h3 className="font-bold text-slate-900 text-base">{srv.title}</h3>
+                    <p className="text-xs text-slate-500 line-clamp-2">{srv.description}</p>
                   </div>
 
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handleOpenEdit(srv)}
-                      className="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl flex items-center justify-center gap-1.5 transition"
-                    >
-                      <Edit className="w-3.5 h-3.5" /> Edit Details & Photo
-                    </button>
-                    <button
-                      onClick={() => handleDelete(srv.id)}
-                      className="p-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl transition cursor-pointer"
-                      title="Delete Service Listing"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                  <div className="space-y-3 pt-3 border-t border-slate-100">
+                    <div className="flex justify-between items-center text-xs text-slate-500">
+                      <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-blue-500" /> {srv.city || 'Mumbai'}</span>
+                      <strong className="text-base text-slate-900 font-extrabold">₹{srv.price}</strong>
+                    </div>
+
+                    <div className="flex items-center justify-between text-xs text-slate-400 pt-1">
+                      <span>Rating: ⭐ {srv.vendorRating || 5.0}</span>
+                      <span className="text-blue-600 font-bold text-[11px]">Market Competitor</span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )
       )}
 
       {/* Add / Edit Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white max-w-lg w-full p-6 rounded-3xl shadow-2xl space-y-4 my-8">
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto font-sans">
+          <div className="bg-white max-w-lg w-full p-6 rounded-3xl shadow-2xl space-y-4 my-8 border border-slate-200">
             <div className="flex justify-between items-center border-b border-slate-100 pb-3">
               <h3 className="font-bold text-slate-900 text-base">
                 {editingService ? 'Edit Job & Work Photo' : 'Register New Job & Upload Work Photo'}
@@ -439,8 +568,8 @@ export const VendorServicesPage = () => {
                   required
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  placeholder="e.g. Professional Barber Services"
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500"
+                  placeholder="e.g. Barber Service / Electrician / Plumber"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 font-bold"
                 />
               </div>
 
@@ -450,11 +579,11 @@ export const VendorServicesPage = () => {
                   <input
                     type="number"
                     required
-                    min={0}
+                    min="0"
                     value={formData.price}
                     onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                    placeholder="200"
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500"
+                    placeholder="350"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 font-bold"
                   />
                 </div>
 
@@ -465,7 +594,7 @@ export const VendorServicesPage = () => {
                     required
                     value={formData.city}
                     onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                    placeholder="Mumbai, Delhi"
+                    placeholder="Mumbai"
                     className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>
@@ -476,6 +605,8 @@ export const VendorServicesPage = () => {
                 <input
                   type="number"
                   required
+                  min="15"
+                  step="15"
                   value={formData.durationMinutes}
                   onChange={(e) => setFormData({ ...formData, durationMinutes: e.target.value })}
                   placeholder="60"
@@ -486,27 +617,40 @@ export const VendorServicesPage = () => {
               <div className="space-y-1">
                 <label className="text-xs font-semibold text-slate-700">Job Description & Details</label>
                 <textarea
-                  rows={3}
+                  rows="3"
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Describe your service offering and pricing details..."
+                  placeholder="Detail your professional experience, tools carried, and service guarantees..."
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500"
-                />
+                ></textarea>
               </div>
 
-              <div className="flex justify-end gap-3 pt-2">
+              <div className="flex items-center gap-2 pt-2">
+                <input
+                  type="checkbox"
+                  id="active"
+                  checked={formData.active}
+                  onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
+                  className="rounded text-emerald-600 focus:ring-emerald-500 w-4 h-4"
+                />
+                <label htmlFor="active" className="text-xs font-medium text-slate-700">
+                  Service active and visible to local customers in {formData.city || 'Mumbai'}
+                </label>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 text-slate-600 font-semibold text-xs"
+                  className="px-4 py-2 text-slate-600 font-semibold text-xs rounded-xl hover:bg-slate-100"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md transition"
+                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl shadow-md transition"
                 >
-                  Save to My Catalog
+                  {editingService ? 'Update Service & Photo' : 'Publish Service Offering →'}
                 </button>
               </div>
             </form>
