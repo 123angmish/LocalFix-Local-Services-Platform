@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.security.SecureRandom;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -25,20 +27,74 @@ public class AuthService {
     private final VendorProfileRepository vendorProfileRepository;
     private final ServiceCategoryRepository categoryRepository;
     private final ServiceRepository serviceRepository;
+    private final EmailOtpRepository emailOtpRepository;
+    private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider tokenProvider;
     private final RefreshTokenService refreshTokenService;
 
-    public AuthService(UserRepository userRepository, VendorProfileRepository vendorProfileRepository, ServiceCategoryRepository categoryRepository, ServiceRepository serviceRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JwtTokenProvider tokenProvider, RefreshTokenService refreshTokenService) {
+    private static final SecureRandom random = new SecureRandom();
+
+    public AuthService(UserRepository userRepository, VendorProfileRepository vendorProfileRepository, ServiceCategoryRepository categoryRepository, ServiceRepository serviceRepository, EmailOtpRepository emailOtpRepository, EmailService emailService, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JwtTokenProvider tokenProvider, RefreshTokenService refreshTokenService) {
         this.userRepository = userRepository;
         this.vendorProfileRepository = vendorProfileRepository;
         this.categoryRepository = categoryRepository;
         this.serviceRepository = serviceRepository;
+        this.emailOtpRepository = emailOtpRepository;
+        this.emailService = emailService;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.tokenProvider = tokenProvider;
         this.refreshTokenService = refreshTokenService;
+    }
+
+    @Transactional
+    public String sendRegistrationOtp(String email, String role, String userName) {
+        if (email == null || !email.contains("@")) {
+            throw new BadRequestException("Please provide a valid email address");
+        }
+
+        // Rate limiting check
+        Optional<EmailOtp> existingOpt = emailOtpRepository.findTopByEmailOrderByCreatedAtDesc(email);
+        if (existingOpt.isPresent()) {
+            EmailOtp existing = existingOpt.get();
+            if (existing.getCreatedAt().plusSeconds(30).isAfter(LocalDateTime.now())) {
+                throw new BadRequestException("Please wait 30 seconds before requesting another OTP");
+            }
+        }
+
+        String otpCode = String.format("%06d", random.nextInt(900000) + 100000);
+        LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(10);
+
+        EmailOtp otp = new EmailOtp(email, otpCode, role != null ? role : "CUSTOMER", "", expiresAt);
+        emailOtpRepository.save(otp);
+
+        emailService.sendOtpEmail(email, otpCode, userName);
+        return "6-Digit Verification OTP sent to " + email;
+    }
+
+    @Transactional
+    public boolean verifyRegistrationOtp(String email, String otpCode) {
+        Optional<EmailOtp> otpOpt = emailOtpRepository.findTopByEmailAndOtpCodeAndVerifiedFalseOrderByCreatedAtDesc(email, otpCode);
+
+        if (otpOpt.isEmpty()) {
+            throw new BadRequestException("Invalid OTP Code for email: " + email);
+        }
+
+        EmailOtp otp = otpOpt.get();
+
+        if (otp.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new BadRequestException("OTP Code has expired. Please request a new verification code.");
+        }
+
+        if (otp.getAttemptCount() >= 5) {
+            throw new BadRequestException("Maximum OTP verification attempts exceeded. Request a new OTP.");
+        }
+
+        otp.setVerified(true);
+        emailOtpRepository.save(otp);
+        return true;
     }
 
     @Transactional

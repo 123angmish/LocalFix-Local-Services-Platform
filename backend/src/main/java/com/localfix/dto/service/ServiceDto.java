@@ -12,6 +12,9 @@ public class ServiceDto {
     private String vendorEmail;
     private Double vendorRating;
     private Integer vendorTotalReviews;
+    private Double vendorLat = 19.0760;
+    private Double vendorLng = 72.8777;
+    private Double distanceKm = 0.0;
     private Long categoryId;
     private String categoryName;
     private String categoryIcon;
@@ -72,6 +75,15 @@ public class ServiceDto {
     public Integer getVendorTotalReviews() { return vendorTotalReviews; }
     public void setVendorTotalReviews(Integer vendorTotalReviews) { this.vendorTotalReviews = vendorTotalReviews; }
 
+    public Double getVendorLat() { return vendorLat; }
+    public void setVendorLat(Double vendorLat) { this.vendorLat = vendorLat; }
+
+    public Double getVendorLng() { return vendorLng; }
+    public void setVendorLng(Double vendorLng) { this.vendorLng = vendorLng; }
+
+    public Double getDistanceKm() { return distanceKm; }
+    public void setDistanceKm(Double distanceKm) { this.distanceKm = distanceKm; }
+
     public Long getCategoryId() { return categoryId; }
     public void setCategoryId(Long categoryId) { this.categoryId = categoryId; }
 
@@ -116,6 +128,9 @@ public class ServiceDto {
         private String vendorEmail;
         private Double vendorRating;
         private Integer vendorTotalReviews;
+        private Double vendorLat = 19.0760;
+        private Double vendorLng = 72.8777;
+        private Double distanceKm = 0.0;
         private Long categoryId;
         private String categoryName;
         private String categoryIcon;
@@ -136,6 +151,9 @@ public class ServiceDto {
         public Builder vendorEmail(String vendorEmail) { this.vendorEmail = vendorEmail; return this; }
         public Builder vendorRating(Double vendorRating) { this.vendorRating = vendorRating; return this; }
         public Builder vendorTotalReviews(Integer vendorTotalReviews) { this.vendorTotalReviews = vendorTotalReviews; return this; }
+        public Builder vendorLat(Double vendorLat) { this.vendorLat = vendorLat; return this; }
+        public Builder vendorLng(Double vendorLng) { this.vendorLng = vendorLng; return this; }
+        public Builder distanceKm(Double distanceKm) { this.distanceKm = distanceKm; return this; }
         public Builder categoryId(Long categoryId) { this.categoryId = categoryId; return this; }
         public Builder categoryName(String categoryName) { this.categoryName = categoryName; return this; }
         public Builder categoryIcon(String categoryIcon) { this.categoryIcon = categoryIcon; return this; }
@@ -149,7 +167,11 @@ public class ServiceDto {
         public Builder createdAt(LocalDateTime createdAt) { this.createdAt = createdAt; return this; }
 
         public ServiceDto build() {
-            return new ServiceDto(id, vendorId, vendorBusinessName, vendorCity, vendorPhone, vendorEmail, vendorRating, vendorTotalReviews, categoryId, categoryName, categoryIcon, title, description, price, city, durationMinutes, imageUrl, active, createdAt);
+            ServiceDto dto = new ServiceDto(id, vendorId, vendorBusinessName, vendorCity, vendorPhone, vendorEmail, vendorRating, vendorTotalReviews, categoryId, categoryName, categoryIcon, title, description, price, city, durationMinutes, imageUrl, active, createdAt);
+            dto.setVendorLat(vendorLat);
+            dto.setVendorLng(vendorLng);
+            dto.setDistanceKm(distanceKm);
+            return dto;
         }
     }
 }

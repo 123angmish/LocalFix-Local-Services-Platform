@@ -4,6 +4,7 @@ import com.localfix.dto.service.ServiceCreateUpdateDto;
 import com.localfix.dto.service.ServiceDto;
 import com.localfix.security.UserPrincipal;
 import com.localfix.service.ServiceItemService;
+import com.localfix.util.LocationUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -13,11 +14,13 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api")
-@Tag(name = "Services", description = "Endpoints for service browsing, vendor service management, and profession reset")
+@Tag(name = "Services", description = "Endpoints for service browsing, nearby vendor Haversine distance search, and vendor service CRUD")
 public class ServiceController {
 
     private final ServiceItemService serviceItemService;
@@ -37,6 +40,36 @@ public class ServiceController {
             @RequestParam(required = false) Double minRating
     ) {
         return ResponseEntity.ok(serviceItemService.searchServices(keyword, categoryId, city, minPrice, maxPrice, minRating));
+    }
+
+    @GetMapping("/vendors/nearby")
+    @Operation(summary = "Get nearby verified vendor services based on Haversine distance coordinates (in KM)")
+    public ResponseEntity<List<ServiceDto>> getNearbyVendors(
+            @RequestParam double lat,
+            @RequestParam double lng,
+            @RequestParam(defaultValue = "25.0") double radiusKm,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String sortBy
+    ) {
+        List<ServiceDto> allServices = serviceItemService.searchServices(category, null, null, null, null, null);
+
+        // Calculate Haversine distance for each service
+        List<ServiceDto> nearby = allServices.stream().peek(srv -> {
+            double vLat = srv.getVendorLat() != null ? srv.getVendorLat() : 19.0760;
+            double vLng = srv.getVendorLng() != null ? srv.getVendorLng() : 72.8777;
+            double dist = LocationUtil.calculateDistanceKm(lat, lng, vLat, vLng);
+            srv.setDistanceKm(Math.round(dist * 10.0) / 10.0);
+        }).filter(srv -> srv.getDistanceKm() <= radiusKm).collect(Collectors.toList());
+
+        if ("price-low".equalsIgnoreCase(sortBy)) {
+            nearby.sort(Comparator.comparing(ServiceDto::getPrice));
+        } else if ("rating".equalsIgnoreCase(sortBy)) {
+            nearby.sort((a, b) -> Double.compare(b.getVendorRating() != null ? b.getVendorRating() : 0.0, a.getVendorRating() != null ? a.getVendorRating() : 0.0));
+        } else {
+            nearby.sort(Comparator.comparing(ServiceDto::getDistanceKm));
+        }
+
+        return ResponseEntity.ok(nearby);
     }
 
     @GetMapping("/services/{id}")

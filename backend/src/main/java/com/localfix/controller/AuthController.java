@@ -10,15 +10,36 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/auth")
-@Tag(name = "Authentication", description = "Endpoints for User and Vendor Login & Registration")
+@Tag(name = "Authentication", description = "Endpoints for User and Vendor Login, Gmail OTP & Registration")
 public class AuthController {
 
     private final AuthService authService;
 
     public AuthController(AuthService authService) {
         this.authService = authService;
+    }
+
+    @PostMapping("/send-otp")
+    @Operation(summary = "Send 6-digit registration OTP to Gmail address")
+    public ResponseEntity<Map<String, String>> sendOtp(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        String role = request.getOrDefault("role", "CUSTOMER");
+        String name = request.get("name");
+        String msg = authService.sendRegistrationOtp(email, role, name);
+        return ResponseEntity.ok(Map.of("message", msg, "email", email));
+    }
+
+    @PostMapping("/verify-otp")
+    @Operation(summary = "Verify 6-digit registration OTP")
+    public ResponseEntity<Map<String, Object>> verifyOtp(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        String otp = request.get("otp");
+        boolean verified = authService.verifyRegistrationOtp(email, otp);
+        return ResponseEntity.ok(Map.of("verified", verified, "message", "Gmail OTP verified successfully"));
     }
 
     @PostMapping("/login")

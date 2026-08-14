@@ -87,17 +87,27 @@ export const RegisterPage = () => {
     }
   };
 
-  // Explicit "Get OTP" button handler for Gmail
-  const handleGetOtp = () => {
+  // Explicit "Get OTP" button handler calling real backend endpoint
+  const handleGetOtp = async () => {
     if (!formData.email || !formData.email.includes('@')) {
       toast.error("Please enter a valid Gmail / Email address first");
       return;
     }
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
-    setGeneratedCode(code);
-    setIsEmailOtpSent(true);
-    setIsEmailVerificationModalOpen(true);
-    toast.success(`📩 Verification Code sent to ${formData.email}! (OTP: ${code})`);
+    setVerifyingEmail(true);
+    try {
+      const res = await api.post('/auth/send-otp', {
+        email: formData.email,
+        role: roleType,
+        name: formData.name
+      });
+      setIsEmailOtpSent(true);
+      setIsEmailVerificationModalOpen(true);
+      toast.success(res.data.message || `📩 6-Digit OTP sent to ${formData.email}!`);
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to dispatch email OTP");
+    } finally {
+      setVerifyingEmail(false);
+    }
   };
 
   // Step 1: Form Submit Handler
@@ -132,18 +142,32 @@ export const RegisterPage = () => {
     executeFinalRegistration();
   };
 
-  // Step 2: Verify Gmail Code & Finalize Account Creation
-  const handleVerifyOtpCode = (e) => {
+  // Step 2: Verify Gmail Code via Real Backend & Finalize Account Creation
+  const handleVerifyOtpCode = async (e) => {
     e.preventDefault();
-    if (inputEmailCode !== generatedCode) {
-      toast.error("Invalid Email Verification Code. Enter code: " + generatedCode);
+    if (!inputEmailCode || inputEmailCode.length !== 6) {
+      toast.error("Please enter a valid 6-digit OTP code");
       return;
     }
 
-    setIsEmailVerified(true);
-    setIsEmailVerificationModalOpen(false);
-    toast.success("✅ Gmail Address Verified Successfully!");
-    executeFinalRegistration();
+    setVerifyingEmail(true);
+    try {
+      const res = await api.post('/auth/verify-otp', {
+        email: formData.email,
+        otp: inputEmailCode
+      });
+
+      if (res.data.verified) {
+        setIsEmailVerified(true);
+        setIsEmailVerificationModalOpen(false);
+        toast.success("✅ Gmail OTP verified successfully!");
+        executeFinalRegistration();
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Invalid OTP Code. Please check and try again.");
+    } finally {
+      setVerifyingEmail(false);
+    }
   };
 
   const executeFinalRegistration = async () => {

@@ -7,11 +7,15 @@ public enum BookingStatus {
     PROVIDER_SELECTED,
     PENDING,
     ACCEPTED,
+    CONFIRMED,
+    PAYMENT_PENDING,
     ON_THE_WAY,
     ARRIVED,
     IN_PROGRESS,
     COMPLETED,
     REJECTED,
     CANCELLED,
+    REFUND_PENDING,
+    REFUNDED,
     DISPUTED
 }

@@ -65,12 +65,17 @@ public class SecurityConfig {
                                 "/swagger-ui.html",
                                 "/v3/api-docs/**",
                                 "/api/ai/recommend-service",
-                                "/api/v1/ai/**"
+                                "/api/v1/ai/**",
+                                "/api/payments/create-order",
+                                "/api/payments/verify",
+                                "/api/payments/webhook",
+                                "/api/payments/dummy",
+                                "/api/vendors/nearby"
                         ).permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/categories/**", "/api/v1/categories/**", "/api/services/**", "/api/v1/services/**", "/api/reviews/**", "/api/v1/reviews/**", "/api/bookings/*/work-proof").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/categories/**", "/api/v1/categories/**", "/api/services/**", "/api/v1/services/**", "/api/reviews/**", "/api/v1/reviews/**", "/api/messages/**").permitAll()
                         .requestMatchers("/api/admin/**", "/api/v1/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/vendor/**", "/api/v1/vendor/**", "/api/v1/professionals/**").hasAnyRole("VENDOR", "PROVIDER", "ADMIN")
-                        .requestMatchers("/api/customer/**", "/api/v1/customer/**", "/api/bookings/**", "/api/v1/bookings/**", "/api/payments/**", "/api/v1/payments/**", "/api/reviews", "/api/disputes", "/api/user/disputes", "/api/v1/quotes/**", "/api/v1/subscriptions/**", "/api/v1/properties/**", "/api/v1/group-bookings/**", "/api/v1/wallet/**", "/api/v1/sos/**").hasAnyRole("CUSTOMER", "ADMIN", "VENDOR", "PROVIDER")
+                        .requestMatchers("/api/customer/**", "/api/v1/customer/**", "/api/bookings/**", "/api/v1/bookings/**", "/api/payments/**", "/api/messages", "/api/reviews", "/api/disputes").hasAnyRole("CUSTOMER", "ADMIN", "VENDOR", "PROVIDER")
                         .anyRequest().authenticated()
                 );
 
@@ -82,9 +87,14 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of("*"));
+        configuration.setAllowedOriginPatterns(List.of(
+                "https://candid-kitten-e6980d.netlify.app",
+                "http://localhost:5173",
+                "http://localhost:3000",
+                "*"
+        ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "X-Razorpay-Signature"));
         configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
