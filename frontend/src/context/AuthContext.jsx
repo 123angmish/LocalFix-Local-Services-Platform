@@ -68,12 +68,8 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const loginWithGoogle = async (roleHint = 'CUSTOMER', explicitEmail = null) => {
-    let userEmail = explicitEmail;
-    if (!userEmail) {
-      userEmail = prompt("Select or Enter your Google Account Email:", "angelmishraofficial@gmail.com");
-    }
-    if (!userEmail) return null;
+  const loginWithGoogle = async (roleHint = 'CUSTOMER', explicitEmail = 'angelmishraofficial@gmail.com') => {
+    const userEmail = explicitEmail ? explicitEmail.trim() : 'angelmishraofficial@gmail.com';
     const userName = userEmail.split('@')[0];
 
     try {
@@ -89,7 +85,6 @@ export const AuthProvider = ({ children }) => {
       toast.success(`Google Sign-In Successful! Welcome, ${userData.name}!`);
       return userData;
     } catch (err) {
-      // Fallback Google Sign-In session
       const fallbackGoogleUser = {
         id: Date.now(),
         name: userName,
@@ -171,7 +166,6 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('token', 'jwt_token_' + Date.now());
     }
 
-    // Save Vendor Service Profile for Worldwide Global Public Visibility
     const newGlobalService = {
       id: Date.now(),
       title: `${data.businessName || data.name} - ${data.professionTitle || 'Expert'} Repair Service`,
