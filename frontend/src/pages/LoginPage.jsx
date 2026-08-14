@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Wrench, Mail, Lock, ArrowRight, UserCheck, Briefcase, Phone, Globe, ShieldCheck, Send, CheckCircle2, X } from 'lucide-react';
 import toast from 'react-hot-toast';
+import api from '../api/axios';
 
 export const LoginPage = () => {
   const navigate = useNavigate();
@@ -16,7 +17,6 @@ export const LoginPage = () => {
 
   // OTP State
   const [isOtpModalOpen, setIsOtpModalOpen] = useState(false);
-  const [generatedOtp, setGeneratedOtp] = useState('');
   const [inputOtpCode, setInputOtpCode] = useState('');
   const [isOtpVerified, setIsOtpVerified] = useState(false);
 
@@ -35,9 +35,8 @@ export const LoginPage = () => {
     { code: '+966', country: 'Saudi Arabia 🇸🇦' }
   ];
 
-  // Explicit "Get OTP" handler
-  const handleGetOtp = () => {
-    const target = loginMethod === 'EMAIL' ? email : `${countryCode} ${phoneNumber}`;
+  // Explicit "Get OTP" handler calling real backend REST endpoint
+  const handleGetOtp = async () => {
     if (loginMethod === 'EMAIL' && (!email || !email.includes('@'))) {
       toast.error("Please enter a valid Gmail / Email address first");
       return;
@@ -47,10 +46,22 @@ export const LoginPage = () => {
       return;
     }
 
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    setGeneratedOtp(otp);
-    setIsOtpModalOpen(true);
-    toast.success(`📩 6-Digit OTP sent to ${target}! (OTP Code: ${otp})`);
+    const targetEmail = loginMethod === 'EMAIL' ? email : `${phoneNumber}@localfix.com`;
+
+    setSubmitting(true);
+    try {
+      const res = await api.post('/auth/send-otp', {
+        email: targetEmail,
+        role: roleType,
+        name: 'User'
+      });
+      setIsOtpModalOpen(true);
+      toast.success(res.data.message || `📩 6-Digit OTP sent to ${targetEmail}!`);
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to send OTP code. Please check your details.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleEmailSubmit = async (e) => {
@@ -81,24 +92,41 @@ export const LoginPage = () => {
     executePhoneLogin();
   };
 
-  const handleVerifyOtpSubmit = (e) => {
+  // Verify OTP via real backend
+  const handleVerifyOtpSubmit = async (e) => {
     e.preventDefault();
-    if (inputOtpCode !== generatedOtp) {
-      toast.error("Invalid OTP Code. Please enter: " + generatedOtp);
+    if (!inputOtpCode || inputOtpCode.length !== 6) {
+      toast.error("Please enter a valid 6-digit OTP code");
       return;
     }
 
-    setIsOtpVerified(true);
-    setIsOtpModalOpen(false);
-    toast.success("✅ OTP Verified Successfully!");
+    const targetEmail = loginMethod === 'EMAIL' ? email : `${phoneNumber}@localfix.com`;
 
-    if (loginMethod === 'PHONE') {
-      executePhoneLogin();
-    } else {
-      login(email, password || 'default123', roleType).then((user) => {
-        if (user.role === 'VENDOR') navigate('/vendor/dashboard');
-        else navigate('/customer/dashboard');
+    setSubmitting(true);
+    try {
+      const res = await api.post('/auth/verify-otp', {
+        email: targetEmail,
+        otp: inputOtpCode
       });
+
+      if (res.data.verified) {
+        setIsOtpVerified(true);
+        setIsOtpModalOpen(false);
+        toast.success("✅ OTP Verified Successfully!");
+
+        if (loginMethod === 'PHONE') {
+          executePhoneLogin();
+        } else {
+          login(email, password || 'default123', roleType).then((user) => {
+            if (user.role === 'VENDOR') navigate('/vendor/dashboard');
+            else navigate('/customer/dashboard');
+          });
+        }
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Invalid OTP Code. Please try again.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -119,8 +147,10 @@ export const LoginPage = () => {
     setSubmitting(true);
     try {
       const user = await loginWithGoogle(roleType);
-      if (user.role === 'VENDOR') navigate('/vendor/dashboard');
-      else navigate('/customer/dashboard');
+      if (user) {
+        if (user.role === 'VENDOR') navigate('/vendor/dashboard');
+        else navigate('/customer/dashboard');
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -129,50 +159,50 @@ export const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-[85vh] flex items-center justify-center px-4 py-10 font-sans">
+    <div className="min-h-[85vh] flex items-center justify-center bg-slate-50 py-12 px-4 sm:px-6 lg:px-8 font-sans">
       <div className="max-w-md w-full space-y-6 bg-white p-8 rounded-3xl border border-slate-200 shadow-xl">
         <div className="text-center space-y-2">
-          <div className="inline-flex p-3 bg-emerald-600 text-white rounded-2xl shadow-lg shadow-emerald-200">
+          <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center mx-auto shadow-lg shadow-emerald-200">
             <Wrench className="w-6 h-6" />
           </div>
-          <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">Sign in to LocalFix</h2>
-          <p className="text-xs text-slate-500">Access your account with Email, Phone OTP, or Google</p>
+          <h2 className="text-2xl font-black tracking-tight text-slate-900">
+            Sign in to LocalFix
+          </h2>
+          <p className="text-xs text-slate-500">
+            Access your account with Email, Phone OTP, or Google
+          </p>
         </div>
 
-        {/* 2 Options Tab: Customer / Vendor */}
-        <div className="grid grid-cols-2 p-1.5 bg-slate-100 rounded-2xl border border-slate-200">
+        {/* Role Toggle Header: Customer vs Vendor */}
+        <div className="grid grid-cols-2 gap-2 bg-slate-100 p-1 rounded-2xl">
           <button
             type="button"
             onClick={() => setRoleType('CUSTOMER')}
-            className={`py-2.5 rounded-xl font-semibold text-xs transition flex items-center justify-center gap-1.5 ${
-              roleType === 'CUSTOMER'
-                ? 'bg-white text-emerald-700 shadow-sm font-bold'
-                : 'text-slate-600 hover:text-slate-900'
+            className={`py-2.5 px-3 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1.5 transition ${
+              roleType === 'CUSTOMER' ? 'bg-white text-emerald-800 shadow-sm border border-slate-200' : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            <UserCheck className="w-3.5 h-3.5" />
-            Sign in as Customer
+            <UserCheck className="w-4 h-4 text-emerald-600" />
+            <span>Sign in as Customer</span>
           </button>
           <button
             type="button"
             onClick={() => setRoleType('VENDOR')}
-            className={`py-2.5 rounded-xl font-semibold text-xs transition flex items-center justify-center gap-1.5 ${
-              roleType === 'VENDOR'
-                ? 'bg-white text-emerald-700 shadow-sm font-bold'
-                : 'text-slate-600 hover:text-slate-900'
+            className={`py-2.5 px-3 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1.5 transition ${
+              roleType === 'VENDOR' ? 'bg-white text-slate-900 shadow-sm border border-slate-200' : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            <Briefcase className="w-3.5 h-3.5" />
-            Sign in as Vendor / Pro
+            <Briefcase className="w-4 h-4 text-amber-600" />
+            <span>Sign in as Vendor / Pro</span>
           </button>
         </div>
 
-        {/* Continue with Google OAuth Button */}
+        {/* 1-Click Google Sign In */}
         <button
           type="button"
           onClick={handleGoogleSignIn}
           disabled={submitting}
-          className="w-full py-3 bg-white border border-slate-300 hover:bg-slate-50 text-slate-800 font-bold text-xs rounded-xl shadow-2xs transition flex items-center justify-center gap-2.5"
+          className="w-full py-3 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl border border-slate-300 shadow-sm transition flex items-center justify-center gap-2"
         >
           <svg className="w-4 h-4" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -264,52 +294,54 @@ export const LoginPage = () => {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl shadow-md transition flex items-center justify-center gap-2 disabled:opacity-50"
+              className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl shadow-md transition flex items-center justify-center gap-2 disabled:opacity-50"
             >
-              {submitting ? 'Signing in...' : `Sign in as ${roleType === 'CUSTOMER' ? 'Customer' : 'Vendor Pro'}`}
-              <ArrowRight className="w-4 h-4" />
+              {submitting ? 'Authenticating...' : `Sign In as ${roleType} →`}
             </button>
           </form>
         ) : (
-          /* Phone Login Form with Country Code Selector */
+          /* Phone OTP Login Form */
           <form onSubmit={handlePhoneSubmit} className="space-y-4">
             <div className="space-y-1">
               <div className="flex justify-between items-center">
-                <label className="block text-xs font-bold text-slate-700">Country Code & Mobile Number</label>
+                <label className="block text-xs font-bold text-slate-700">Mobile Phone Number</label>
                 <button
                   type="button"
                   onClick={handleGetOtp}
                   className="text-[10px] text-emerald-700 hover:text-emerald-800 font-extrabold underline flex items-center gap-1 cursor-pointer"
                 >
-                  <Send className="w-3 h-3 text-emerald-600" /> Get OTP
+                  <Send className="w-3 h-3 text-emerald-600" /> Get SMS OTP
                 </button>
               </div>
+
               <div className="flex gap-2">
                 <select
                   value={countryCode}
                   onChange={(e) => setCountryCode(e.target.value)}
-                  className="p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800"
+                  className="py-2.5 px-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:ring-2 focus:ring-emerald-500"
                 >
                   {countryCodes.map((c) => (
-                    <option key={c.code} value={c.code}>{c.country} ({c.code})</option>
+                    <option key={c.code} value={c.code}>{c.country}</option>
                   ))}
                 </select>
+
                 <div className="relative flex-1">
-                  <Phone className="w-4 h-4 absolute left-3 top-3.5 text-slate-400" />
+                  <Phone className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400" />
                   <input
                     type="tel"
                     required
-                    maxLength={10}
-                    placeholder="98201 11223"
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ''))}
-                    className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 tracking-wider"
+                    placeholder="9876543210"
+                    maxLength={10}
+                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>
+
                 <button
                   type="button"
                   onClick={handleGetOtp}
-                  className="px-3 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl shadow-xs transition shrink-0"
+                  className="px-3 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl shadow-xs transition flex items-center gap-1 shrink-0"
                 >
                   Get OTP
                 </button>
@@ -319,70 +351,76 @@ export const LoginPage = () => {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl shadow-md transition flex items-center justify-center gap-2 disabled:opacity-50"
+              className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl shadow-md transition flex items-center justify-center gap-2 disabled:opacity-50"
             >
-              {submitting ? 'Signing in...' : `Sign in with Mobile OTP`}
-              <ArrowRight className="w-4 h-4" />
+              {submitting ? 'Verifying OTP...' : 'Send SMS Verification OTP →'}
             </button>
           </form>
         )}
 
-        <div className="text-center text-xs text-slate-600">
-          Don't have an account?{' '}
-          <Link to={`/register?type=${roleType.toLowerCase()}`} className="font-bold text-emerald-600 hover:underline">
-            Register Here
-          </Link>
+        <div className="text-center pt-2 border-t border-slate-100">
+          <p className="text-xs text-slate-600">
+            Don't have an account?{' '}
+            <Link to={`/register?type=${roleType.toLowerCase()}`} className="font-extrabold text-emerald-600 hover:text-emerald-700 underline">
+              Register as {roleType}
+            </Link>
+          </p>
         </div>
       </div>
 
-      {/* Verification OTP Modal */}
+      {/* 6-Digit OTP Verification Modal */}
       {isOtpModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-white max-w-sm w-full p-6 rounded-3xl shadow-2xl space-y-4 font-sans">
-            <div className="flex justify-between items-center border-b border-slate-100 pb-3">
-              <h3 className="font-extrabold text-slate-900 text-base flex items-center gap-2">
-                <Send className="w-5 h-5 text-emerald-600" />
-                OTP Verification Required
-              </h3>
-              <button onClick={() => setIsOtpModalOpen(false)} className="text-slate-400 hover:text-slate-600">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 font-sans">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-6 border border-slate-200 animate-in fade-in zoom-in duration-200">
+            <div className="flex justify-between items-center border-b border-slate-100 pb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
+                  <Send className="w-5 h-5 text-emerald-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-slate-900">Enter 6-Digit OTP</h3>
+                  <p className="text-xs text-slate-500">Verification code sent to {loginMethod === 'EMAIL' ? email : `${countryCode} ${phoneNumber}`}</p>
+                </div>
+              </div>
+              <button onClick={() => setIsOtpModalOpen(false)} className="p-2 text-slate-400 hover:text-slate-600">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleVerifyOtpSubmit} className="space-y-4 text-xs">
-              <p className="text-slate-600">
-                Enter the 6-digit OTP code sent to <strong>{loginMethod === 'EMAIL' ? email : `${countryCode} ${phoneNumber}`}</strong>.
-              </p>
-
-              <div className="p-3 bg-emerald-50 rounded-2xl border border-emerald-200 text-emerald-950 font-bold text-center">
-                <span>Verification OTP: <strong className="text-emerald-700 text-base font-mono">{generatedOtp}</strong></span>
+            <form onSubmit={handleVerifyOtpSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-xs font-extrabold uppercase tracking-wider text-slate-700 block text-center">
+                  6-Digit OTP Code
+                </label>
+                <input
+                  type="text"
+                  maxLength={6}
+                  required
+                  autoFocus
+                  value={inputOtpCode}
+                  onChange={(e) => setInputOtpCode(e.target.value.replace(/\D/g, ''))}
+                  placeholder="• • • • • •"
+                  className="w-full p-4 bg-slate-50 border-2 border-emerald-500 rounded-2xl text-center text-2xl font-black tracking-[0.5em] text-slate-900 focus:ring-4 focus:ring-emerald-100"
+                />
               </div>
 
-              <input
-                type="text"
-                maxLength={6}
-                required
-                placeholder="e.g. 849201"
-                value={inputOtpCode}
-                onChange={(e) => setInputOtpCode(e.target.value.replace(/\D/g, ''))}
-                className="w-full text-center text-2xl font-mono tracking-widest py-3 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:ring-2 focus:ring-emerald-500 text-slate-900"
-              />
-
-              <div className="flex justify-end gap-2 pt-2">
+              <div className="flex items-center justify-between text-xs text-slate-500">
+                <span>Didn't receive code?</span>
                 <button
                   type="button"
-                  onClick={() => setIsOtpModalOpen(false)}
-                  className="px-4 py-2 text-slate-600 font-semibold"
+                  onClick={handleGetOtp}
+                  className="font-bold text-emerald-600 hover:text-emerald-700 underline"
                 >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-xl shadow-md"
-                >
-                  Verify OTP & Sign In
+                  Resend OTP Code
                 </button>
               </div>
+
+              <button
+                type="submit"
+                className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl shadow-lg transition"
+              >
+                Verify & Continue →
+              </button>
             </form>
           </div>
         </div>
