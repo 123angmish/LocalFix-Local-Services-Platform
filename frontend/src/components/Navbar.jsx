@@ -215,18 +215,11 @@ export const Navbar = () => {
               ) : (
                 <div className="flex items-center space-x-3">
                   <Link
-                    to="/login?type=customer"
-                    className="px-3 py-2 font-bold text-slate-700 hover:text-emerald-700 hover:bg-slate-100 rounded-xl transition flex items-center gap-1.5"
+                    to="/login"
+                    className="px-4 py-2 font-extrabold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-sm transition flex items-center gap-2 text-xs"
                   >
-                    <User className="w-4 h-4 text-emerald-600" />
-                    <span>Customer Sign In</span>
-                  </Link>
-                  <Link
-                    to="/login?type=vendor"
-                    className="px-4 py-2 font-extrabold bg-slate-900 hover:bg-slate-800 text-white rounded-xl shadow-md transition flex items-center gap-1.5"
-                  >
-                    <Briefcase className="w-4 h-4 text-amber-400" />
-                    <span>Vendor Partner Portal</span>
+                    <User className="w-4 h-4 text-white" />
+                    <span>Sign In / Register</span>
                   </Link>
                 </div>
               )}
@@ -285,11 +278,8 @@ export const Navbar = () => {
               </>
             ) : (
               <div className="pt-2 border-t border-slate-100 flex flex-col space-y-2">
-                <Link to="/login?type=customer" onClick={() => setMobileMenuOpen(false)} className="w-full text-center py-2.5 text-xs font-bold text-slate-800 border border-slate-200 rounded-xl">
-                  Customer Sign In
-                </Link>
-                <Link to="/login?type=vendor" onClick={() => setMobileMenuOpen(false)} className="w-full text-center py-2.5 text-xs font-bold bg-slate-900 text-white rounded-xl">
-                  Vendor Partner Portal Sign In
+                <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="w-full text-center py-2.5 text-xs font-extrabold bg-emerald-600 text-white rounded-xl shadow-sm">
+                  Sign In / Register
                 </Link>
               </div>
             )}
