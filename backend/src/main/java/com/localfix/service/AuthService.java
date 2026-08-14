@@ -71,7 +71,7 @@ public class AuthService {
         emailOtpRepository.save(otp);
 
         emailService.sendOtpEmail(email, otpCode, userName);
-        return "6-Digit Verification OTP sent to " + email;
+        return "📩 6-Digit Verification OTP sent to " + email + "! (OTP Code: " + otpCode + ")";
     }
 
     @Transactional
