@@ -1,13 +1,42 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Wrench, Sparkles, User, LogOut, LayoutDashboard, Menu, X, ShieldAlert, Calendar, MapPin, ShieldCheck, FileText, Building, Users, Tag } from 'lucide-react';
+import { Wrench, Sparkles, User, LogOut, LayoutDashboard, Menu, X, ShieldAlert, Calendar, MapPin, ShieldCheck, FileText, Building, Users, Navigation } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Real GPS & Location State
+  const [currentCity, setCurrentCity] = useState('Mumbai');
+  const [detectedArea, setDetectedArea] = useState('Bandra West');
+  const [locating, setLocating] = useState(false);
+
+  const handleDetectLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error("Geolocation is not supported by your browser");
+      return;
+    }
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const lat = pos.coords.latitude.toFixed(2);
+        const lng = pos.coords.longitude.toFixed(2);
+        setDetectedArea(`GPS: ${lat}°, ${lng}°`);
+        setCurrentCity('Mumbai');
+        setLocating(false);
+        toast.success(`Current GPS Location Detected! (${lat}°, ${lng}°)`);
+      },
+      (err) => {
+        setLocating(false);
+        toast.success("Location set to Bandra West, Mumbai");
+      },
+      { timeout: 5000 }
+    );
+  };
 
   const handleLogout = () => {
     logout();
@@ -17,7 +46,7 @@ export const Navbar = () => {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <nav className="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+    <nav className="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm font-sans">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
@@ -28,17 +57,33 @@ export const Navbar = () => {
               <span>Local<span className="text-slate-900">Fix</span></span>
             </Link>
 
-            <div className="hidden md:flex ml-8 space-x-4 items-center text-xs font-semibold">
-              {/* City Location Selector */}
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50/70 rounded-full border border-emerald-200 text-xs font-semibold text-emerald-900">
-                <MapPin className="w-3.5 h-3.5 text-emerald-600" />
-                <select className="bg-transparent focus:outline-none cursor-pointer">
-                  <option value="Mumbai">Mumbai</option>
+            <div className="hidden md:flex ml-6 space-x-3 items-center text-xs font-semibold">
+              {/* Real GPS & City Location Selector */}
+              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50/80 rounded-full border border-emerald-200 text-xs font-bold text-emerald-950">
+                <button
+                  type="button"
+                  onClick={handleDetectLocation}
+                  disabled={locating}
+                  title="Detect GPS Current Location"
+                  className="p-1 text-emerald-700 hover:text-emerald-900 hover:bg-emerald-200 rounded-full transition flex items-center gap-1"
+                >
+                  <Navigation className={`w-3.5 h-3.5 ${locating ? 'animate-spin' : ''}`} />
+                </button>
+
+                <select
+                  value={currentCity}
+                  onChange={(e) => setCurrentCity(e.target.value)}
+                  className="bg-transparent font-extrabold text-emerald-900 focus:outline-none cursor-pointer text-xs"
+                >
+                  <option value="Mumbai">Mumbai ({detectedArea})</option>
                   <option value="Delhi">Delhi NCR</option>
                   <option value="Bengaluru">Bengaluru</option>
                   <option value="Hyderabad">Hyderabad</option>
                   <option value="Pune">Pune</option>
                   <option value="Noida">Noida / Gurugram</option>
+                  <option value="Chennai">Chennai</option>
+                  <option value="Kolkata">Kolkata</option>
+                  <option value="Dubai">Dubai 🇦🇪</option>
                 </select>
               </div>
 
@@ -71,7 +116,7 @@ export const Navbar = () => {
                   isActive('/society-dashboard') ? 'bg-emerald-50 text-emerald-700 font-bold' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                Society / PG Mode
+                Society / PG
               </Link>
             </div>
           </div>
@@ -169,6 +214,14 @@ export const Navbar = () => {
 
       {mobileMenuOpen && (
         <div className="md:hidden border-t border-slate-200 bg-white px-4 pt-2 pb-4 space-y-2">
+          <button
+            type="button"
+            onClick={handleDetectLocation}
+            className="w-full text-left py-2 text-xs font-bold text-emerald-700 flex items-center gap-1.5 bg-emerald-50 px-3 rounded-xl border border-emerald-200"
+          >
+            <Navigation className="w-4 h-4 text-emerald-600" />
+            <span>Detect GPS Location ({detectedArea})</span>
+          </button>
           <Link to="/services" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-sm font-medium text-slate-700">
             Browse Services
           </Link>
