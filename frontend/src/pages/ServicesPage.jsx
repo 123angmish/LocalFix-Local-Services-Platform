@@ -14,7 +14,7 @@ export const ServicesPage = () => {
   // Filters state
   const [keyword, setKeyword] = useState(searchParams.get('keyword') || '');
   const [categoryId, setCategoryId] = useState(searchParams.get('categoryId') || '');
-  const [city, setCity] = useState(searchParams.get('city') || '');
+  const [city, setCity] = useState(searchParams.get('city') || localStorage.getItem('localfix_city') || '');
   const [minRating, setMinRating] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
   const [sortBy, setSortBy] = useState('rating'); // rating, price-low, price-high, nearest
@@ -23,7 +23,7 @@ export const ServicesPage = () => {
   const [userLat, setUserLat] = useState(null);
   const [userLng, setUserLng] = useState(null);
   const [locating, setLocating] = useState(false);
-  const [locationName, setLocationName] = useState('');
+  const [locationName, setLocationName] = useState(localStorage.getItem('localfix_area') || '');
 
   // Synchronize state with URL search params changes
   useEffect(() => {
@@ -35,27 +35,47 @@ export const ServicesPage = () => {
     if (cat !== null) setCategoryId(cat);
   }, [searchParams]);
 
+  // Real OpenStreetMap Reverse Geocoding Auto-Detector
   const requestGeolocation = () => {
-    if (!navigator.geolocation) {
-      toast.error("Geolocation is not supported by your browser");
-      return;
-    }
+    if (!navigator.geolocation) return;
     setLocating(true);
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setUserLat(pos.coords.latitude);
-        setUserLng(pos.coords.longitude);
-        setLocationName(`Lat: ${pos.coords.latitude.toFixed(2)}, Lng: ${pos.coords.longitude.toFixed(2)}`);
-        toast.success("GPS Location acquired!");
-        setLocating(false);
-        fetchNearbyVendors(pos.coords.latitude, pos.coords.longitude);
+      async (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        setUserLat(lat);
+        setUserLng(lng);
+
+        try {
+          const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+          const data = await response.json();
+          const addr = data.address || {};
+          const cityFound = addr.city || addr.town || addr.city_district || addr.state_district || addr.state || 'Local City';
+          const areaFound = addr.suburb || addr.neighbourhood || addr.road || `${lat.toFixed(2)}°, ${lng.toFixed(2)}°`;
+
+          setLocationName(`${cityFound} (${areaFound})`);
+          if (!city) setCity(cityFound);
+          localStorage.setItem('localfix_city', cityFound);
+          localStorage.setItem('localfix_area', areaFound);
+          toast.success(`📍 Auto-Detected Location: ${cityFound}`);
+        } catch (err) {
+          setLocationName(`GPS: ${lat.toFixed(2)}°, ${lng.toFixed(2)}°`);
+        } finally {
+          setLocating(false);
+          fetchNearbyVendors(lat, lng);
+        }
       },
       (err) => {
-        toast.error("Could not fetch location permission. You can filter by city manually.");
         setLocating(false);
-      }
+      },
+      { timeout: 8000, enableHighAccuracy: true }
     );
   };
+
+  // Auto-detect GPS location on initial page mount
+  useEffect(() => {
+    requestGeolocation();
+  }, []);
 
   const fetchNearbyVendors = async (lat, lng) => {
     setLoading(true);
@@ -91,7 +111,6 @@ export const ServicesPage = () => {
       const res = await api.get(`/services?${params.toString()}`);
       let list = Array.isArray(res.data) ? res.data : [];
 
-      // Sort client-side if needed
       if (sortBy === 'price-low') {
         list.sort((a, b) => a.price - b.price);
       } else if (sortBy === 'price-high') {
@@ -140,8 +159,8 @@ export const ServicesPage = () => {
               disabled={locating}
               className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow transition disabled:opacity-50"
             >
-              <Navigation className="w-4 h-4" />
-              <span>{locating ? 'Acquiring GPS Location...' : locationName || 'Use GPS Location'}</span>
+              <Navigation className={`w-4 h-4 ${locating ? 'animate-spin' : ''}`} />
+              <span>{locating ? 'Auto-Detecting Location...' : locationName ? `📍 ${locationName}` : 'Auto-Detect GPS Location'}</span>
             </button>
           </div>
 
@@ -163,7 +182,7 @@ export const ServicesPage = () => {
                 type="text"
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
-                placeholder="Enter City / Pincode"
+                placeholder="Auto-Detected City / Pincode"
                 className="w-full pl-11 pr-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-sm font-medium text-white placeholder-slate-400 focus:ring-2 focus:ring-emerald-500"
               />
             </div>
