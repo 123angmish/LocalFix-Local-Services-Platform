@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import api from '../api/axios';
 import toast from 'react-hot-toast';
-import { Search, MapPin, Filter, Star, Clock, ArrowUpDown, RefreshCw, Wrench, ShieldAlert, Zap, Droplet, Key, AlertTriangle, X, CheckCircle2, Globe } from 'lucide-react';
+import { Search, MapPin, Filter, Star, Clock, ArrowUpDown, RefreshCw, Wrench, ShieldAlert, Zap, Droplet, Key, AlertTriangle, X, CheckCircle2, Globe, Sparkles } from 'lucide-react';
 
 export const ServicesPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -26,6 +26,16 @@ export const ServicesPage = () => {
   const [emergencyNotes, setEmergencyNotes] = useState('');
   const [dispatching, setDispatching] = useState(false);
 
+  // Synchronize state with URL search params changes
+  useEffect(() => {
+    const k = searchParams.get('keyword');
+    if (k !== null) setKeyword(k);
+    const c = searchParams.get('city');
+    if (c !== null) setCity(c);
+    const cat = searchParams.get('categoryId');
+    if (cat !== null) setCategoryId(cat);
+  }, [searchParams]);
+
   const fallbackCategories = [
     { id: 1, name: 'AC Repair', description: 'Gas refill, water leak fix, jet wash' },
     { id: 2, name: 'Electrician', description: 'MCB trip, short circuit, house wiring' },
@@ -41,7 +51,9 @@ export const ServicesPage = () => {
     { id: 3, title: 'Bathroom Tap Leakage & Flush Tank Repair', categoryName: 'Plumbing', price: 299, vendorBusinessName: 'HydroFlow Plumbing', vendorRating: 4.9, totalReviews: 54, city: 'Mumbai', description: 'Washer replacement, high water pressure joint sealing, and toilet flush valve repair.' },
     { id: 4, title: 'Full House Upholstery & Sofa Deep Cleaning', categoryName: 'Cleaner', price: 799, vendorBusinessName: 'ProClean Sanitization', vendorRating: 4.7, totalReviews: 29, city: 'Mumbai', description: 'Stain extraction, deep dust vacuuming, and eco-friendly fabric sanitization.' },
     { id: 5, title: 'Double Door Refrigerator Thermostat Repair', categoryName: 'Appliance Repair', price: 599, vendorBusinessName: 'Chrono Appliance Solutions', vendorRating: 4.9, totalReviews: 41, city: 'Mumbai', description: 'Cooling thermostat calibration, relay replacement, and compressor thermal check.' },
-    { id: 6, title: 'At-Home Organic Facial & Scalp Relaxation Massage', categoryName: 'Salon', price: 699, vendorBusinessName: 'GlowCare Spa At Home', vendorRating: 5.0, totalReviews: 63, city: 'Mumbai', description: 'Rejuvenating herbal facial treatment, herbal face mask, and deep scalp stress relief massage by female beautician.' }
+    { id: 6, title: 'At-Home Organic Facial & Scalp Relaxation Massage', categoryName: 'Salon', price: 699, vendorBusinessName: 'GlowCare Spa At Home', vendorRating: 5.0, totalReviews: 63, city: 'Mumbai', description: 'Rejuvenating herbal facial treatment, herbal face mask, and deep scalp stress relief massage by female beautician.' },
+    { id: 7, title: 'Herbal Glow Face Cleanup & De-Tan Spa Package', categoryName: 'Salon', price: 549, vendorBusinessName: 'Aura Home Salon & Beauty', vendorRating: 4.9, totalReviews: 38, city: 'Delhi NCR', description: 'Deep cleansing, steam extraction, herbal scrub, and soothing face massage at your doorstep.' },
+    { id: 8, title: 'Hair Styling & Organic Head Massage Spa', categoryName: 'Salon', price: 449, vendorBusinessName: 'Velvet Hair & Spa Studio', vendorRating: 4.8, totalReviews: 27, city: 'Bengaluru', description: 'Nourishing hot oil head massage, hair wash, and professional blow dry styling at home.' }
   ];
 
   const fetchCategories = async () => {
@@ -84,8 +96,21 @@ export const ServicesPage = () => {
         console.error(e);
       }
 
-      if (keyword) {
-        result = result.filter(s => s.title.toLowerCase().includes(keyword.toLowerCase()) || s.categoryName.toLowerCase().includes(keyword.toLowerCase()));
+      // Exact Category & Keyword Strict Filter (e.g. Salon -> ONLY Salon services)
+      if (keyword && keyword.trim() !== '') {
+        const kw = keyword.trim().toLowerCase();
+        result = result.filter(s => {
+          const categoryMatch = s.categoryName && s.categoryName.toLowerCase().includes(kw);
+          const titleMatch = s.title && s.title.toLowerCase().includes(kw);
+          const descMatch = s.description && s.description.toLowerCase().includes(kw);
+          return categoryMatch || titleMatch || descMatch;
+        });
+      }
+
+      if (city && city.trim() !== '') {
+        const cLower = city.toLowerCase();
+        const cityFiltered = result.filter(s => s.city && s.city.toLowerCase().includes(cLower));
+        if (cityFiltered.length > 0) result = cityFiltered;
       }
 
       // Sorting
@@ -100,12 +125,10 @@ export const ServicesPage = () => {
       setServices(result);
     } catch (err) {
       let result = fallbackServices;
-      try {
-        const globalVendorServices = JSON.parse(localStorage.getItem('localfix_global_vendor_services') || '[]');
-        if (globalVendorServices.length > 0) {
-          result = [...globalVendorServices, ...result];
-        }
-      } catch (e) {}
+      if (keyword && keyword.trim() !== '') {
+        const kw = keyword.trim().toLowerCase();
+        result = result.filter(s => (s.categoryName && s.categoryName.toLowerCase().includes(kw)) || (s.title && s.title.toLowerCase().includes(kw)));
+      }
       setServices(result);
     } finally {
       setLoading(false);
@@ -153,7 +176,7 @@ export const ServicesPage = () => {
         <div className="space-y-1">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-extrabold uppercase tracking-wider border border-emerald-500/30">
             <Globe className="w-3.5 h-3.5 text-emerald-400" />
-            Global Marketplace Marketplace Directory
+            Global Marketplace Directory
           </div>
           <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">Worldwide Vendor Directory & Instant Search</h2>
           <p className="text-xs text-emerald-100/90 max-w-xl">
@@ -171,9 +194,22 @@ export const ServicesPage = () => {
       </div>
 
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Browse Verified Local Services & Vendor Partners</h1>
-        <p className="text-xs sm:text-sm text-slate-600">Explore all global vendor service listings with upfront transparent prices</p>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+        <div>
+          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Browse Verified Local Services & Vendor Partners</h1>
+          <p className="text-xs sm:text-sm text-slate-600">
+            {keyword ? `Showing results for AI Recommended Category: "${keyword}"` : "Explore all global vendor service listings with upfront transparent prices"}
+          </p>
+        </div>
+
+        {keyword && (
+          <button
+            onClick={handleReset}
+            className="px-4 py-2 bg-emerald-50 text-emerald-700 font-bold text-xs rounded-xl border border-emerald-200 hover:bg-emerald-100 transition flex items-center gap-1"
+          >
+            Show All Services (Clear "{keyword}") <X className="w-3.5 h-3.5" />
+          </button>
+        )}
       </div>
 
       {/* Search & Filter Bar */}
@@ -183,9 +219,12 @@ export const ServicesPage = () => {
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
             <input
               type="text"
-              placeholder="Search by service or issue (e.g. AC leakage, facial, plumber)..."
+              placeholder="Search by service or category (e.g. Salon, AC leakage, facial, plumber)..."
               value={keyword}
-              onChange={(e) => setKeyword(e.target.value)}
+              onChange={(e) => {
+                setKeyword(e.target.value);
+                setSearchParams(e.target.value ? { keyword: e.target.value } : {});
+              }}
               className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-emerald-500 text-slate-800"
             />
           </div>
@@ -215,7 +254,7 @@ export const ServicesPage = () => {
       {/* Main List */}
       <div className="space-y-4">
         <div className="flex justify-between items-center text-xs">
-          <span className="text-slate-500 font-medium">Showing <strong>{services.length}</strong> verified global services</span>
+          <span className="text-slate-500 font-medium">Showing <strong>{services.length}</strong> verified services {keyword ? `matched for "${keyword}"` : ''}</span>
           <div className="flex items-center gap-2">
             <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />
             <select
@@ -230,41 +269,51 @@ export const ServicesPage = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {services.map((srv) => (
-            <div key={srv.id} className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4 flex flex-col justify-between hover:border-emerald-500 transition">
-              <div className="space-y-2">
-                <div className="flex justify-between items-start">
-                  <span className="text-[10px] uppercase font-extrabold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded border border-emerald-100">
-                    {srv.categoryName}
-                  </span>
-                  <div className="flex items-center gap-1 text-xs font-bold text-slate-800">
-                    <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-                    <span>{srv.vendorRating || '5.0'}</span>
-                    <span className="text-slate-400 text-[10px]">({srv.totalReviews || 12})</span>
+        {services.length === 0 ? (
+          <div className="bg-white p-12 rounded-3xl border border-slate-200 text-center space-y-3">
+            <Wrench className="w-10 h-10 text-slate-300 mx-auto" />
+            <p className="text-xs font-semibold text-slate-700">No verified services matched filter "{keyword}".</p>
+            <button onClick={handleReset} className="px-4 py-2 bg-emerald-600 text-white font-bold text-xs rounded-xl shadow-md">
+              View All Services
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {services.map((srv) => (
+              <div key={srv.id} className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4 flex flex-col justify-between hover:border-emerald-500 transition">
+                <div className="space-y-2">
+                  <div className="flex justify-between items-start">
+                    <span className="text-[10px] uppercase font-extrabold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded border border-emerald-100">
+                      {srv.categoryName}
+                    </span>
+                    <div className="flex items-center gap-1 text-xs font-bold text-slate-800">
+                      <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+                      <span>{srv.vendorRating || '5.0'}</span>
+                      <span className="text-slate-400 text-[10px]">({srv.totalReviews || 12})</span>
+                    </div>
                   </div>
+
+                  <h3 className="font-extrabold text-slate-900 text-base">{srv.title}</h3>
+                  <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">{srv.description}</p>
+                  <p className="text-[11px] text-slate-500">Provider: <strong>{srv.vendorBusinessName}</strong> ({srv.city || 'Global'})</p>
                 </div>
 
-                <h3 className="font-extrabold text-slate-900 text-base">{srv.title}</h3>
-                <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">{srv.description}</p>
-                <p className="text-[11px] text-slate-500">Provider: <strong>{srv.vendorBusinessName}</strong> ({srv.city || 'Global'})</p>
-              </div>
-
-              <div className="pt-3 border-t border-slate-100 flex justify-between items-center">
-                <div>
-                  <span className="text-[10px] text-slate-400 block font-medium">Upfront Price</span>
-                  <strong className="text-lg font-black text-slate-900">₹{srv.price}</strong>
+                <div className="pt-3 border-t border-slate-100 flex justify-between items-center">
+                  <div>
+                    <span className="text-[10px] text-slate-400 block font-medium">Upfront Price</span>
+                    <strong className="text-lg font-black text-slate-900">₹{srv.price}</strong>
+                  </div>
+                  <Link
+                    to={`/book/${srv.id}`}
+                    className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl shadow-md transition"
+                  >
+                    Book Service →
+                  </Link>
                 </div>
-                <Link
-                  to={`/book/${srv.id}`}
-                  className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl shadow-md transition"
-                >
-                  Book Service →
-                </Link>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Emergency Modal */}
