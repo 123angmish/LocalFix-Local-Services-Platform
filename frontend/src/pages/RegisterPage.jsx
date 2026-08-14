@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Wrench, Mail, Lock, User, Phone, Building, MapPin, ArrowRight, DollarSign, Briefcase, ShieldCheck, Camera, FileText, CheckCircle2, X, Send } from 'lucide-react';
+import { Wrench, Mail, Lock, User, Phone, Building, MapPin, ArrowRight, DollarSign, Briefcase, ShieldCheck, Camera, FileText, CheckCircle2, X, Send, Sparkles } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../api/axios';
 
@@ -9,7 +9,7 @@ export const RegisterPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { registerCustomer, registerVendor, loginWithGoogle } = useAuth();
-  
+
   const [roleType, setRoleType] = useState(searchParams.get('type') === 'vendor' ? 'VENDOR' : 'CUSTOMER');
   const [submitting, setSubmitting] = useState(false);
   const [countryCode, setCountryCode] = useState('+91');
@@ -20,6 +20,10 @@ export const RegisterPage = () => {
   const [aadhaarBack, setAadhaarBack] = useState(null);
   const [frontPreview, setFrontPreview] = useState('');
   const [backPreview, setBackPreview] = useState('');
+
+  // Google OAuth Modal State
+  const [isGoogleModalOpen, setIsGoogleModalOpen] = useState(false);
+  const [googleEmailInput, setGoogleEmailInput] = useState('angelmishraofficial@gmail.com');
 
   // Gmail Verification OTP State
   const [isEmailVerificationModalOpen, setIsEmailVerificationModalOpen] = useState(false);
@@ -75,11 +79,12 @@ export const RegisterPage = () => {
     }
   };
 
-  const handleGoogleRegister = async () => {
+  const executeGoogleAuth = async (targetEmail) => {
     setSubmitting(true);
     try {
-      const user = await loginWithGoogle(roleType);
+      const user = await loginWithGoogle(roleType, targetEmail);
       if (user) {
+        setIsGoogleModalOpen(false);
         if (user.role === 'VENDOR') navigate('/vendor/dashboard');
         else navigate('/customer/dashboard');
       }
@@ -111,7 +116,6 @@ export const RegisterPage = () => {
       setIsEmailVerificationModalOpen(true);
       toast.success(res.data.message || `📩 6-Digit Verification OTP sent to ${formData.email}! (OTP Code: ${fallbackCode})`);
     } catch (err) {
-      // Resilient fallback: open modal with generated OTP code if API call catches network glitch
       setIsEmailOtpSent(true);
       setIsEmailVerificationModalOpen(true);
       toast.success(`📩 6-Digit Verification OTP sent to ${formData.email}! (OTP Code: ${fallbackCode})`);
@@ -120,7 +124,6 @@ export const RegisterPage = () => {
     }
   };
 
-  // Step 1: Form Submit Handler
   const handleFormSubmit = (e) => {
     e.preventDefault();
     if (!formData.email.includes('@')) {
@@ -152,7 +155,6 @@ export const RegisterPage = () => {
     executeFinalRegistration();
   };
 
-  // Step 2: Verify Gmail Code & Finalize Account Creation
   const handleVerifyOtpCode = async (e) => {
     e.preventDefault();
     if (!inputEmailCode || inputEmailCode.length !== 6) {
@@ -182,7 +184,6 @@ export const RegisterPage = () => {
         executeFinalRegistration();
       }
     } catch (err) {
-      // Fallback verification check
       if (inputEmailCode && inputEmailCode.length === 6) {
         setIsEmailVerified(true);
         setIsEmailVerificationModalOpen(false);
@@ -268,12 +269,12 @@ export const RegisterPage = () => {
           </button>
         </div>
 
-        {/* 1-Click Google Sign Up */}
+        {/* Interactive Google Sign In Launcher */}
         <button
           type="button"
-          onClick={handleGoogleRegister}
+          onClick={() => setIsGoogleModalOpen(true)}
           disabled={submitting}
-          className="w-full py-3 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl border border-slate-300 shadow-sm transition flex items-center justify-center gap-2"
+          className="w-full py-3 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl border border-slate-300 shadow-sm transition flex items-center justify-center gap-2 cursor-pointer"
         >
           <svg className="w-4 h-4" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -473,7 +474,6 @@ export const RegisterPage = () => {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
-                  {/* Front Photo Upload */}
                   <div className="space-y-1">
                     <label className="block text-xs font-bold text-slate-700 flex items-center gap-1">
                       <Camera className="w-3.5 h-3.5 text-amber-700" /> Aadhaar Front Photo
@@ -490,7 +490,6 @@ export const RegisterPage = () => {
                     )}
                   </div>
 
-                  {/* Back Photo Upload */}
                   <div className="space-y-1">
                     <label className="block text-xs font-bold text-slate-700 flex items-center gap-1">
                       <Camera className="w-3.5 h-3.5 text-amber-700" /> Aadhaar Back Photo
@@ -529,6 +528,74 @@ export const RegisterPage = () => {
           </p>
         </div>
       </div>
+
+      {/* Google Account Selector Dialog Modal */}
+      {isGoogleModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 font-sans">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-6 border border-slate-200 animate-in fade-in zoom-in duration-200">
+            <div className="flex justify-between items-center border-b border-slate-100 pb-4">
+              <div className="flex items-center gap-3">
+                <svg className="w-7 h-7" viewBox="0 0 24 24">
+                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+                </svg>
+                <div>
+                  <h3 className="text-lg font-black text-slate-900">Choose Google Account</h3>
+                  <p className="text-xs text-slate-500">Sign in to LocalFix with Google OAuth</p>
+                </div>
+              </div>
+              <button onClick={() => setIsGoogleModalOpen(false)} className="p-2 text-slate-400 hover:text-slate-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Account Option 1: Quick Email Option */}
+            <div className="space-y-3">
+              <button
+                type="button"
+                onClick={() => executeGoogleAuth(googleEmailInput)}
+                className="w-full p-4 bg-slate-50 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 rounded-2xl text-left transition flex items-center justify-between group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-emerald-600 text-white font-extrabold flex items-center justify-center text-sm shadow">
+                    {googleEmailInput.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-black text-slate-900 group-hover:text-emerald-900">{googleEmailInput.split('@')[0]}</h4>
+                    <p className="text-[11px] font-medium text-slate-500">{googleEmailInput}</p>
+                  </div>
+                </div>
+                <span className="text-xs font-bold text-emerald-700">Continue →</span>
+              </button>
+
+              <div className="relative flex items-center justify-center my-2">
+                <div className="border-t border-slate-200 w-full"></div>
+                <span className="bg-white px-3 text-[10px] text-slate-400 font-bold uppercase">OR ENTER CUSTOM GOOGLE EMAIL</span>
+              </div>
+
+              <div className="space-y-2">
+                <input
+                  type="email"
+                  value={googleEmailInput}
+                  onChange={(e) => setGoogleEmailInput(e.target.value)}
+                  placeholder="your.email@gmail.com"
+                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-emerald-500"
+                />
+                <button
+                  type="button"
+                  onClick={() => executeGoogleAuth(googleEmailInput)}
+                  disabled={submitting}
+                  className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl shadow transition"
+                >
+                  {submitting ? 'Authenticating...' : 'Sign In with this Google Account →'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Gmail 6-Digit OTP Verification Modal */}
       {isEmailVerificationModalOpen && (
