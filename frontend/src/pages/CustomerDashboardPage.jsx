@@ -3,14 +3,16 @@ import { Link, useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
-import { Calendar, Clock, CheckCircle2, IndianRupee, ArrowRight, Wrench, Sparkles, ShieldCheck, FileText, AlertTriangle, Building, Tag, ShieldAlert, X, ChevronRight, Check, Plus } from 'lucide-react';
+import { Calendar, Clock, CheckCircle2, IndianRupee, ArrowRight, Wrench, Sparkles, ShieldCheck, FileText, AlertTriangle, Building, Tag, ShieldAlert, X, ChevronRight, Check, Plus, Search, MapPin, Star } from 'lucide-react';
 
 export const CustomerDashboardPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [stats, setStats] = useState(null);
   const [recentBookings, setRecentBookings] = useState([]);
+  const [allServices, setAllServices] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchFilter, setSearchFilter] = useState('');
 
   // Active Interactive Feature Modal State
   const [activeModuleModal, setActiveModuleModal] = useState(null); // 'PASSPORT', 'QUOTES', 'SOCIETY', 'WARRANTY', 'DISPUTE'
@@ -19,12 +21,14 @@ export const CustomerDashboardPage = () => {
   useEffect(() => {
     const fetchDashboard = async () => {
       try {
-        const [statsRes, bookingsRes] = await Promise.all([
+        const [statsRes, bookingsRes, servicesRes] = await Promise.all([
           api.get('/customer/dashboard'),
-          api.get('/customer/bookings')
+          api.get('/customer/bookings'),
+          api.get('/services')
         ]);
         setStats(statsRes.data);
         setRecentBookings(Array.isArray(bookingsRes.data) ? bookingsRes.data.slice(0, 3) : []);
+        setAllServices(Array.isArray(servicesRes.data) ? servicesRes.data : []);
       } catch (err) {
         console.error("Dashboard error", err);
       } finally {
@@ -44,6 +48,16 @@ export const CustomerDashboardPage = () => {
     setActiveModuleModal(null);
   };
 
+  const filteredServices = allServices.filter(s => {
+    if (!searchFilter) return true;
+    const kw = searchFilter.toLowerCase();
+    return (
+      (s.title && s.title.toLowerCase().includes(kw)) ||
+      (s.categoryName && s.categoryName.toLowerCase().includes(kw)) ||
+      (s.city && s.city.toLowerCase().includes(kw))
+    );
+  });
+
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-12 space-y-6">
@@ -55,25 +69,31 @@ export const CustomerDashboardPage = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 bg-slate-50 font-sans">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-gradient-to-r from-emerald-950 via-teal-900 to-slate-900 p-8 rounded-3xl text-white shadow-xl border border-emerald-500/20">
-        <div className="space-y-1">
-          <span className="text-xs font-semibold text-emerald-400 uppercase tracking-wider">Customer Portal</span>
-          <h1 className="text-3xl font-extrabold tracking-tight">Welcome back, {user?.name || 'Customer'}!</h1>
-          <p className="text-xs text-emerald-100/80">Track active bookings, view order history, or book new services</p>
+      {/* Top Banner with BIG BROWSE ALL SERVICES Button */}
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 bg-gradient-to-r from-emerald-950 via-teal-900 to-slate-900 p-8 sm:p-10 rounded-3xl text-white shadow-xl border border-emerald-500/20">
+        <div className="space-y-2 max-w-xl">
+          <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">Customer Portal</span>
+          <h1 className="text-3xl sm:text-4xl font-black tracking-tight">Welcome back, {user?.name || 'Customer'}!</h1>
+          <p className="text-xs sm:text-sm text-emerald-100/80">
+            Explore verified technicians, book instant home services, or manage your active bookings.
+          </p>
         </div>
-        <div className="flex flex-wrap gap-3">
+
+        <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
           <Link
             to="/ai-recommender"
-            className="px-4 py-2.5 bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold text-xs rounded-xl shadow-md flex items-center gap-1.5 transition"
+            className="px-4 py-3 bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-xs rounded-2xl shadow-md flex items-center gap-2 transition"
           >
-            <Sparkles className="w-4 h-4 text-slate-900" />
-            AI Service Diagnosis
+            <Sparkles className="w-4 h-4 text-slate-950" />
+            <span>AI Diagnosis</span>
           </Link>
           <Link
             to="/services"
-            className="px-4 py-2.5 bg-white text-emerald-800 hover:bg-emerald-50 font-bold text-xs rounded-xl shadow-md transition"
+            className="px-6 py-4 bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400 hover:from-emerald-300 hover:to-teal-200 text-slate-950 font-black text-sm rounded-2xl shadow-2xl hover:shadow-emerald-400/40 transition transform hover:scale-105 flex items-center justify-center gap-2.5 cursor-pointer border-2 border-emerald-200 flex-1 lg:flex-none"
           >
-            Book New Service
+            <Wrench className="w-5 h-5 text-slate-950" />
+            <span>🔍 BROWSE & EXPLORE ALL SERVICES</span>
+            <ArrowRight className="w-4 h-4 text-slate-950" />
           </Link>
         </div>
       </div>
@@ -119,6 +139,99 @@ export const CustomerDashboardPage = () => {
             <div className="text-2xl font-extrabold text-slate-900">₹{stats?.totalSpent || 0}</div>
           </div>
         </div>
+      </div>
+
+      {/* BIG ALL AVAILABLE SERVICES DIRECTORY SECTION */}
+      <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-100 pb-4">
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="font-black text-slate-900 text-xl tracking-tight">🛠️ All Available Marketplace Services</h3>
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800">
+                {allServices.length} Active Services
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 mt-0.5">Instant booking with 30-day warranty & verified Aadhaar pros</p>
+          </div>
+
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            <div className="relative flex-1 sm:w-64">
+              <Search className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
+              <input
+                type="text"
+                value={searchFilter}
+                onChange={(e) => setSearchFilter(e.target.value)}
+                placeholder="Search Plumber, Electrician, Salon..."
+                className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-emerald-500"
+              />
+            </div>
+            <Link
+              to="/services"
+              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl shadow transition whitespace-nowrap"
+            >
+              View Full Catalog →
+            </Link>
+          </div>
+        </div>
+
+        {filteredServices.length === 0 ? (
+          <div className="py-12 text-center space-y-3">
+            <Wrench className="w-10 h-10 text-slate-300 mx-auto" />
+            <p className="text-xs text-slate-500 font-medium">No services match your search keyword.</p>
+            <button onClick={() => setSearchFilter('')} className="text-xs text-emerald-600 font-bold hover:underline">
+              Clear Search Filter
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredServices.map((srv) => (
+              <div key={srv.id} className="bg-slate-50 rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col justify-between hover:shadow-md hover:border-emerald-400 transition group">
+                <div className="relative h-44 bg-slate-200 overflow-hidden">
+                  {srv.imageUrl ? (
+                    <img src={srv.imageUrl} alt={srv.title} className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-slate-400 bg-slate-200">
+                      <Wrench className="w-8 h-8" />
+                    </div>
+                  )}
+                  <div className="absolute top-3 left-3">
+                    <span className="px-3 py-1 bg-white/90 backdrop-blur-md text-emerald-900 text-xs font-extrabold rounded-full shadow-sm">
+                      {srv.categoryName || 'General Repair'}
+                    </span>
+                  </div>
+                  <div className="absolute top-3 right-3">
+                    <span className="px-2.5 py-0.5 bg-slate-900/80 backdrop-blur-md text-amber-400 text-[10px] font-extrabold rounded-full flex items-center gap-1 shadow">
+                      <Star className="w-3 h-3 fill-current" /> 5.0
+                    </span>
+                  </div>
+                </div>
+
+                <div className="p-5 space-y-4 flex-grow flex flex-col justify-between">
+                  <div className="space-y-1.5">
+                    <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">{srv.vendorBusinessName || 'LocalFix Certified Pro'}</span>
+                    <h4 className="font-extrabold text-slate-900 text-base line-clamp-1">{srv.title}</h4>
+                    <p className="text-xs text-slate-500 line-clamp-2">{srv.description}</p>
+                  </div>
+
+                  <div className="space-y-3 pt-3 border-t border-slate-200/60">
+                    <div className="flex justify-between items-center text-xs text-slate-500">
+                      <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-emerald-600" /> {srv.city || 'Mumbai'}</span>
+                      <strong className="text-lg text-slate-900 font-black">₹{srv.price}</strong>
+                    </div>
+
+                    <Link
+                      to={`/book/${srv.id}`}
+                      className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer"
+                    >
+                      <span>⚡ Book Service Instantly</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Startup MVP Core Features Navigation Grid */}
