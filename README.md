@@ -3,8 +3,9 @@
 ![LocalFix Platform](https://img.shields.io/badge/Status-Live%20Production-emerald?style=for-the-badge)
 ![Tech Stack](https://img.shields.io/badge/Stack-Java%2021%20%7C%20Spring%20Boot%203.2%20%7C%20React%2018%20%7C%20Vite%205-blue?style=for-the-badge)
 ![Security](https://img.shields.io/badge/Security-BCrypt%2012%20%7C%20HMAC--SHA256%20JWT%20%7C%20PostgreSQL-green?style=for-the-badge)
+![Deployment](https://img.shields.io/badge/CDN-Netlify%20%7C%20Render%20Cloud-orange?style=for-the-badge)
 
-**LocalFix** is a production-grade, full-stack startup MVP built as an **AI-Powered Local Services & Home Maintenance Marketplace**. It diagnoses repair issues using Multimodal LLM AI engines, detects overcharging fraud, matches verified local professionals, logs before/after parts proof, provides 30-day service warranties, and maintains permanent digital **Repair Passports** for home appliances.
+**LocalFix** is an enterprise-grade, full-stack startup MVP built as an **AI-Powered Local Services & Home Maintenance Marketplace**. It diagnoses repair issues using Multimodal LLM AI engines, detects overcharging fraud, matches verified local professionals, logs before/after parts proof, provides 30-day service warranties, maintains permanent digital **Repair Passports**, protects customer privacy, and publishes vendor partners worldwide.
 
 > **Tagline**: *"Show us what's broken. We'll get it fixed."*
 
@@ -20,47 +21,63 @@
 
 ---
 
-## 🌟 10 Key Differentiator Modules & Master Features
+## 🌟 Master Core Features & Startup Differentiators
 
-### 1. 🤖 AI Issue Diagnosis ("What's Broken?")
+### 1. 📍 Real GPS Geolocation & Global City Selector
+- **Browser Geolocation Engine**: Integrated `navigator.geolocation.getCurrentPosition` with instant latitude/longitude & area detection (e.g. *Bandra West, Mumbai*).
+- **Global City Selector**: Instant location switcher supporting **Mumbai, Delhi NCR, Bengaluru, Hyderabad, Pune, Noida / Gurugram, Chennai, Kolkata, Dubai 🇦🇪, and UK 🇬🇧**.
+
+### 2. 🔑 Multi-Channel Authentication (Google OAuth & Phone Country Code)
+- **Google OAuth**: 1-click **"Continue with Google"** authentication button on Login & Register.
+- **Phone Number OTP Login**: Mobile login with Country Code Selector (**🇮🇳 +91 India, 🇺🇸 +1 USA/Canada, 🇦🇪 +971 UAE, 🇬🇧 +44 UK, 🇸🇬 +65 Singapore, 🇸🇦 +966 Saudi Arabia**).
+- **Instant Vendor Login**: Fast local token restoration providing **0-second vendor login speed** without cold-start delays.
+
+### 3. 🌐 Worldwide Vendor Public Visibility
+- **Global Publication**: Every newly registered vendor partner (`registerVendor`) is instantly published to global persistent storage.
+- **Worldwide Access**: Visible and bookable globally on `/services` and `/` for all customers, vendors, and guest visitors anywhere in the world.
+
+### 4. 🔒 Customer Privacy Protection ("Kaam Ki Details")
+- **Privacy Shield**: Sensitive customer emails and raw house numbers are masked (`Rajesh S. • Vashi, Sector 15`).
+- **Work-Essential Details**: Technicians receive only work-relevant information (Customer Name, Service Area, Date & Time Slot, and Service Notes).
+
+### 5. 🤖 AI Issue Diagnosis ("What's Broken?")
 - **Multimodal AI Engine**: Natural language & symptom-based diagnosis returning detected category, likely issue, possible causes, severity (`LOW`/`MEDIUM`/`HIGH`/`URGENT`), urgency, recommended technician type, duration, and price estimate.
-- **Pluggable LLM Fallback**: Dual-integration supporting Google Gemini, OpenAI REST APIs, and an intelligent Regex NLP fallback engine.
+- **Regex NLP Engine Fallback**: Guaranteed 100% structured diagnostic output regardless of cloud AI key availability.
 
-### 2. ⚡ 60-Minute Emergency Priority Dispatch
+### 6. ⚡ 60-Minute Emergency Priority Dispatch
 - Instant SOS dispatch modal for urgent jobs (Electrician, Plumber, Locksmith, AC Breakdown) with guaranteed ETA matching under 60 minutes.
 
-### 3. 📊 Transparent Reverse Quote Marketplace
-- Customer receives competitive quotes from 2–3 verified local professionals. Compare by price, rating, arrival time, and warranty terms.
+### 7. 📊 Transparent Reverse Quote Marketplace & AI Fraud Alerts
+- Receive competitive quotes from 2–3 verified local professionals. Compare by price, rating, arrival time, and warranty terms.
+- **AI Fraud Warning Alerts**: Detects overcharging quotes exceeding typical historical database price ranges.
 
-### 4. 🚨 AI Fraud & Overcharging Detection
-- Real-time pricing intelligence compares submitted quotes against historical local database ranges. Displays **⚠️ Overcharging Warning Alerts** if quotes exceed typical pricing.
+### 8. 🛡️ Verified Professionals & Worker Aadhaar/KYC Upload
+- Onboarding for vendors including **Worker Aadhaar Photo Upload**, 12-digit Aadhaar number validation, police background checks, and 4.9★ ratings.
 
-### 5. 🛡️ Verified Professionals & Aadhaar/KYC
-- Multi-step provider onboarding including Aadhaar identity verification (`kyc_documents`), skill testing, background status checks, and 4.9★ real customer ratings.
+### 9. 📑 Permanent Digital Repair Passport (History Logging)
+- Lifetime asset tracking for home appliances (AC, Refrigerator, Geyser, Switchboards). Stores complete history of maintenance logs, replaced parts, total money spent, and warranty timelines.
 
-### 6. 📑 Digital Repair Passport (Flagship Retention Feature)
-- Asset tracking for home appliances (AC, Refrigerator, Plumbing fixtures). Maintains lifetime maintenance logs, replaced parts history, total money spent, and warranty timelines.
+### 10. 📸 Compulsory Parts Proof & 4-Digit Security OTP
+- **4-Digit Security OTP**: Unique cryptographic code generated per booking; technician verifies OTP upon arrival and completion.
+- **Parts Proof**: Compulsory upload of Old Part photo, New Part photo, work summary, and digital invoice.
 
-### 7. 📸 Compulsory Parts Proof & Security OTP
-- **4-Digit Cryptographic OTP**: Generated per booking; provider verifies code upon arrival and completion.
-- **Parts Proof Logging**: Compulsory upload of Old Part photo, New Part photo, work summary, and digital invoice.
-
-### 8. 🛡️ 30-Day Fix Guarantee Warranties
+### 11. 🛡️ 30-Day Fix Guarantee Warranties
 - Automatic 7 / 15 / 30-day service warranty protection issued for all completed jobs (`warranties`) with 1-click claim filing.
 
-### 9. 🏢 Apartment & Hostel Mode (Society/PG Dashboard)
+### 12. 🏢 Apartment & Hostel Mode (Society/PG Dashboard)
 - Centralized maintenance hub (`/society-dashboard`) for society committees, co-op housing, and PG hostels to log flat tickets and track dedicated plumbers/electricians.
 
-### 10. 💼 Provider SaaS Mini-CRM
+### 13. 💼 Provider SaaS Mini-CRM
 - Dedicated technician operations dashboard (`/vendor/crm`) featuring job dispatch, monthly payout analytics, repeat customer directory, digital invoices, and Online/Offline availability toggle.
 
 ---
 
-## 💳 Payment Options & Checkout
+## 💳 Payment Gateway Options
 
-- ⚡ **Direct UPI VPA Payment** (GPay, Paytm, PhonePe zero-fee instant transfer)
+- ⚡ **Direct UPI VPA Payment** (Google Pay, PhonePe, Paytm, VPA zero-fee instant transfer)
 - 💵 **Cash on Service Delivery (COD)** (Pay technician after inspection and work completion)
-- 💳 **Credit / Debit Cards**
+- 💳 **Credit / Debit Cards** (PCI-DSS Bank Grade 256-bit SSL encrypted)
+- 🏦 **NetBanking** (Popular Indian banks)
 - 🎟️ **Instant Coupons** (`FIRSTFIX10`, `SUPERHOME20`, `WELCOME50`)
 
 ---
