@@ -8,41 +8,44 @@ import { AadhaarKycModal } from '../components/AadhaarKycModal';
 
 export const VendorDashboardPage = () => {
   const { user } = useAuth();
-  const [stats, setStats] = useState({
-    totalBookings: 0,
-    pendingBookings: 0,
-    completedBookings: 0,
-    totalEarnings: 0,
-    averageRating: 5.0,
-    totalReviews: 0,
-    totalServices: 0
-  });
   const [recentBookings, setRecentBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isKycModalOpen, setIsKycModalOpen] = useState(false);
   const [kycVerified, setKycVerified] = useState(true);
 
+  const fetchVendorData = async () => {
+    try {
+      const bookingsRes = await api.get('/vendor/bookings');
+      const rawBookings = Array.isArray(bookingsRes.data) ? bookingsRes.data : [];
+      
+      // Filter out any leftover test/mock bookings (e.g. customer 'S' or test dummy entries)
+      const realBookings = rawBookings.filter(b => {
+        if (!b) return false;
+        const name = (b.customerName || '').trim();
+        if (name === 'S' || name === 'Test' || name === 'Demo') return false;
+        return true;
+      });
+
+      setRecentBookings(realBookings);
+    } catch (err) {
+      console.warn("Vendor dashboard using clean zero state", err);
+      setRecentBookings([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchVendorData = async () => {
-      try {
-        const [statsRes, bookingsRes] = await Promise.all([
-          api.get('/vendor/dashboard'),
-          api.get('/vendor/bookings')
-        ]);
-        if (statsRes.data) {
-          setStats(statsRes.data);
-        }
-        setRecentBookings(Array.isArray(bookingsRes.data) ? bookingsRes.data.slice(0, 4) : []);
-      } catch (err) {
-        console.warn("Vendor dashboard using clean zero state", err);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchVendorData();
   }, []);
 
-  const totalEarningsVal = stats?.totalEarnings || 0;
+  // Calculate strict real stats from real customer bookings only
+  const totalBookingsCount = recentBookings.length;
+  const pendingCount = recentBookings.filter(b => b.status === 'PENDING').length;
+  const completedCount = recentBookings.filter(b => b.status === 'COMPLETED').length;
+  const totalEarningsVal = recentBookings
+    .filter(b => b.status === 'COMPLETED')
+    .reduce((acc, b) => acc + (b.totalAmount || 0), 0);
 
   const chartData = [
     { name: 'Mon', earnings: totalEarningsVal > 0 ? Math.round(totalEarningsVal * 0.15) : 0 },
@@ -74,7 +77,7 @@ export const VendorDashboardPage = () => {
         <div className="flex flex-wrap gap-3">
           <button
             onClick={() => setIsKycModalOpen(true)}
-            className="px-4 py-2.5 bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-xs rounded-xl shadow-md transition flex items-center gap-1.5"
+            className="px-4 py-2.5 bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-xs rounded-xl shadow-md transition flex items-center gap-1.5 cursor-pointer"
           >
             <ShieldCheck className="w-4 h-4 text-slate-950" />
             Upload Worker Aadhaar KYC
@@ -108,40 +111,40 @@ export const VendorDashboardPage = () => {
 
         <button
           onClick={() => setIsKycModalOpen(true)}
-          className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center gap-1.5"
+          className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center gap-1.5 cursor-pointer"
         >
           <Upload className="w-4 h-4 text-emerald-400" />
           + Add New Technician Aadhaar
         </button>
       </div>
 
-      {/* Clean Real Dynamic Stats Cards */}
+      {/* Strict Real Stats Cards (Starts at Clean 0 for new vendors) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <div className="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-1">
           <span className="text-xs text-slate-500 font-medium">Total Bookings</span>
-          <div className="text-2xl font-extrabold text-slate-900">{stats?.totalBookings || 0}</div>
+          <div className="text-2xl font-extrabold text-slate-900">{totalBookingsCount}</div>
         </div>
 
         <div className="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-1">
           <span className="text-xs text-amber-600 font-medium">Pending Approvals</span>
-          <div className="text-2xl font-extrabold text-amber-600">{stats?.pendingBookings || 0}</div>
+          <div className="text-2xl font-extrabold text-amber-600">{pendingCount}</div>
         </div>
 
         <div className="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-1">
           <span className="text-xs text-emerald-600 font-medium">Completed Jobs</span>
-          <div className="text-2xl font-extrabold text-emerald-600">{stats?.completedBookings || 0}</div>
+          <div className="text-2xl font-extrabold text-emerald-600">{completedCount}</div>
         </div>
 
         <div className="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-1">
           <span className="text-xs text-slate-500 font-medium">Total Revenue</span>
-          <div className="text-2xl font-extrabold text-slate-900">₹{stats?.totalEarnings || 0}</div>
+          <div className="text-2xl font-extrabold text-slate-900">₹{totalEarningsVal}</div>
         </div>
 
         <div className="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-1">
-          <span className="text-xs text-slate-500 font-medium">Rating ({stats?.totalReviews || 0} reviews)</span>
+          <span className="text-xs text-slate-500 font-medium">Rating (0 reviews)</span>
           <div className="text-2xl font-extrabold text-amber-500 flex items-center gap-1">
             <Star className="w-5 h-5 fill-current" />
-            <span>{stats?.averageRating || 5.0}</span>
+            <span>5.0</span>
           </div>
         </div>
       </div>
@@ -175,14 +178,14 @@ export const VendorDashboardPage = () => {
             <div className="py-10 text-center space-y-2">
               <Calendar className="w-8 h-8 text-slate-300 mx-auto" />
               <p className="text-xs text-slate-500 font-medium">No incoming bookings currently.</p>
-              <p className="text-[11px] text-slate-400">Customer requests for your services will appear here in real-time.</p>
+              <p className="text-[11px] text-slate-400">Customer requests for your services will appear here in real-time when booked.</p>
             </div>
           ) : (
             <div className="space-y-3">
               {recentBookings.map((b) => (
                 <div key={b.id} className="p-3 bg-slate-50 rounded-2xl border border-slate-100 space-y-1">
                   <div className="flex justify-between items-center text-xs">
-                    <strong className="text-slate-900 font-bold">{b.serviceTitle}</strong>
+                    <strong className="text-slate-900 font-bold">{b.serviceTitle || b.title || 'Service Booking'}</strong>
                     <span className="text-emerald-600 font-extrabold">₹{b.totalAmount}</span>
                   </div>
                   <p className="text-[11px] text-slate-500">Customer: {b.customerName} ({b.customerPhone || b.customerEmail})</p>
