@@ -69,21 +69,27 @@ export const AuthProvider = ({ children }) => {
   };
 
   const loginWithGoogle = async (roleHint = 'CUSTOMER') => {
-    const isVendor = roleHint === 'VENDOR';
-    const googleUser = {
-      id: isVendor ? 202 : 201,
-      name: isVendor ? 'Apex Pro Partner (Google)' : 'Google Verified User',
-      email: 'user.google@gmail.com',
-      role: isVendor ? 'VENDOR' : 'CUSTOMER',
-      businessName: isVendor ? 'Google Partner Specialist' : null,
-      authProvider: 'GOOGLE'
-    };
-    const token = 'jwt_google_oauth_' + Date.now();
-    localStorage.setItem('token', token);
-    localStorage.setItem('localfix_user', JSON.stringify(googleUser));
-    setUser(googleUser);
-    toast.success(`Signed in with Google as ${googleUser.name}!`);
-    return googleUser;
+    // Prompt user for Google account email or use Google Identity Services prompt
+    const userEmail = prompt("Enter your Google Account email address:", "user.google@gmail.com");
+    if (!userEmail) return null;
+    const userName = userEmail.split('@')[0];
+
+    try {
+      const res = await api.post('/auth/google', {
+        email: userEmail,
+        name: userName,
+        role: roleHint
+      });
+      const { token, user: userData } = res.data;
+      localStorage.setItem('token', token);
+      localStorage.setItem('localfix_user', JSON.stringify(userData));
+      setUser(userData);
+      toast.success(`Google Sign-In Successful! Welcome, ${userData.name}!`);
+      return userData;
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Google authentication failed");
+      throw err;
+    }
   };
 
   const loginWithPhone = async (countryCode, phoneNumber, roleHint = 'CUSTOMER') => {

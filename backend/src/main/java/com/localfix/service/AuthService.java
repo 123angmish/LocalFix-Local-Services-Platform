@@ -19,6 +19,7 @@ import java.math.BigDecimal;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class AuthService {
@@ -55,7 +56,6 @@ public class AuthService {
             throw new BadRequestException("Please provide a valid email address");
         }
 
-        // Rate limiting check
         Optional<EmailOtp> existingOpt = emailOtpRepository.findTopByEmailOrderByCreatedAtDesc(email);
         if (existingOpt.isPresent()) {
             EmailOtp existing = existingOpt.get();
@@ -120,6 +120,56 @@ public class AuthService {
     }
 
     @Transactional
+    public AuthResponse loginWithGoogle(String email, String name, String roleStr) {
+        Role targetRole = "VENDOR".equalsIgnoreCase(roleStr) ? Role.VENDOR : Role.CUSTOMER;
+        Optional<User> userOpt = userRepository.findByEmail(email);
+
+        User user;
+        if (userOpt.isPresent()) {
+            user = userOpt.get();
+        } else {
+            String randomPass = UUID.randomUUID().toString();
+            user = User.builder()
+                    .name(name != null ? name : "Google User")
+                    .email(email)
+                    .password(passwordEncoder.encode(randomPass))
+                    .phone("+91 9876543210")
+                    .role(targetRole)
+                    .enabled(true)
+                    .build();
+
+            user = userRepository.save(user);
+
+            if (targetRole == Role.VENDOR) {
+                VendorProfile vendorProfile = VendorProfile.builder()
+                        .user(user)
+                        .businessName(user.getName() + " Services")
+                        .description("Professional verified Google partner services.")
+                        .city("Mumbai")
+                        .address("Local Area")
+                        .approved(true)
+                        .rating(5.0)
+                        .totalReviews(1)
+                        .build();
+                vendorProfileRepository.save(vendorProfile);
+            }
+        }
+
+        UserPrincipal principal = UserPrincipal.create(user);
+        Authentication authentication = new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        String jwt = tokenProvider.generateToken(authentication);
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getId());
+
+        return AuthResponse.builder()
+                .token(jwt)
+                .refreshToken(refreshToken.getToken())
+                .user(mapToUserDto(user))
+                .build();
+    }
+
+    @Transactional
     public AuthResponse registerCustomer(RegisterCustomerRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new BadRequestException("Email address is already in use!");
@@ -169,7 +219,6 @@ public class AuthService {
 
         VendorProfile savedVendor = vendorProfileRepository.save(vendorProfile);
 
-        // Find or create matching ServiceCategory
         String categoryName = determineCategoryName(request.getProfessionTitle());
         ServiceCategory category = categoryRepository.findByNameIgnoreCase(categoryName)
                 .orElseGet(() -> categoryRepository.save(ServiceCategory.builder()
@@ -178,7 +227,6 @@ public class AuthService {
                         .icon("Wrench")
                         .build()));
 
-        // Create initial ServiceItem in SQL Database automatically
         BigDecimal servicePrice = request.getPrice() != null ? request.getPrice() : new BigDecimal("200");
         ServiceItem item = ServiceItem.builder()
                 .vendor(savedVendor)

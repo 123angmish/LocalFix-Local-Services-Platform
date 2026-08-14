@@ -14,13 +14,22 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
-@Tag(name = "Authentication", description = "Endpoints for User and Vendor Login, Gmail OTP & Registration")
+@Tag(name = "Authentication", description = "Endpoints for User and Vendor Login, Google OAuth, Gmail OTP & Registration")
 public class AuthController {
 
     private final AuthService authService;
 
     public AuthController(AuthService authService) {
         this.authService = authService;
+    }
+
+    @PostMapping("/google")
+    @Operation(summary = "Login or Register user via Google OAuth")
+    public ResponseEntity<AuthResponse> loginWithGoogle(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        String name = request.get("name");
+        String role = request.getOrDefault("role", "CUSTOMER");
+        return ResponseEntity.ok(authService.loginWithGoogle(email, name, role));
     }
 
     @PostMapping("/send-otp")
