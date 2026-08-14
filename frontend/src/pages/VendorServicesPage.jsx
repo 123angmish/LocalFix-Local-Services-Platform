@@ -101,14 +101,14 @@ export const VendorServicesPage = () => {
   const handleImageFileUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 2 * 1024 * 1024) {
-        toast.error("Image file size should be less than 2MB");
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error("Image file size should be less than 10MB");
         return;
       }
       const reader = new FileReader();
       reader.onloadend = () => {
         setFormData(prev => ({ ...prev, imageUrl: reader.result }));
-        toast.success("Picture attached successfully!");
+        toast.success("📸 Work Photo attached successfully!");
       };
       reader.readAsDataURL(file);
     }
@@ -332,30 +332,42 @@ export const VendorServicesPage = () => {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
-                  <Camera className="w-3.5 h-3.5 text-emerald-600" />
-                  Work Picture / Service Photo
-                </label>
+              <div className="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                <div className="flex justify-between items-center">
+                  <label className="text-xs font-extrabold text-slate-900 flex items-center gap-1.5 uppercase tracking-wider">
+                    <Camera className="w-4 h-4 text-emerald-600" />
+                    Service Work Photo
+                  </label>
+                  <span className="text-[10px] text-slate-400 font-semibold">JPG, PNG, WEBP (Max 10MB)</span>
+                </div>
 
-                {formData.imageUrl && (
-                  <div className="relative h-32 rounded-2xl overflow-hidden border border-slate-200 group bg-slate-100">
+                {formData.imageUrl ? (
+                  <div className="relative h-44 rounded-2xl overflow-hidden border-2 border-emerald-500 shadow-md group bg-slate-900">
                     <img src={formData.imageUrl} alt="Work preview" className="w-full h-full object-cover" />
-                    <button
-                      type="button"
-                      onClick={() => setFormData({ ...formData, imageUrl: '' })}
-                      className="absolute top-2 right-2 p-1.5 bg-rose-600 text-white rounded-full hover:bg-rose-700 shadow-md transition text-xs"
-                      title="Remove picture"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent flex items-end justify-between p-3">
+                      <span className="text-[11px] font-extrabold text-white bg-emerald-600 px-2.5 py-1 rounded-lg shadow-sm flex items-center gap-1">
+                        <CheckCircle2 className="w-3.5 h-3.5" /> Photo Attached
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setFormData({ ...formData, imageUrl: '' })}
+                        className="px-3 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-bold text-xs shadow-md transition flex items-center gap-1 cursor-pointer"
+                      >
+                        <X className="w-3.5 h-3.5" /> Remove
+                      </button>
+                    </div>
                   </div>
-                )}
-
-                <div className="flex items-center gap-2">
-                  <label className="flex-1 cursor-pointer flex items-center justify-center gap-2 px-3 py-2 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-semibold transition">
-                    <Upload className="w-4 h-4" />
-                    Upload Image File from Device
+                ) : (
+                  <label className="cursor-pointer border-2 border-dashed border-emerald-400 hover:border-emerald-600 bg-white hover:bg-emerald-50/50 p-6 rounded-2xl transition flex flex-col items-center justify-center gap-2 group text-center">
+                    <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 group-hover:scale-110 transition flex items-center justify-center font-bold">
+                      <Upload className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <strong className="text-xs font-black text-slate-900 block group-hover:text-emerald-800">
+                        📸 Click to Upload Photo from Gallery / Device
+                      </strong>
+                      <span className="text-[11px] text-slate-500">Supports photos taken from Mobile Camera or Gallery</span>
+                    </div>
                     <input
                       type="file"
                       accept="image/*"
@@ -363,28 +375,37 @@ export const VendorServicesPage = () => {
                       className="hidden"
                     />
                   </label>
-                </div>
+                )}
 
-                <div className="space-y-1">
-                  <span className="text-[11px] text-slate-500 font-medium">Or paste image URL:</span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                  <label className="cursor-pointer py-2 px-3 bg-white border border-slate-200 hover:border-emerald-400 rounded-xl text-[11px] font-bold text-slate-700 flex items-center justify-center gap-1.5 transition">
+                    <Upload className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Upload New Device File</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageFileUpload}
+                      className="hidden"
+                    />
+                  </label>
                   <input
                     type="url"
                     value={formData.imageUrl}
                     onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                    placeholder="https://images.unsplash.com/photo-..."
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500"
+                    placeholder="Or paste image URL link"
+                    className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>
 
-                <div className="space-y-1">
-                  <span className="text-[11px] text-slate-500 font-medium">Or pick sample work photo:</span>
-                  <div className="grid grid-cols-3 gap-2">
+                <div className="space-y-1 pt-1">
+                  <span className="text-[10px] uppercase font-bold text-slate-400">Or Select Sample Work Photo:</span>
+                  <div className="grid grid-cols-3 gap-1.5">
                     {PRESET_SAMPLE_PHOTOS.map((p, idx) => (
                       <button
                         type="button"
                         key={idx}
                         onClick={() => setFormData({ ...formData, imageUrl: p.url })}
-                        className={`text-[10px] p-1.5 rounded-lg border text-left truncate transition ${formData.imageUrl === p.url ? 'border-emerald-600 bg-emerald-50 text-emerald-800 font-bold' : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100'}`}
+                        className={`text-[10px] p-1.5 rounded-lg border text-left truncate transition ${formData.imageUrl === p.url ? 'border-emerald-600 bg-emerald-600 text-white font-extrabold shadow-sm' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-100 font-medium'}`}
                       >
                         {p.name}
                       </button>
