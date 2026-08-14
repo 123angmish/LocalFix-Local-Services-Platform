@@ -22,8 +22,15 @@ public class CategoryService {
 
     public List<CategoryDto> getAllCategories() {
         return categoryRepository.findAll().stream()
+                .filter(c -> isCleanCategory(c.getName()))
                 .map(this::mapToDto)
                 .collect(Collectors.toList());
+    }
+
+    private boolean isCleanCategory(String name) {
+        if (name == null || name.trim().length() < 3) return false;
+        String clean = name.trim().toLowerCase();
+        return !clean.contains("kzhd") && !clean.contains("ljafd") && !clean.contains("asdf") && !clean.contains("test");
     }
 
     public CategoryDto getCategoryById(Long id) {

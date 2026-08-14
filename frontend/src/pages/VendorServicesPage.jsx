@@ -42,9 +42,14 @@ export const VendorServicesPage = () => {
       ]);
       const apiServices = Array.isArray(srvRes.data) ? srvRes.data : [];
       setServices(apiServices);
-      setCategories(Array.isArray(catRes.data) ? catRes.data : []);
-      if (catRes.data.length > 0 && !formData.categoryId) {
-        setFormData(prev => ({ ...prev, categoryId: catRes.data[0].id }));
+      const validCategories = (Array.isArray(catRes.data) ? catRes.data : []).filter(c => {
+        if (!c.name || c.name.trim().length < 3) return false;
+        const nameLower = c.name.toLowerCase();
+        return !['kzhd', 'ljafdsfhdsf', 'asdf', 'test', 'demo'].some(j => nameLower.includes(j));
+      });
+      setCategories(validCategories);
+      if (validCategories.length > 0 && !formData.categoryId) {
+        setFormData(prev => ({ ...prev, categoryId: validCategories[0].id }));
       }
     } catch (err) {
       // Load vendor's own isolated services

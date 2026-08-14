@@ -92,7 +92,12 @@ export const ServicesPage = () => {
   const fetchCategories = async () => {
     try {
       const res = await api.get('/categories');
-      setCategories(Array.isArray(res.data) ? res.data : []);
+      const cleanCats = (Array.isArray(res.data) ? res.data : []).filter(c => {
+        if (!c.name || c.name.trim().length < 3) return false;
+        const nameLower = c.name.toLowerCase();
+        return !['kzhd', 'ljafdsfhdsf', 'asdf', 'test', 'demo'].some(j => nameLower.includes(j));
+      });
+      setCategories(cleanCats);
     } catch (err) {
       setCategories([]);
     }
