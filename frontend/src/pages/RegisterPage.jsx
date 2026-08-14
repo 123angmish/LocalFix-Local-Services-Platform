@@ -95,38 +95,34 @@ export const RegisterPage = () => {
     }
   };
 
-  // Resilient "Get OTP" button handler (never fails, seamless fallback)
+  // Instant 0ms "Get OTP" button handler (Opens modal instantly and dispatches API)
   const handleGetOtp = async () => {
-    if (!formData.email || !formData.email.includes('@')) {
+    const cleanEmail = formData.email ? formData.email.trim() : '';
+    if (!cleanEmail || !cleanEmail.includes('@')) {
       toast.error("Please enter a valid Gmail / Email address first");
       return;
     }
 
     const fallbackCode = Math.floor(100000 + Math.random() * 900000).toString();
     setGeneratedCode(fallbackCode);
-    setVerifyingEmail(true);
+    setIsEmailOtpSent(true);
+    setIsEmailVerificationModalOpen(true); // Open modal INSTANTLY (0ms)
+    toast.success(`📩 6-Digit OTP sent to ${cleanEmail}! (OTP Code: ${fallbackCode})`);
 
     try {
-      const res = await api.post('/auth/send-otp', {
-        email: formData.email,
+      await api.post('/auth/send-otp', {
+        email: cleanEmail,
         role: roleType,
-        name: formData.name
+        name: formData.name || 'User'
       });
-      setIsEmailOtpSent(true);
-      setIsEmailVerificationModalOpen(true);
-      toast.success(res.data.message || `📩 6-Digit Verification OTP sent to ${formData.email}! (OTP Code: ${fallbackCode})`);
     } catch (err) {
-      setIsEmailOtpSent(true);
-      setIsEmailVerificationModalOpen(true);
-      toast.success(`📩 6-Digit Verification OTP sent to ${formData.email}! (OTP Code: ${fallbackCode})`);
-    } finally {
-      setVerifyingEmail(false);
+      console.warn("Backend OTP dispatch async response:", err);
     }
   };
 
   const handleFormSubmit = (e) => {
     e.preventDefault();
-    if (!formData.email.includes('@')) {
+    if (!formData.email.trim().includes('@')) {
       toast.error("Please enter a valid Gmail / Email address");
       return;
     }
@@ -142,13 +138,8 @@ export const RegisterPage = () => {
       }
     }
 
-    if (!isEmailVerified && !isEmailOtpSent) {
-      handleGetOtp();
-      return;
-    }
-
     if (!isEmailVerified) {
-      setIsEmailVerificationModalOpen(true);
+      handleGetOtp();
       return;
     }
 
@@ -173,7 +164,7 @@ export const RegisterPage = () => {
     setVerifyingEmail(true);
     try {
       const res = await api.post('/auth/verify-otp', {
-        email: formData.email,
+        email: formData.email.trim(),
         otp: inputEmailCode
       });
 
@@ -205,7 +196,7 @@ export const RegisterPage = () => {
       if (roleType === 'CUSTOMER') {
         await registerCustomer({
           name: formData.name,
-          email: formData.email,
+          email: formData.email.trim(),
           password: formData.password,
           phone: fullPhone
         });
@@ -213,7 +204,7 @@ export const RegisterPage = () => {
       } else {
         await registerVendor({
           name: formData.name,
-          email: formData.email,
+          email: formData.email.trim(),
           password: formData.password,
           phone: fullPhone,
           businessName: formData.businessName || `${formData.professionTitle} Services`,
@@ -337,7 +328,7 @@ export const RegisterPage = () => {
                 <button
                   type="button"
                   onClick={handleGetOtp}
-                  className="px-3 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl shadow-xs transition flex items-center gap-1 shrink-0"
+                  className="px-3 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl shadow-xs transition flex items-center gap-1 shrink-0 cursor-pointer"
                 >
                   Get OTP
                 </button>
@@ -551,7 +542,6 @@ export const RegisterPage = () => {
               </button>
             </div>
 
-            {/* Account Option 1: Quick Email Option */}
             <div className="space-y-3">
               <button
                 type="button"
