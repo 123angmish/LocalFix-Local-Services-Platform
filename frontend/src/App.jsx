@@ -43,17 +43,17 @@ export function App() {
           <Route path="/services" element={<ServicesPage />} />
           <Route path="/services/:id" element={<ServiceDetailPage />} />
           <Route path="/ai-recommender" element={<AIRecommenderPage />} />
+          <Route path="/repair-passport" element={<RepairPassportPage />} />
+          <Route path="/warranties" element={<WarrantyPage />} />
+          <Route path="/disputes" element={<DisputePage />} />
+          <Route path="/society-dashboard" element={<SocietyDashboardPage />} />
+          <Route path="/quotes" element={<QuotesComparisonPage />} />
 
           {/* Customer Routes */}
-          <Route element={<ProtectedRoute allowedRoles={['CUSTOMER', 'ADMIN']} />}>
+          <Route element={<ProtectedRoute allowedRoles={['CUSTOMER', 'VENDOR', 'PROVIDER', 'ADMIN']} />}>
             <Route path="/book/:serviceId" element={<BookingPage />} />
             <Route path="/customer/dashboard" element={<CustomerDashboardPage />} />
             <Route path="/customer/bookings" element={<CustomerBookingsPage />} />
-            <Route path="/repair-passport" element={<RepairPassportPage />} />
-            <Route path="/warranties" element={<WarrantyPage />} />
-            <Route path="/disputes" element={<DisputePage />} />
-            <Route path="/society-dashboard" element={<SocietyDashboardPage />} />
-            <Route path="/quotes" element={<QuotesComparisonPage />} />
           </Route>
 
           {/* Vendor Routes */}
