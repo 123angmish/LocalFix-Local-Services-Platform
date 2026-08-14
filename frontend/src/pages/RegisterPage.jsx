@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Wrench, Mail, Lock, User, Phone, Building, MapPin, ArrowRight, DollarSign, Briefcase, ShieldCheck, Camera, FileText, CheckCircle2, X } from 'lucide-react';
+import { Wrench, Mail, Lock, User, Phone, Building, MapPin, ArrowRight, DollarSign, Briefcase, ShieldCheck, Camera, FileText, CheckCircle2, X, Send } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export const RegisterPage = () => {
@@ -20,10 +20,12 @@ export const RegisterPage = () => {
   const [frontPreview, setFrontPreview] = useState('');
   const [backPreview, setBackPreview] = useState('');
 
-  // Gmail Verification OTP Dialog State
+  // Gmail Verification OTP State
   const [isEmailVerificationModalOpen, setIsEmailVerificationModalOpen] = useState(false);
   const [generatedCode, setGeneratedCode] = useState('');
   const [inputEmailCode, setInputEmailCode] = useState('');
+  const [isEmailOtpSent, setIsEmailOtpSent] = useState(false);
+  const [isEmailVerified, setIsEmailVerified] = useState(false);
   const [verifyingEmail, setVerifyingEmail] = useState(false);
 
   const countryCodes = [
@@ -85,7 +87,20 @@ export const RegisterPage = () => {
     }
   };
 
-  // Step 1: Validate & Trigger Gmail Verification Code
+  // Explicit "Get OTP" button handler for Gmail
+  const handleGetOtp = () => {
+    if (!formData.email || !formData.email.includes('@')) {
+      toast.error("Please enter a valid Gmail / Email address first");
+      return;
+    }
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    setGeneratedCode(code);
+    setIsEmailOtpSent(true);
+    setIsEmailVerificationModalOpen(true);
+    toast.success(`📩 Verification Code sent to ${formData.email}! (OTP: ${code})`);
+  };
+
+  // Step 1: Form Submit Handler
   const handleFormSubmit = (e) => {
     e.preventDefault();
     if (!formData.email.includes('@')) {
@@ -104,21 +119,34 @@ export const RegisterPage = () => {
       }
     }
 
-    // Generate 6-digit random email verification code
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
-    setGeneratedCode(code);
-    setIsEmailVerificationModalOpen(true);
-    toast.success(`Verification Code sent to ${formData.email}! (Code: ${code})`);
-  };
-
-  // Step 2: Verify Gmail Code & Finalize Account Creation
-  const handleFinalRegistration = async (e) => {
-    e.preventDefault();
-    if (inputEmailCode !== generatedCode) {
-      toast.error("Invalid Email Verification Code. Please enter code: " + generatedCode);
+    if (!isEmailVerified && !isEmailOtpSent) {
+      handleGetOtp();
       return;
     }
 
+    if (!isEmailVerified) {
+      setIsEmailVerificationModalOpen(true);
+      return;
+    }
+
+    executeFinalRegistration();
+  };
+
+  // Step 2: Verify Gmail Code & Finalize Account Creation
+  const handleVerifyOtpCode = (e) => {
+    e.preventDefault();
+    if (inputEmailCode !== generatedCode) {
+      toast.error("Invalid Email Verification Code. Enter code: " + generatedCode);
+      return;
+    }
+
+    setIsEmailVerified(true);
+    setIsEmailVerificationModalOpen(false);
+    toast.success("✅ Gmail Address Verified Successfully!");
+    executeFinalRegistration();
+  };
+
+  const executeFinalRegistration = async () => {
     setVerifyingEmail(true);
     const fullPhone = `${countryCode} ${formData.phone}`;
 
@@ -130,7 +158,6 @@ export const RegisterPage = () => {
           password: formData.password,
           phone: fullPhone
         });
-        setIsEmailVerificationModalOpen(false);
         navigate('/customer/dashboard');
       } else {
         await registerVendor({
@@ -146,7 +173,6 @@ export const RegisterPage = () => {
           address: formData.address,
           aadhaarNumber: aadhaarNumber.replace(/\D/g, '')
         });
-        setIsEmailVerificationModalOpen(false);
         navigate('/vendor/dashboard');
       }
     } catch (err) {
@@ -164,7 +190,7 @@ export const RegisterPage = () => {
             <Wrench className="w-6 h-6" />
           </div>
           <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">Create LocalFix Account</h2>
-          <p className="text-xs text-slate-500">Gmail Verification & Vendor Aadhaar Identity Verification Required</p>
+          <p className="text-xs text-slate-500">Gmail OTP Verification & Vendor Aadhaar Identity Verification Required</p>
         </div>
 
         {/* Role Type Selector Tabs */}
@@ -232,19 +258,46 @@ export const RegisterPage = () => {
               </div>
             </div>
 
+            {/* Email Field with Explicit "Get OTP" Button */}
             <div className="space-y-1">
-              <label className="block text-xs font-bold text-slate-700">Gmail / Email Address</label>
-              <div className="relative">
-                <Mail className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
-                <input
-                  type="email"
-                  name="email"
-                  required
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder="name@gmail.com"
-                  className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-emerald-500"
-                />
+              <div className="flex justify-between items-center">
+                <label className="block text-xs font-bold text-slate-700">Email Address</label>
+                {isEmailVerified ? (
+                  <span className="text-[10px] text-emerald-600 font-extrabold flex items-center gap-1">
+                    <CheckCircle2 className="w-3 h-3" /> Verified
+                  </span>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleGetOtp}
+                    className="text-[10px] text-emerald-700 hover:text-emerald-800 font-extrabold underline flex items-center gap-1 cursor-pointer"
+                  >
+                    <Send className="w-3 h-3 text-emerald-600" /> Get OTP
+                  </button>
+                )}
+              </div>
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Mail className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
+                  <input
+                    type="email"
+                    name="email"
+                    required
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="name@gmail.com"
+                    className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-emerald-500"
+                  />
+                </div>
+                {!isEmailVerified && (
+                  <button
+                    type="button"
+                    onClick={handleGetOtp}
+                    className="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl shadow-xs transition flex items-center gap-1 shrink-0"
+                  >
+                    <span>Get OTP</span>
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -436,9 +489,10 @@ export const RegisterPage = () => {
 
           <button
             type="submit"
-            className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl shadow-md transition flex items-center justify-center gap-2"
+            disabled={verifyingEmail}
+            className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl shadow-md transition flex items-center justify-center gap-2 disabled:opacity-50"
           >
-            <span>Proceed to Gmail Verification</span>
+            {verifyingEmail ? 'Creating Account...' : `Register as ${roleType === 'CUSTOMER' ? 'Customer' : 'Vendor Partner'}`}
             <ArrowRight className="w-4 h-4" />
           </button>
         </form>
@@ -458,16 +512,16 @@ export const RegisterPage = () => {
             <div className="flex justify-between items-center border-b border-slate-100 pb-3">
               <h3 className="font-extrabold text-slate-900 text-base flex items-center gap-2">
                 <Mail className="w-5 h-5 text-emerald-600" />
-                Gmail Verification Required
+                Gmail OTP Verification
               </h3>
               <button onClick={() => setIsEmailVerificationModalOpen(false)} className="text-slate-400 hover:text-slate-600">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleFinalRegistration} className="space-y-4 text-xs">
+            <form onSubmit={handleVerifyOtpCode} className="space-y-4 text-xs">
               <p className="text-slate-600">
-                Enter the 6-digit Email Verification Code sent to <strong>{formData.email}</strong>.
+                Enter the 6-digit Email Verification OTP sent to <strong>{formData.email}</strong>.
               </p>
 
               <div className="p-3 bg-emerald-50 rounded-2xl border border-emerald-200 text-emerald-950 font-bold text-center">
@@ -494,10 +548,9 @@ export const RegisterPage = () => {
                 </button>
                 <button
                   type="submit"
-                  disabled={verifyingEmail}
-                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-xl shadow-md disabled:opacity-50"
+                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-xl shadow-md"
                 >
-                  {verifyingEmail ? 'Creating Account...' : 'Verify Gmail & Register'}
+                  Verify OTP & Complete
                 </button>
               </div>
             </form>

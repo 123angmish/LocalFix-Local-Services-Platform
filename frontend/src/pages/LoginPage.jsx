@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Wrench, Mail, Lock, ArrowRight, UserCheck, Briefcase, Phone, Globe, ShieldCheck } from 'lucide-react';
+import { Wrench, Mail, Lock, ArrowRight, UserCheck, Briefcase, Phone, Globe, ShieldCheck, Send, CheckCircle2, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export const LoginPage = () => {
@@ -13,6 +13,12 @@ export const LoginPage = () => {
   // Form states
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+  // OTP State
+  const [isOtpModalOpen, setIsOtpModalOpen] = useState(false);
+  const [generatedOtp, setGeneratedOtp] = useState('');
+  const [inputOtpCode, setInputOtpCode] = useState('');
+  const [isOtpVerified, setIsOtpVerified] = useState(false);
 
   // Phone states
   const [countryCode, setCountryCode] = useState('+91');
@@ -28,6 +34,24 @@ export const LoginPage = () => {
     { code: '+65', country: 'Singapore 🇸🇬' },
     { code: '+966', country: 'Saudi Arabia 🇸🇦' }
   ];
+
+  // Explicit "Get OTP" handler
+  const handleGetOtp = () => {
+    const target = loginMethod === 'EMAIL' ? email : `${countryCode} ${phoneNumber}`;
+    if (loginMethod === 'EMAIL' && (!email || !email.includes('@'))) {
+      toast.error("Please enter a valid Gmail / Email address first");
+      return;
+    }
+    if (loginMethod === 'PHONE' && (!phoneNumber || phoneNumber.length < 8)) {
+      toast.error("Please enter a valid Mobile Number first");
+      return;
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    setGeneratedOtp(otp);
+    setIsOtpModalOpen(true);
+    toast.success(`📩 6-Digit OTP sent to ${target}! (OTP Code: ${otp})`);
+  };
 
   const handleEmailSubmit = async (e) => {
     e.preventDefault();
@@ -50,6 +74,35 @@ export const LoginPage = () => {
       toast.error("Please enter a valid phone number");
       return;
     }
+    if (!isOtpVerified) {
+      handleGetOtp();
+      return;
+    }
+    executePhoneLogin();
+  };
+
+  const handleVerifyOtpSubmit = (e) => {
+    e.preventDefault();
+    if (inputOtpCode !== generatedOtp) {
+      toast.error("Invalid OTP Code. Please enter: " + generatedOtp);
+      return;
+    }
+
+    setIsOtpVerified(true);
+    setIsOtpModalOpen(false);
+    toast.success("✅ OTP Verified Successfully!");
+
+    if (loginMethod === 'PHONE') {
+      executePhoneLogin();
+    } else {
+      login(email, password || 'default123', roleType).then((user) => {
+        if (user.role === 'VENDOR') navigate('/vendor/dashboard');
+        else navigate('/customer/dashboard');
+      });
+    }
+  };
+
+  const executePhoneLogin = async () => {
     setSubmitting(true);
     try {
       const user = await loginWithPhone(countryCode, phoneNumber, roleType);
@@ -83,7 +136,7 @@ export const LoginPage = () => {
             <Wrench className="w-6 h-6" />
           </div>
           <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">Sign in to LocalFix</h2>
-          <p className="text-xs text-slate-500">Access your account with Email, Phone, or Google</p>
+          <p className="text-xs text-slate-500">Access your account with Email, Phone OTP, or Google</p>
         </div>
 
         {/* 2 Options Tab: Customer / Vendor */}
@@ -144,7 +197,7 @@ export const LoginPage = () => {
               loginMethod === 'EMAIL' ? 'border-emerald-600 text-emerald-700 font-bold' : 'border-transparent text-slate-500'
             }`}
           >
-            Email Login
+            Email / Password
           </button>
           <button
             type="button"
@@ -153,7 +206,7 @@ export const LoginPage = () => {
               loginMethod === 'PHONE' ? 'border-emerald-600 text-emerald-700 font-bold' : 'border-transparent text-slate-500'
             }`}
           >
-            Mobile Number OTP Login
+            Mobile Phone OTP
           </button>
         </div>
 
@@ -161,17 +214,35 @@ export const LoginPage = () => {
         {loginMethod === 'EMAIL' ? (
           <form onSubmit={handleEmailSubmit} autoComplete="off" className="space-y-4">
             <div className="space-y-1">
-              <label className="block text-xs font-bold text-slate-700">Email Address</label>
-              <div className="relative">
-                <Mail className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400" />
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@example.com"
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-emerald-500"
-                />
+              <div className="flex justify-between items-center">
+                <label className="block text-xs font-bold text-slate-700">Email Address</label>
+                <button
+                  type="button"
+                  onClick={handleGetOtp}
+                  className="text-[10px] text-emerald-700 hover:text-emerald-800 font-extrabold underline flex items-center gap-1 cursor-pointer"
+                >
+                  <Send className="w-3 h-3 text-emerald-600" /> Get OTP via Email
+                </button>
+              </div>
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Mail className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400" />
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="name@example.com"
+                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-emerald-500"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={handleGetOtp}
+                  className="px-3 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl shadow-xs transition flex items-center gap-1 shrink-0"
+                >
+                  Get OTP
+                </button>
               </div>
             </div>
 
@@ -203,7 +274,16 @@ export const LoginPage = () => {
           /* Phone Login Form with Country Code Selector */
           <form onSubmit={handlePhoneSubmit} className="space-y-4">
             <div className="space-y-1">
-              <label className="block text-xs font-bold text-slate-700">Country Code & Mobile Number</label>
+              <div className="flex justify-between items-center">
+                <label className="block text-xs font-bold text-slate-700">Country Code & Mobile Number</label>
+                <button
+                  type="button"
+                  onClick={handleGetOtp}
+                  className="text-[10px] text-emerald-700 hover:text-emerald-800 font-extrabold underline flex items-center gap-1 cursor-pointer"
+                >
+                  <Send className="w-3 h-3 text-emerald-600" /> Get OTP
+                </button>
+              </div>
               <div className="flex gap-2">
                 <select
                   value={countryCode}
@@ -226,6 +306,13 @@ export const LoginPage = () => {
                     className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 tracking-wider"
                   />
                 </div>
+                <button
+                  type="button"
+                  onClick={handleGetOtp}
+                  className="px-3 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl shadow-xs transition shrink-0"
+                >
+                  Get OTP
+                </button>
               </div>
             </div>
 
@@ -234,7 +321,7 @@ export const LoginPage = () => {
               disabled={submitting}
               className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl shadow-md transition flex items-center justify-center gap-2 disabled:opacity-50"
             >
-              {submitting ? 'Sending OTP...' : `Send OTP to ${countryCode} ${phoneNumber || 'Mobile'}`}
+              {submitting ? 'Signing in...' : `Sign in with Mobile OTP`}
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
@@ -247,6 +334,59 @@ export const LoginPage = () => {
           </Link>
         </div>
       </div>
+
+      {/* Verification OTP Modal */}
+      {isOtpModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-white max-w-sm w-full p-6 rounded-3xl shadow-2xl space-y-4 font-sans">
+            <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+              <h3 className="font-extrabold text-slate-900 text-base flex items-center gap-2">
+                <Send className="w-5 h-5 text-emerald-600" />
+                OTP Verification Required
+              </h3>
+              <button onClick={() => setIsOtpModalOpen(false)} className="text-slate-400 hover:text-slate-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleVerifyOtpSubmit} className="space-y-4 text-xs">
+              <p className="text-slate-600">
+                Enter the 6-digit OTP code sent to <strong>{loginMethod === 'EMAIL' ? email : `${countryCode} ${phoneNumber}`}</strong>.
+              </p>
+
+              <div className="p-3 bg-emerald-50 rounded-2xl border border-emerald-200 text-emerald-950 font-bold text-center">
+                <span>Verification OTP: <strong className="text-emerald-700 text-base font-mono">{generatedOtp}</strong></span>
+              </div>
+
+              <input
+                type="text"
+                maxLength={6}
+                required
+                placeholder="e.g. 849201"
+                value={inputOtpCode}
+                onChange={(e) => setInputOtpCode(e.target.value.replace(/\D/g, ''))}
+                className="w-full text-center text-2xl font-mono tracking-widest py-3 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:ring-2 focus:ring-emerald-500 text-slate-900"
+              />
+
+              <div className="flex justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsOtpModalOpen(false)}
+                  className="px-4 py-2 text-slate-600 font-semibold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-xl shadow-md"
+                >
+                  Verify OTP & Sign In
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
