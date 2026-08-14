@@ -4,7 +4,14 @@ import toast from 'react-hot-toast';
 import { ShieldCheck, Plus, Wrench, Calendar, IndianRupee, Cpu, ArrowRight, X, Clock, FileText } from 'lucide-react';
 
 export const RepairPassportPage = () => {
-  const [summary, setSummary] = useState(null);
+  const [summary, setSummary] = useState({
+    totalAppliances: 0,
+    totalRepairsCount: 0,
+    totalMaintenanceSpent: 0,
+    totalPartsReplaced: 0,
+    appliances: [],
+    recentTimeline: []
+  });
   const [loading, setLoading] = useState(true);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [applianceForm, setApplianceForm] = useState({
@@ -15,34 +22,14 @@ export const RepairPassportPage = () => {
     serialNumber: ''
   });
 
-  const fallbackSummary = {
-    totalAppliances: 3,
-    totalRepairsCount: 4,
-    totalMaintenanceSpent: 2140,
-    totalPartsReplaced: 3,
-    appliances: [
-      { id: 101, name: 'Living Room Inverter AC (1.5 Ton)', brand: 'Daikin', model: 'FTKF50TV', purchaseYear: 2023, serialNumber: 'DKN-9982-AC' },
-      { id: 102, name: 'Double Door Frost Free Refrigerator', brand: 'Samsung', model: 'RT28T3052S8', purchaseYear: 2022, serialNumber: 'SMG-7741-RF' },
-      { id: 103, name: 'Bathroom Instant Water Heater / Geyser', brand: 'Havells', model: 'Monza EC 15', purchaseYear: 2024, serialNumber: 'HVL-4410-GS' }
-    ],
-    recentTimeline: [
-      { id: 501, appliance: { name: 'Living Room Inverter AC (1.5 Ton)' }, workSummary: 'Split AC Deep Foam Jet Wash, drain line unclogging, and R32 Gas Pressure refill.', totalSpent: 799, diagnosisSummary: 'Low cooling caused by clogged condenser coils and minor 15% gas pressure leak.', partsReplacedCount: 1, createdAt: '2026-08-10T10:30:00Z' },
-      { id: 502, appliance: { name: 'Double Door Frost Free Refrigerator' }, workSummary: 'Defrost thermostat replacement and compressor overload relay calibration.', totalSpent: 599, diagnosisSummary: 'Freezer cooling properly but lower compartment warming up due to faulty defrost sensor.', partsReplacedCount: 1, createdAt: '2026-07-28T14:15:00Z' },
-      { id: 503, appliance: { name: 'Living Room Inverter AC (1.5 Ton)' }, workSummary: 'Dual fan capacitor replacement and terminal wire insulation tape renewal.', totalSpent: 449, diagnosisSummary: 'Outdoor unit fan motor not spinning during peak heat hours.', partsReplacedCount: 1, createdAt: '2026-06-15T09:00:00Z' },
-      { id: 504, appliance: { name: 'Bathroom Instant Water Heater / Geyser' }, workSummary: 'Heating element descaling and thermostat safety cut-off switch replacement.', totalSpent: 293, diagnosisSummary: 'Geyser tripping main MCB switch whenever turned on.', partsReplacedCount: 0, createdAt: '2026-05-02T16:45:00Z' }
-    ]
-  };
-
   const fetchPassportData = async () => {
     try {
       const res = await api.get('/customer/passport/summary');
-      if (res.data && res.data.totalAppliances > 0) {
+      if (res.data) {
         setSummary(res.data);
-      } else {
-        setSummary(fallbackSummary);
       }
     } catch (err) {
-      setSummary(fallbackSummary);
+      console.error("Passport fetch error:", err);
     } finally {
       setLoading(false);
     }
@@ -86,7 +73,7 @@ export const RepairPassportPage = () => {
         totalAppliances: (prev?.totalAppliances || 0) + 1,
         appliances: [newApp, ...(prev?.appliances || [])]
       }));
-      toast.success("Asset added to Digital Passport history!");
+      toast.success("Real asset added to Digital Passport history!");
       setIsAddModalOpen(false);
       setApplianceForm({ name: '', brand: '', model: '', purchaseYear: new Date().getFullYear(), serialNumber: '' });
     }
@@ -118,7 +105,7 @@ export const RepairPassportPage = () => {
           onClick={() => setIsAddModalOpen(true)}
           className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center gap-1.5"
         >
-          <Plus className="w-4 h-4" /> Add Asset / Appliance
+          <Plus className="w-4 h-4" /> Add Real Asset / Appliance
         </button>
       </div>
 
@@ -153,7 +140,7 @@ export const RepairPassportPage = () => {
           <h3 className="font-extrabold text-slate-900 text-base">Registered Home Assets</h3>
           {(!summary?.appliances || summary.appliances.length === 0) ? (
             <div className="bg-white p-6 rounded-3xl border border-slate-200 text-center space-y-2">
-              <p className="text-xs text-slate-500">No appliances registered yet. Click "Add Asset" to start tracking repairs!</p>
+              <p className="text-xs text-slate-500">No appliances registered yet. Click "Add Real Asset" to start tracking repairs!</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -287,7 +274,7 @@ export const RepairPassportPage = () => {
                   Cancel
                 </button>
                 <button type="submit" className="px-4 py-2 bg-emerald-600 text-white font-extrabold rounded-xl shadow-md">
-                  Save Asset
+                  Save Real Asset
                 </button>
               </div>
             </form>
