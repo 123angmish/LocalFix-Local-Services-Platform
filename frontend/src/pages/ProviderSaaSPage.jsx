@@ -51,8 +51,8 @@ export const ProviderSaaSPage = () => {
       {/* Header & Mini CRM Status */}
       <div className="bg-slate-900 text-white p-8 rounded-3xl shadow-xl border border-slate-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="space-y-1">
-          <span className="text-xs font-semibold text-emerald-400 uppercase tracking-wider">Technician Mini-CRM SaaS</span>
-          <h1 className="text-3xl font-extrabold tracking-tight">Provider Operations Hub</h1>
+          <span className="text-xs font-semibold text-emerald-400 uppercase tracking-wider">Vendor Management Portal</span>
+          <h1 className="text-3xl font-extrabold tracking-tight">Work History & Digital Invoices</h1>
           <p className="text-xs text-slate-300">Manage dispatch jobs, customer invoices, parts replacement logs, and repeat client directory</p>
         </div>
 

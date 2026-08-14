@@ -179,13 +179,6 @@ export const Navbar = () => {
                         <Wrench className="w-4 h-4 text-emerald-600" />
                         Manage Services
                       </Link>
-                      <Link
-                        to="/vendor/crm"
-                        className="px-3 py-2 font-extrabold text-emerald-800 bg-emerald-100/70 rounded-lg flex items-center gap-1.5 border border-emerald-200 transition"
-                      >
-                        <Users className="w-4 h-4 text-emerald-700" />
-                        Technician SaaS CRM
-                      </Link>
                     </>
                   )}
 
