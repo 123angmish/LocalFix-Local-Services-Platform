@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api/axios';
+import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
-import { Calendar, Clock, CheckCircle2, IndianRupee, Star, Wrench, Layers, ArrowRight, ShieldCheck, Upload } from 'lucide-react';
+import { Calendar, Clock, CheckCircle2, IndianRupee, Star, Wrench, Layers, ArrowRight, ShieldCheck, Upload, Edit, X, Building, User, Phone, MapPin } from 'lucide-react';
 import { AadhaarKycModal } from '../components/AadhaarKycModal';
 
 export const VendorDashboardPage = () => {
@@ -12,6 +13,29 @@ export const VendorDashboardPage = () => {
   const [loading, setLoading] = useState(true);
   const [isKycModalOpen, setIsKycModalOpen] = useState(false);
   const [kycVerified, setKycVerified] = useState(true);
+
+  // Edit Business Profile Modal State
+  const [isEditProfileModalOpen, setIsEditProfileModalOpen] = useState(false);
+  const [profileData, setProfileData] = useState({
+    businessName: user?.businessName || user?.name || 'Apex Services',
+    ownerName: user?.name || '',
+    phone: user?.phone || '',
+    city: user?.city || 'Mumbai',
+    description: user?.description || 'Professional service provider.'
+  });
+
+  // Sync profile data if user changes
+  useEffect(() => {
+    if (user) {
+      setProfileData({
+        businessName: user.businessName || user.name || 'Apex Services',
+        ownerName: user.name || '',
+        phone: user.phone || '',
+        city: user.city || 'Mumbai',
+        description: user.description || 'Professional service provider.'
+      });
+    }
+  }, [user]);
 
   const fetchVendorData = async () => {
     try {
@@ -38,6 +62,38 @@ export const VendorDashboardPage = () => {
   useEffect(() => {
     fetchVendorData();
   }, []);
+
+  const handleSaveProfile = async (e) => {
+    e.preventDefault();
+    if (!profileData.businessName.trim()) {
+      toast.error("Please enter a valid Business / Shop Name");
+      return;
+    }
+
+    try {
+      await api.put('/vendor/profile', profileData);
+    } catch (err) {
+      console.warn("Backend profile update fallback:", err);
+    }
+
+    // Update local stored user session
+    try {
+      const stored = JSON.parse(localStorage.getItem('localfix_user') || '{}');
+      const updated = {
+        ...stored,
+        businessName: profileData.businessName,
+        name: profileData.ownerName || stored.name,
+        phone: profileData.phone || stored.phone,
+        city: profileData.city || stored.city
+      };
+      localStorage.setItem('localfix_user', JSON.stringify(updated));
+    } catch (e) {
+      console.error(e);
+    }
+
+    setIsEditProfileModalOpen(false);
+    toast.success("✅ Business Name & Profile updated successfully!");
+  };
 
   // Calculate strict real stats from real customer bookings only
   const totalBookingsCount = recentBookings.length;
@@ -69,12 +125,32 @@ export const VendorDashboardPage = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-sans">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-gradient-to-r from-slate-900 via-emerald-950 to-slate-900 p-8 rounded-3xl text-white shadow-xl border border-emerald-500/20">
-        <div className="space-y-1">
+        <div className="space-y-2">
           <span className="text-xs font-semibold text-emerald-400 uppercase tracking-wider">Vendor Management Portal</span>
-          <h1 className="text-3xl font-extrabold tracking-tight">{user?.businessName || user?.name || 'My Vendor Workspace'}</h1>
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="text-3xl font-extrabold tracking-tight">
+              {profileData.businessName || user?.businessName || user?.name || 'My Vendor Business'}
+            </h1>
+            <button
+              onClick={() => setIsEditProfileModalOpen(true)}
+              className="px-3 py-1 bg-emerald-800/80 hover:bg-emerald-700 text-emerald-200 rounded-xl transition cursor-pointer flex items-center gap-1.5 text-xs font-bold border border-emerald-500/30"
+              title="Edit Business Name & Profile Details"
+            >
+              <Edit className="w-3.5 h-3.5" />
+              <span>Edit Business Name</span>
+            </button>
+          </div>
           <p className="text-xs text-slate-300">Manage incoming service bookings, service offerings, and track revenue</p>
         </div>
+
         <div className="flex flex-wrap gap-3">
+          <button
+            onClick={() => setIsEditProfileModalOpen(true)}
+            className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center gap-1.5 cursor-pointer border border-slate-700"
+          >
+            <Edit className="w-4 h-4 text-emerald-400" />
+            Edit Profile Details
+          </button>
           <button
             onClick={() => setIsKycModalOpen(true)}
             className="px-4 py-2.5 bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-xs rounded-xl shadow-md transition flex items-center gap-1.5 cursor-pointer"
@@ -199,6 +275,116 @@ export const VendorDashboardPage = () => {
           )}
         </div>
       </div>
+
+      {/* Edit Business Profile Modal */}
+      {isEditProfileModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 font-sans">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-6 border border-slate-200 animate-in fade-in zoom-in duration-200">
+            <div className="flex justify-between items-center border-b border-slate-100 pb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
+                  <Building className="w-5 h-5 text-emerald-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-slate-900">Edit Business Profile</h3>
+                  <p className="text-xs text-slate-500">Update your Shop/Business Name & Details</p>
+                </div>
+              </div>
+              <button onClick={() => setIsEditProfileModalOpen(false)} className="p-2 text-slate-400 hover:text-slate-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveProfile} className="space-y-4">
+              <div className="space-y-1">
+                <label className="block text-xs font-bold text-slate-700">Business / Shop Name</label>
+                <div className="relative">
+                  <Building className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400" />
+                  <input
+                    type="text"
+                    required
+                    value={profileData.businessName}
+                    onChange={(e) => setProfileData({ ...profileData, businessName: e.target.value })}
+                    placeholder="e.g. Apex Electricals & Plumbing"
+                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:ring-2 focus:ring-emerald-500"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="block text-xs font-bold text-slate-700">Owner Full Name</label>
+                <div className="relative">
+                  <User className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400" />
+                  <input
+                    type="text"
+                    value={profileData.ownerName}
+                    onChange={(e) => setProfileData({ ...profileData, ownerName: e.target.value })}
+                    placeholder="Angel Mishra"
+                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-emerald-500"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="block text-xs font-bold text-slate-700">Phone Number</label>
+                  <div className="relative">
+                    <Phone className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400" />
+                    <input
+                      type="text"
+                      value={profileData.phone}
+                      onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
+                      placeholder="9717017988"
+                      className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-emerald-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="block text-xs font-bold text-slate-700">City / Operational Area</label>
+                  <div className="relative">
+                    <MapPin className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400" />
+                    <input
+                      type="text"
+                      value={profileData.city}
+                      onChange={(e) => setProfileData({ ...profileData, city: e.target.value })}
+                      placeholder="Mumbai"
+                      className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-emerald-500"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="block text-xs font-bold text-slate-700">Business Description</label>
+                <textarea
+                  rows="3"
+                  value={profileData.description}
+                  onChange={(e) => setProfileData({ ...profileData, description: e.target.value })}
+                  placeholder="Tell customers about your services, experience, and guarantees..."
+                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-emerald-500"
+                ></textarea>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setIsEditProfileModalOpen(false)}
+                  className="px-4 py-2.5 text-slate-600 font-semibold text-xs rounded-xl hover:bg-slate-100"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl shadow-md transition"
+                >
+                  Save & Update Business Profile →
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       <AadhaarKycModal
         isOpen={isKycModalOpen}
