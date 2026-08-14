@@ -70,22 +70,8 @@ export const HomePage = () => {
   return (
     <div className="space-y-16 pb-20 bg-slate-50 text-slate-900 font-sans">
 
-      {/* Startup Banner */}
-      <div className="bg-emerald-900 text-emerald-100 text-xs py-2 px-4 border-b border-emerald-800">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2">
-          <div className="flex items-center gap-2 font-semibold">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span>LocalFix Startup Guarantee: Fixed Upfront Pricing • 4-Digit Security OTP • Repair Passport Timeline</span>
-          </div>
-          <div className="flex items-center gap-4 text-[11px] text-emerald-300 font-medium">
-            <span>🛡️ ₹10,000 Property Protection</span>
-            <span>⏱️ Instant Professional Matching</span>
-          </div>
-        </div>
-      </div>
-
       {/* 1. Hero Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
 
           {/* Left Hero Column */}
@@ -116,7 +102,7 @@ export const HomePage = () => {
                 to="/services"
                 className="px-6 py-3.5 bg-white hover:bg-slate-100 text-slate-900 font-bold text-sm rounded-xl border border-slate-300 shadow-2xs transition"
               >
-                Book a Professional
+                Find Local Experts
               </Link>
             </div>
 

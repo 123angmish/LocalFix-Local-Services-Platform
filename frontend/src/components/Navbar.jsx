@@ -10,34 +10,10 @@ export const Navbar = () => {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Real GPS & Location State with City-to-Area Mapping
+  // Real GPS & Location State
   const [currentCity, setCurrentCity] = useState('Delhi NCR');
   const [detectedArea, setDetectedArea] = useState('Connaught Place');
   const [locating, setLocating] = useState(false);
-
-  const cityAreaMap = {
-    'Delhi NCR': 'Connaught Place, New Delhi',
-    'Jaipur': 'Malviya Nagar, Pink City',
-    'Mumbai': 'Bandra West, Mumbai',
-    'Bengaluru': 'Indiranagar, Bengaluru',
-    'Hyderabad': 'Gachibowli, Hyderabad',
-    'Pune': 'Koregaon Park, Pune',
-    'Noida': 'Sector 62, Noida / Cyber Hub',
-    'Chennai': 'T. Nagar, Chennai',
-    'Kolkata': 'Salt Lake, Kolkata',
-    'Dubai': 'Downtown Dubai 🇦🇪'
-  };
-
-  const handleCityChange = (newCity) => {
-    setCurrentCity(newCity);
-    const area = cityAreaMap[newCity] || 'City Center';
-    setDetectedArea(area);
-    toast.success(`Location updated to ${newCity} (${area})`);
-    // Navigate to filtered services if on services page or browse
-    if (location.pathname === '/services') {
-      navigate(`/services?city=${encodeURIComponent(newCity)}`);
-    }
-  };
 
   const handleDetectLocation = () => {
     if (!navigator.geolocation) {
@@ -51,7 +27,6 @@ export const Navbar = () => {
         const lng = pos.coords.longitude;
         setLocating(false);
 
-        // Geolocation latitude bounding check for North India (Delhi/Jaipur) vs West India (Mumbai)
         let matchedCity = 'Delhi NCR';
         let matchedArea = `GPS: ${lat.toFixed(2)}°, ${lng.toFixed(2)}°`;
 
@@ -72,10 +47,6 @@ export const Navbar = () => {
         setCurrentCity(matchedCity);
         setDetectedArea(matchedArea);
         toast.success(`📍 Precise Location Detected: ${matchedCity} (${matchedArea})`);
-        
-        if (location.pathname === '/services') {
-          navigate(`/services?city=${encodeURIComponent(matchedCity)}`);
-        }
       },
       (err) => {
         setLocating(false);
@@ -107,44 +78,18 @@ export const Navbar = () => {
             </Link>
 
             <div className="hidden md:flex ml-6 space-x-3 items-center text-xs font-semibold">
-              {/* Real GPS & City Location Selector */}
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50/80 rounded-full border border-emerald-200 text-xs font-bold text-emerald-950">
-                <button
-                  type="button"
-                  onClick={handleDetectLocation}
-                  disabled={locating}
-                  title="Detect GPS Current Location"
-                  className="p-1 text-emerald-700 hover:text-emerald-900 hover:bg-emerald-200 rounded-full transition flex items-center gap-1"
-                >
-                  <Navigation className={`w-3.5 h-3.5 ${locating ? 'animate-spin' : ''}`} />
-                </button>
-
-                <select
-                  value={currentCity}
-                  onChange={(e) => handleCityChange(e.target.value)}
-                  className="bg-transparent font-extrabold text-emerald-900 focus:outline-none cursor-pointer text-xs"
-                >
-                  <option value="Delhi NCR">📍 Delhi NCR ({currentCity === 'Delhi NCR' ? detectedArea : 'Connaught Place'})</option>
-                  <option value="Jaipur">📍 Jaipur ({currentCity === 'Jaipur' ? detectedArea : 'Pink City'})</option>
-                  <option value="Mumbai">📍 Mumbai ({currentCity === 'Mumbai' ? detectedArea : 'Bandra West'})</option>
-                  <option value="Bengaluru">📍 Bengaluru ({currentCity === 'Bengaluru' ? detectedArea : 'Indiranagar'})</option>
-                  <option value="Hyderabad">📍 Hyderabad ({currentCity === 'Hyderabad' ? detectedArea : 'Gachibowli'})</option>
-                  <option value="Pune">📍 Pune ({currentCity === 'Pune' ? detectedArea : 'Koregaon Park'})</option>
-                  <option value="Noida">📍 Noida / Gurugram ({currentCity === 'Noida' ? detectedArea : 'Sector 62'})</option>
-                  <option value="Chennai">📍 Chennai ({currentCity === 'Chennai' ? detectedArea : 'T. Nagar'})</option>
-                  <option value="Kolkata">📍 Kolkata ({currentCity === 'Kolkata' ? detectedArea : 'Salt Lake'})</option>
-                  <option value="Dubai">📍 Dubai 🇦🇪</option>
-                </select>
-              </div>
-
-              <Link
-                to="/services"
-                className={`px-3 py-2 rounded-lg ${
-                  isActive('/services') ? 'bg-emerald-50 text-emerald-700 font-bold' : 'text-slate-600 hover:text-slate-900'
-                }`}
+              {/* Sleek GPS Location Badge without dropdown */}
+              <button
+                type="button"
+                onClick={handleDetectLocation}
+                disabled={locating}
+                title="Detect GPS Current Location"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 rounded-full border border-emerald-200 text-xs font-bold text-emerald-950 transition"
               >
-                Browse Services
-              </Link>
+                <Navigation className={`w-3.5 h-3.5 text-emerald-600 ${locating ? 'animate-spin' : ''}`} />
+                <span>📍 {currentCity} ({detectedArea})</span>
+              </button>
+
               <Link
                 to="/ai-recommender"
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-sm hover:opacity-90 transition`}
@@ -270,11 +215,8 @@ export const Navbar = () => {
             className="w-full text-left py-2 text-xs font-bold text-emerald-700 flex items-center gap-1.5 bg-emerald-50 px-3 rounded-xl border border-emerald-200"
           >
             <Navigation className="w-4 h-4 text-emerald-600" />
-            <span>Detect GPS Location ({currentCity} - {detectedArea})</span>
+            <span>📍 Detect GPS Location ({currentCity} - {detectedArea})</span>
           </button>
-          <Link to="/services" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-sm font-medium text-slate-700">
-            Browse Services
-          </Link>
           <Link to="/ai-recommender" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-sm font-medium text-emerald-600 font-semibold">
             ✨ AI Assistant
           </Link>
