@@ -1,0 +1,9 @@
+{
+  "name": "localfix-platform-root",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "cd frontend && npm install && npm run build && pwsh -Command \"Copy-Item -Recurse -Force ./dist/* ../dist/\"",
+    "start": "cd frontend && npm run dev"
+  }
+}
