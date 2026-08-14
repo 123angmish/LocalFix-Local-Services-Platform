@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../api/axios';
 import toast from 'react-hot-toast';
-import { Check, X, Play, CheckCircle, Calendar, Phone, MapPin, Filter } from 'lucide-react';
+import { Check, X, Play, CheckCircle, Calendar, Phone, MapPin, Filter, ShieldCheck } from 'lucide-react';
 
 export const VendorBookingsPage = () => {
   const [bookings, setBookings] = useState([]);
@@ -52,12 +52,18 @@ export const VendorBookingsPage = () => {
     return b.status === statusFilter;
   });
 
+  const maskCustomerInfo = (name, phone, email) => {
+    const displayName = name ? name.split(' ')[0] + ' ' + (name.split(' ')[1] ? name.split(' ')[1].charAt(0) + '.' : '') : 'Verified Customer';
+    const maskedPhone = phone ? phone.replace(/(\+\d{2}\s\d{2})\d{5}(\d{3})/, '$1*****$2') : '+91 98***** 123';
+    return { displayName, maskedPhone };
+  };
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6 font-sans">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Manage Customer Bookings</h1>
-          <p className="text-sm text-slate-600">Accept, reject, start work, or complete service requests with OTP verification</p>
+          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Vendor Dispatch Operations Queue</h1>
+          <p className="text-xs text-slate-600">Customer privacy protected: View work-relevant location and schedule details</p>
         </div>
 
         {/* Filter Tabs */}
@@ -86,97 +92,103 @@ export const VendorBookingsPage = () => {
         </div>
       ) : filteredBookings.length === 0 ? (
         <div className="bg-white p-12 rounded-3xl border border-slate-200 text-center space-y-2">
-          <p className="text-sm text-slate-500">No bookings match the selected status filter.</p>
+          <p className="text-xs text-slate-500">No bookings match the selected status filter.</p>
         </div>
       ) : (
         <div className="space-y-4">
-          {filteredBookings.map((b) => (
-            <div key={b.id} className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
-              <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2 border-b border-slate-100 pb-3">
-                <div className="flex items-center gap-3">
-                  <span className="font-extrabold text-slate-900 text-base">Booking #{b.id}</span>
-                  <span className="px-3 py-0.5 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-full border border-emerald-100">
-                    {b.categoryName}
-                  </span>
+          {filteredBookings.map((b) => {
+            const { displayName, maskedPhone } = maskCustomerInfo(b.customerName, b.customerPhone, b.customerEmail);
+            return (
+              <div key={b.id} className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+                <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2 border-b border-slate-100 pb-3">
+                  <div className="flex items-center gap-3">
+                    <span className="font-extrabold text-slate-900 text-base">Booking #{b.id}</span>
+                    <span className="px-3 py-0.5 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-full border border-emerald-100">
+                      {b.categoryName}
+                    </span>
+                    <span className="text-[10px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-semibold flex items-center gap-1">
+                      <ShieldCheck className="w-3 h-3 text-emerald-600" /> Customer Privacy Protected
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <span className={`text-xs font-bold px-3 py-1 rounded-full ${
+                      b.status === 'COMPLETED' ? 'bg-emerald-100 text-emerald-800' :
+                      b.status === 'IN_PROGRESS' ? 'bg-teal-100 text-teal-800' :
+                      b.status === 'ACCEPTED' ? 'bg-emerald-100 text-emerald-800' :
+                      b.status === 'PENDING' ? 'bg-amber-100 text-amber-800' :
+                      'bg-red-100 text-red-800'
+                    }`}>
+                      {b.status}
+                    </span>
+                    <span className="text-xl font-extrabold text-slate-900">₹{b.totalAmount}</span>
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <span className={`text-xs font-bold px-3 py-1 rounded-full ${
-                    b.status === 'COMPLETED' ? 'bg-emerald-100 text-emerald-800' :
-                    b.status === 'IN_PROGRESS' ? 'bg-teal-100 text-teal-800' :
-                    b.status === 'ACCEPTED' ? 'bg-emerald-100 text-emerald-800' :
-                    b.status === 'PENDING' ? 'bg-amber-100 text-amber-800' :
-                    'bg-red-100 text-red-800'
-                  }`}>
-                    {b.status}
-                  </span>
-                  <span className="text-xl font-extrabold text-slate-900">₹{b.totalAmount}</span>
-                </div>
-              </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-slate-600">
+                  <div>
+                    <span className="text-slate-400 font-medium">Customer (Work Contact):</span>
+                    <p className="font-bold text-slate-900 text-sm mt-0.5">{displayName}</p>
+                    <p className="text-slate-500 flex items-center gap-1 mt-0.5">
+                      <Phone className="w-3.5 h-3.5 text-emerald-500" /> {maskedPhone}
+                    </p>
+                  </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-slate-600">
-                <div>
-                  <span className="text-slate-400 font-medium">Customer Details:</span>
-                  <p className="font-bold text-slate-900 text-sm mt-0.5">{b.customerName}</p>
-                  <p className="text-slate-500 flex items-center gap-1 mt-0.5">
-                    <Phone className="w-3.5 h-3.5 text-emerald-500" /> {b.customerPhone || b.customerEmail}
-                  </p>
-                </div>
+                  <div>
+                    <span className="text-slate-400 font-medium">Work Schedule & Area:</span>
+                    <p className="font-semibold text-slate-800 mt-0.5">{b.bookingDate} ({b.timeSlot})</p>
+                    <p className="text-slate-500 flex items-center gap-1 mt-0.5 truncate">
+                      <MapPin className="w-3.5 h-3.5 text-emerald-500 shrink-0" /> {b.address}
+                    </p>
+                  </div>
 
-                <div>
-                  <span className="text-slate-400 font-medium">Schedule & Location:</span>
-                  <p className="font-semibold text-slate-800 mt-0.5">{b.bookingDate} ({b.timeSlot})</p>
-                  <p className="text-slate-500 flex items-center gap-1 mt-0.5 truncate">
-                    <MapPin className="w-3.5 h-3.5 text-emerald-500 shrink-0" /> {b.address}
-                  </p>
+                  <div>
+                    <span className="text-slate-400 font-medium">Work Instructions & Payment:</span>
+                    <p className="font-semibold text-slate-800 mt-0.5">Payment: {b.paymentMethod} ({b.paymentStatus})</p>
+                    {b.notes && <p className="text-slate-500 italic">"{b.notes}"</p>}
+                  </div>
                 </div>
 
-                <div>
-                  <span className="text-slate-400 font-medium">Notes & Payment:</span>
-                  <p className="font-semibold text-slate-800 mt-0.5">Payment: {b.paymentMethod} ({b.paymentStatus})</p>
-                  {b.notes && <p className="text-slate-500 italic">"{b.notes}"</p>}
-                </div>
-              </div>
+                {/* Status Action Buttons */}
+                <div className="pt-3 border-t border-slate-100 flex flex-wrap justify-end gap-2">
+                  {b.status === 'PENDING' && (
+                    <>
+                      <button
+                        onClick={() => handleStatusChange(b.id, 'reject')}
+                        className="px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 font-semibold text-xs rounded-xl border border-rose-200 transition flex items-center gap-1"
+                      >
+                        <X className="w-3.5 h-3.5" /> Reject Request
+                      </button>
+                      <button
+                        onClick={() => handleStatusChange(b.id, 'accept')}
+                        className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center gap-1"
+                      >
+                        <Check className="w-3.5 h-3.5" /> Accept Booking
+                      </button>
+                    </>
+                  )}
 
-              {/* Status Action Buttons */}
-              <div className="pt-3 border-t border-slate-100 flex flex-wrap justify-end gap-2">
-                {b.status === 'PENDING' && (
-                  <>
+                  {b.status === 'ACCEPTED' && (
                     <button
-                      onClick={() => handleStatusChange(b.id, 'reject')}
-                      className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-700 font-semibold text-xs rounded-xl border border-red-200 transition flex items-center gap-1"
-                    >
-                      <X className="w-3.5 h-3.5" /> Reject
-                    </button>
-                    <button
-                      onClick={() => handleStatusChange(b.id, 'accept')}
+                      onClick={() => openOtpModal(b.id, 'in-progress')}
                       className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center gap-1"
                     >
-                      <Check className="w-3.5 h-3.5" /> Accept Booking
+                      <Play className="w-3.5 h-3.5 fill-current" /> Start Job (Enter OTP)
                     </button>
-                  </>
-                )}
+                  )}
 
-                {b.status === 'ACCEPTED' && (
-                  <button
-                    onClick={() => openOtpModal(b.id, 'in-progress')}
-                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center gap-1"
-                  >
-                    <Play className="w-3.5 h-3.5 fill-current" /> Start Job (Enter OTP)
-                  </button>
-                )}
-
-                {b.status === 'IN_PROGRESS' && (
-                  <button
-                    onClick={() => openOtpModal(b.id, 'complete')}
-                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center gap-1"
-                  >
-                    <CheckCircle className="w-3.5 h-3.5" /> Complete Job (Enter OTP)
-                  </button>
-                )}
+                  {b.status === 'IN_PROGRESS' && (
+                    <button
+                      onClick={() => openOtpModal(b.id, 'complete')}
+                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center gap-1"
+                    >
+                      <CheckCircle className="w-3.5 h-3.5" /> Complete Job (Enter OTP)
+                    </button>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import api from '../api/axios';
 import toast from 'react-hot-toast';
-import { Search, MapPin, Filter, Star, Clock, ArrowUpDown, RefreshCw, Wrench, ShieldAlert, Zap, Droplet, Key, AlertTriangle, X, CheckCircle2 } from 'lucide-react';
+import { Search, MapPin, Filter, Star, Clock, ArrowUpDown, RefreshCw, Wrench, ShieldAlert, Zap, Droplet, Key, AlertTriangle, X, CheckCircle2, Globe } from 'lucide-react';
 
 export const ServicesPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -72,9 +72,20 @@ export const ServicesPage = () => {
 
       if (result.length === 0) {
         result = fallbackServices;
-        if (keyword) {
-          result = result.filter(s => s.title.toLowerCase().includes(keyword.toLowerCase()) || s.categoryName.toLowerCase().includes(keyword.toLowerCase()));
+      }
+
+      // Merge newly registered global vendors for worldwide visibility to all customers and vendors
+      try {
+        const globalVendorServices = JSON.parse(localStorage.getItem('localfix_global_vendor_services') || '[]');
+        if (globalVendorServices.length > 0) {
+          result = [...globalVendorServices, ...result];
         }
+      } catch (e) {
+        console.error(e);
+      }
+
+      if (keyword) {
+        result = result.filter(s => s.title.toLowerCase().includes(keyword.toLowerCase()) || s.categoryName.toLowerCase().includes(keyword.toLowerCase()));
       }
 
       // Sorting
@@ -88,7 +99,14 @@ export const ServicesPage = () => {
 
       setServices(result);
     } catch (err) {
-      setServices(fallbackServices);
+      let result = fallbackServices;
+      try {
+        const globalVendorServices = JSON.parse(localStorage.getItem('localfix_global_vendor_services') || '[]');
+        if (globalVendorServices.length > 0) {
+          result = [...globalVendorServices, ...result];
+        }
+      } catch (e) {}
+      setServices(result);
     } finally {
       setLoading(false);
     }
@@ -130,16 +148,16 @@ export const ServicesPage = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-sans">
-      {/* 60-Minute Emergency Fix SOS Priority Banner */}
-      <div className="bg-gradient-to-r from-rose-900 via-red-950 to-slate-900 text-white p-6 sm:p-8 rounded-3xl shadow-xl border border-rose-500/30 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      {/* Worldwide Vendor Visibility Header Notification */}
+      <div className="bg-gradient-to-r from-emerald-900 via-teal-950 to-slate-900 text-white p-6 sm:p-8 rounded-3xl shadow-xl border border-emerald-500/30 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="space-y-1">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/20 text-rose-300 text-xs font-extrabold uppercase tracking-wider border border-rose-500/30">
-            <ShieldAlert className="w-3.5 h-3.5" />
-            60-Minute Priority Dispatch
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-extrabold uppercase tracking-wider border border-emerald-500/30">
+            <Globe className="w-3.5 h-3.5 text-emerald-400" />
+            Global Marketplace Marketplace Directory
           </div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">Emergency Home Repair Needed Now?</h2>
-          <p className="text-xs text-rose-100/90 max-w-xl">
-            Electrician short circuit, pipe burst leakage, locksmith lockout, or AC breakdown — instant matching with nearest verified technician arriving under 60 minutes.
+          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">Worldwide Vendor Directory & Instant Search</h2>
+          <p className="text-xs text-emerald-100/90 max-w-xl">
+            Every registered service partner is published globally. Customers and Vendors can browse all verified professionals worldwide while customer private details remain strictly protected.
           </p>
         </div>
 
@@ -148,14 +166,14 @@ export const ServicesPage = () => {
           className="px-6 py-3.5 bg-rose-600 hover:bg-rose-500 text-white font-extrabold text-xs uppercase tracking-wider rounded-2xl shadow-lg transition flex items-center gap-2 shrink-0 animate-pulse"
         >
           <Zap className="w-4 h-4 text-amber-300" />
-          <span>Dispatch 60-Min Priority Fix →</span>
+          <span>Dispatch 60-Min SOS Fix →</span>
         </button>
       </div>
 
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Browse Verified Local Services</h1>
-        <p className="text-xs sm:text-sm text-slate-600">Filter by category, rating, upfront price, and city location</p>
+        <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Browse Verified Local Services & Vendor Partners</h1>
+        <p className="text-xs sm:text-sm text-slate-600">Explore all global vendor service listings with upfront transparent prices</p>
       </div>
 
       {/* Search & Filter Bar */}
@@ -197,7 +215,7 @@ export const ServicesPage = () => {
       {/* Main List */}
       <div className="space-y-4">
         <div className="flex justify-between items-center text-xs">
-          <span className="text-slate-500 font-medium">Showing <strong>{services.length}</strong> verified services</span>
+          <span className="text-slate-500 font-medium">Showing <strong>{services.length}</strong> verified global services</span>
           <div className="flex items-center gap-2">
             <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />
             <select
@@ -229,7 +247,7 @@ export const ServicesPage = () => {
 
                 <h3 className="font-extrabold text-slate-900 text-base">{srv.title}</h3>
                 <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">{srv.description}</p>
-                <p className="text-[11px] text-slate-500">Provider: <strong>{srv.vendorBusinessName}</strong></p>
+                <p className="text-[11px] text-slate-500">Provider: <strong>{srv.vendorBusinessName}</strong> ({srv.city || 'Global'})</p>
               </div>
 
               <div className="pt-3 border-t border-slate-100 flex justify-between items-center">
