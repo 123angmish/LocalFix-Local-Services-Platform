@@ -18,12 +18,15 @@ public class EmailService {
     private JavaMailSender mailSender;
 
     @Value("${spring.mail.username:}")
-    private String mailFrom;
+    private String rawMailFrom;
 
     @Value("${spring.mail.password:}")
-    private String mailPassword;
+    private String rawMailPassword;
 
     public boolean sendOtpEmail(String recipientEmail, String otpCode, String userName) {
+        String mailFrom = rawMailFrom != null ? rawMailFrom.trim().replaceAll("^\"|\"$", "") : "";
+        String mailPassword = rawMailPassword != null ? rawMailPassword.trim().replaceAll("^\"|\"$", "").replaceAll("\\s+", "") : "";
+
         String htmlContent = "<div style='font-family: Arial, sans-serif; max-width: 500px; padding: 24px; background-color: #f8fafc; border-radius: 16px; border: 1px solid #e2e8f0;'>"
                 + "<h2 style='color: #059669; margin-bottom: 8px;'>LocalFix Account Verification</h2>"
                 + "<p style='color: #475569; font-size: 14px;'>Hello " + (userName != null ? userName : "User") + ",</p>"
@@ -36,8 +39,8 @@ public class EmailService {
                 + "<p style='color: #94a3b8; font-size: 11px; text-align: center;'>LocalFix Hyperlocal On-Demand Services Platform</p>"
                 + "</div>";
 
-        if (mailSender == null || mailFrom == null || mailFrom.trim().isEmpty() || mailPassword == null || mailPassword.trim().isEmpty()) {
-            logger.warn("Gmail SMTP credentials not configured (MAIL_USERNAME/MAIL_PASSWORD). Generated verification OTP code: {} for {}", otpCode, recipientEmail);
+        if (mailSender == null || mailFrom.isEmpty() || mailPassword.isEmpty()) {
+            logger.warn("Gmail SMTP credentials missing or empty in environment. Generated verification OTP code: {} for {}", otpCode, recipientEmail);
             return true;
         }
 
@@ -50,11 +53,11 @@ public class EmailService {
             helper.setText(htmlContent, true);
 
             mailSender.send(message);
-            logger.info("Successfully dispatched Gmail OTP email to: {}", recipientEmail);
+            logger.info("Successfully dispatched Gmail OTP email to: {} via FROM: {}", recipientEmail, mailFrom);
             return true;
         } catch (Exception e) {
-            logger.warn("Gmail SMTP delivery failed for {} (OTP Code: {}). Error: {}", recipientEmail, otpCode, e.getMessage());
-            return true; // Return true so registration flow is never blocked
+            logger.warn("Gmail SMTP delivery attempt failed for {} (OTP Code: {}). Error: {}", recipientEmail, otpCode, e.getMessage());
+            return true;
         }
     }
 }
