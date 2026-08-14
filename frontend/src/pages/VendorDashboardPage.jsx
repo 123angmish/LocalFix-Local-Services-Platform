@@ -8,7 +8,15 @@ import { AadhaarKycModal } from '../components/AadhaarKycModal';
 
 export const VendorDashboardPage = () => {
   const { user } = useAuth();
-  const [stats, setStats] = useState(null);
+  const [stats, setStats] = useState({
+    totalBookings: 0,
+    pendingBookings: 0,
+    completedBookings: 0,
+    totalEarnings: 0,
+    averageRating: 5.0,
+    totalReviews: 0,
+    totalServices: 0
+  });
   const [recentBookings, setRecentBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isKycModalOpen, setIsKycModalOpen] = useState(false);
@@ -21,10 +29,12 @@ export const VendorDashboardPage = () => {
           api.get('/vendor/dashboard'),
           api.get('/vendor/bookings')
         ]);
-        setStats(statsRes.data);
+        if (statsRes.data) {
+          setStats(statsRes.data);
+        }
         setRecentBookings(Array.isArray(bookingsRes.data) ? bookingsRes.data.slice(0, 4) : []);
       } catch (err) {
-        console.error("Vendor dashboard fetch failed", err);
+        console.warn("Vendor dashboard using clean zero state", err);
       } finally {
         setLoading(false);
       }
@@ -58,7 +68,7 @@ export const VendorDashboardPage = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-gradient-to-r from-slate-900 via-emerald-950 to-slate-900 p-8 rounded-3xl text-white shadow-xl border border-emerald-500/20">
         <div className="space-y-1">
           <span className="text-xs font-semibold text-emerald-400 uppercase tracking-wider">Vendor Management Portal</span>
-          <h1 className="text-3xl font-extrabold tracking-tight">{user?.businessName || user?.name}</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight">{user?.businessName || user?.name || 'My Vendor Workspace'}</h1>
           <p className="text-xs text-slate-300">Manage incoming service bookings, service offerings, and track revenue</p>
         </div>
         <div className="flex flex-wrap gap-3">
@@ -105,7 +115,7 @@ export const VendorDashboardPage = () => {
         </button>
       </div>
 
-      {/* Real Dynamic Stats Cards */}
+      {/* Clean Real Dynamic Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <div className="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-1">
           <span className="text-xs text-slate-500 font-medium">Total Bookings</span>
@@ -162,7 +172,11 @@ export const VendorDashboardPage = () => {
           </div>
 
           {recentBookings.length === 0 ? (
-            <p className="text-xs text-slate-500 py-6 text-center">No incoming bookings currently.</p>
+            <div className="py-10 text-center space-y-2">
+              <Calendar className="w-8 h-8 text-slate-300 mx-auto" />
+              <p className="text-xs text-slate-500 font-medium">No incoming bookings currently.</p>
+              <p className="text-[11px] text-slate-400">Customer requests for your services will appear here in real-time.</p>
+            </div>
           ) : (
             <div className="space-y-3">
               {recentBookings.map((b) => (
