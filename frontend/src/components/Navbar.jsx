@@ -10,10 +10,34 @@ export const Navbar = () => {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Real GPS & Location State
-  const [currentCity, setCurrentCity] = useState('Mumbai');
-  const [detectedArea, setDetectedArea] = useState('Bandra West');
+  // Real GPS & Location State with City-to-Area Mapping
+  const [currentCity, setCurrentCity] = useState('Delhi NCR');
+  const [detectedArea, setDetectedArea] = useState('Connaught Place');
   const [locating, setLocating] = useState(false);
+
+  const cityAreaMap = {
+    'Delhi NCR': 'Connaught Place, New Delhi',
+    'Jaipur': 'Malviya Nagar, Pink City',
+    'Mumbai': 'Bandra West, Mumbai',
+    'Bengaluru': 'Indiranagar, Bengaluru',
+    'Hyderabad': 'Gachibowli, Hyderabad',
+    'Pune': 'Koregaon Park, Pune',
+    'Noida': 'Sector 62, Noida / Cyber Hub',
+    'Chennai': 'T. Nagar, Chennai',
+    'Kolkata': 'Salt Lake, Kolkata',
+    'Dubai': 'Downtown Dubai 🇦🇪'
+  };
+
+  const handleCityChange = (newCity) => {
+    setCurrentCity(newCity);
+    const area = cityAreaMap[newCity] || 'City Center';
+    setDetectedArea(area);
+    toast.success(`Location updated to ${newCity} (${area})`);
+    // Navigate to filtered services if on services page or browse
+    if (location.pathname === '/services') {
+      navigate(`/services?city=${encodeURIComponent(newCity)}`);
+    }
+  };
 
   const handleDetectLocation = () => {
     if (!navigator.geolocation) {
@@ -23,18 +47,43 @@ export const Navbar = () => {
     setLocating(true);
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        const lat = pos.coords.latitude.toFixed(2);
-        const lng = pos.coords.longitude.toFixed(2);
-        setDetectedArea(`GPS: ${lat}°, ${lng}°`);
-        setCurrentCity('Mumbai');
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
         setLocating(false);
-        toast.success(`Current GPS Location Detected! (${lat}°, ${lng}°)`);
+
+        // Geolocation latitude bounding check for North India (Delhi/Jaipur) vs West India (Mumbai)
+        let matchedCity = 'Delhi NCR';
+        let matchedArea = `GPS: ${lat.toFixed(2)}°, ${lng.toFixed(2)}°`;
+
+        if (lat >= 26.5 && lat <= 27.5 && lng >= 75.0 && lng <= 76.5) {
+          matchedCity = 'Jaipur';
+          matchedArea = 'Pink City, Jaipur';
+        } else if (lat >= 28.3 && lat <= 29.0 && lng >= 76.8 && lng <= 77.5) {
+          matchedCity = 'Delhi NCR';
+          matchedArea = 'Connaught Place, New Delhi';
+        } else if (lat >= 18.8 && lat <= 19.4 && lng >= 72.7 && lng <= 73.1) {
+          matchedCity = 'Mumbai';
+          matchedArea = 'Bandra West, Mumbai';
+        } else if (lat >= 12.8 && lat <= 13.2 && lng >= 77.4 && lng <= 77.8) {
+          matchedCity = 'Bengaluru';
+          matchedArea = 'Indiranagar, Bengaluru';
+        }
+
+        setCurrentCity(matchedCity);
+        setDetectedArea(matchedArea);
+        toast.success(`📍 Precise Location Detected: ${matchedCity} (${matchedArea})`);
+        
+        if (location.pathname === '/services') {
+          navigate(`/services?city=${encodeURIComponent(matchedCity)}`);
+        }
       },
       (err) => {
         setLocating(false);
-        toast.success("Location set to Bandra West, Mumbai");
+        setCurrentCity('Delhi NCR');
+        setDetectedArea('Connaught Place, New Delhi');
+        toast.success("Location set to Connaught Place, Delhi NCR");
       },
-      { timeout: 5000 }
+      { timeout: 6000, enableHighAccuracy: true }
     );
   };
 
@@ -72,18 +121,19 @@ export const Navbar = () => {
 
                 <select
                   value={currentCity}
-                  onChange={(e) => setCurrentCity(e.target.value)}
+                  onChange={(e) => handleCityChange(e.target.value)}
                   className="bg-transparent font-extrabold text-emerald-900 focus:outline-none cursor-pointer text-xs"
                 >
-                  <option value="Mumbai">Mumbai ({detectedArea})</option>
-                  <option value="Delhi">Delhi NCR</option>
-                  <option value="Bengaluru">Bengaluru</option>
-                  <option value="Hyderabad">Hyderabad</option>
-                  <option value="Pune">Pune</option>
-                  <option value="Noida">Noida / Gurugram</option>
-                  <option value="Chennai">Chennai</option>
-                  <option value="Kolkata">Kolkata</option>
-                  <option value="Dubai">Dubai 🇦🇪</option>
+                  <option value="Delhi NCR">📍 Delhi NCR ({currentCity === 'Delhi NCR' ? detectedArea : 'Connaught Place'})</option>
+                  <option value="Jaipur">📍 Jaipur ({currentCity === 'Jaipur' ? detectedArea : 'Pink City'})</option>
+                  <option value="Mumbai">📍 Mumbai ({currentCity === 'Mumbai' ? detectedArea : 'Bandra West'})</option>
+                  <option value="Bengaluru">📍 Bengaluru ({currentCity === 'Bengaluru' ? detectedArea : 'Indiranagar'})</option>
+                  <option value="Hyderabad">📍 Hyderabad ({currentCity === 'Hyderabad' ? detectedArea : 'Gachibowli'})</option>
+                  <option value="Pune">📍 Pune ({currentCity === 'Pune' ? detectedArea : 'Koregaon Park'})</option>
+                  <option value="Noida">📍 Noida / Gurugram ({currentCity === 'Noida' ? detectedArea : 'Sector 62'})</option>
+                  <option value="Chennai">📍 Chennai ({currentCity === 'Chennai' ? detectedArea : 'T. Nagar'})</option>
+                  <option value="Kolkata">📍 Kolkata ({currentCity === 'Kolkata' ? detectedArea : 'Salt Lake'})</option>
+                  <option value="Dubai">📍 Dubai 🇦🇪</option>
                 </select>
               </div>
 
@@ -220,7 +270,7 @@ export const Navbar = () => {
             className="w-full text-left py-2 text-xs font-bold text-emerald-700 flex items-center gap-1.5 bg-emerald-50 px-3 rounded-xl border border-emerald-200"
           >
             <Navigation className="w-4 h-4 text-emerald-600" />
-            <span>Detect GPS Location ({detectedArea})</span>
+            <span>Detect GPS Location ({currentCity} - {detectedArea})</span>
           </button>
           <Link to="/services" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-sm font-medium text-slate-700">
             Browse Services
