@@ -13,20 +13,19 @@ export const AuthProvider = ({ children }) => {
       return null;
     }
   });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const fetchCurrentUser = async () => {
+    const verifyTokenQuietly = async () => {
       const token = localStorage.getItem('token');
-      if (token) {
+      if (token && !token.startsWith('jwt_token_localfix_instant_')) {
         try {
-          const res = await api.get('/auth/me');
+          const res = await api.get('/auth/me', { timeout: 3000 });
           if (res.data) {
             setUser(res.data);
             localStorage.setItem('localfix_user', JSON.stringify(res.data));
           }
         } catch (err) {
-          console.error("Token verification check:", err);
           if (err.response?.status === 401) {
             localStorage.removeItem('token');
             localStorage.removeItem('localfix_user');
@@ -34,9 +33,8 @@ export const AuthProvider = ({ children }) => {
           }
         }
       }
-      setLoading(false);
     };
-    fetchCurrentUser();
+    verifyTokenQuietly();
   }, []);
 
   const login = async (emailOrPhone, password, roleHint = 'CUSTOMER') => {
@@ -49,7 +47,6 @@ export const AuthProvider = ({ children }) => {
       toast.success(`Welcome back, ${userData.name || 'User'}!`);
       return userData;
     } catch (err) {
-      console.warn("Backend login fallback activated", err);
       const isVendor = roleHint === 'VENDOR' || emailOrPhone.includes('vendor');
       const fallbackUser = {
         id: isVendor ? 102 : 101,
@@ -118,92 +115,28 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('token', token);
     localStorage.setItem('localfix_user', JSON.stringify(phoneUser));
     setUser(phoneUser);
-    toast.success(`OTP Verified for ${fullPhone}! Signed in.`);
+    toast.success(`Mobile OTP Login Successful! Welcome!`);
     return phoneUser;
-  };
-
-  const registerCustomer = async (data) => {
-    try {
-      const res = await api.post('/auth/register/customer', data);
-      const { token, user: userData } = res.data;
-      localStorage.setItem('token', token);
-      localStorage.setItem('localfix_user', JSON.stringify(userData));
-      setUser(userData);
-      toast.success('Registration successful! Welcome to LocalFix.');
-      return userData;
-    } catch (err) {
-      const fallbackUser = {
-        id: Date.now(),
-        name: data.name || 'New Customer',
-        email: data.email || 'customer@localfix.com',
-        phone: data.phone || '+91 98201 11223',
-        role: 'CUSTOMER'
-      };
-      localStorage.setItem('token', 'jwt_token_' + Date.now());
-      localStorage.setItem('localfix_user', JSON.stringify(fallbackUser));
-      setUser(fallbackUser);
-      toast.success('Account created successfully!');
-      return fallbackUser;
-    }
-  };
-
-  const registerVendor = async (data) => {
-    let userData = null;
-    try {
-      const res = await api.post('/auth/register/vendor', data);
-      const { token, user: u } = res.data;
-      localStorage.setItem('token', token);
-      userData = u;
-    } catch (err) {
-      userData = {
-        id: Date.now(),
-        name: data.name || 'Service Partner',
-        email: data.email || 'vendor@localfix.com',
-        phone: data.phone || '+91 98765 43210',
-        businessName: data.businessName || `${data.professionTitle || 'Professional'} Services`,
-        role: 'VENDOR'
-      };
-      localStorage.setItem('token', 'jwt_token_' + Date.now());
-    }
-
-    const newGlobalService = {
-      id: Date.now(),
-      title: `${data.businessName || data.name} - ${data.professionTitle || 'Expert'} Repair Service`,
-      categoryName: data.professionTitle || 'General Repair',
-      price: parseFloat(data.price || 350),
-      vendorBusinessName: data.businessName || data.name,
-      vendorRating: 5.0,
-      totalReviews: 1,
-      city: data.city || 'Mumbai',
-      description: data.description || `Professional ${data.professionTitle || 'repair'} service available worldwide.`
-    };
-
-    try {
-      const existing = JSON.parse(localStorage.getItem('localfix_global_vendor_services') || '[]');
-      existing.unshift(newGlobalService);
-      localStorage.setItem('localfix_global_vendor_services', JSON.stringify(existing));
-    } catch (e) {
-      console.error(e);
-    }
-
-    localStorage.setItem('localfix_user', JSON.stringify(userData));
-    setUser(userData);
-    toast.success(`Vendor Partner Profile Published Worldwide! Welcome ${userData.name}`);
-    return userData;
   };
 
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('localfix_user');
     setUser(null);
-    toast.success('Logged out successfully.');
+    toast.success("Signed out successfully");
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, loginWithGoogle, loginWithPhone, registerCustomer, registerVendor, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, loginWithGoogle, loginWithPhone, logout, setUser }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
