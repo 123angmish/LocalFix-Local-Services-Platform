@@ -103,7 +103,7 @@ export const Navbar = () => {
   };
 
   const handleGoHome = (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     navigate('/');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -133,11 +133,11 @@ export const Navbar = () => {
                 <span>Local<span className="text-slate-900">Fix</span></span>
               </a>
 
-              {/* ALWAYS-VISIBLE PROMINENT GO TO HOME BUTTON ON ALL SCREEN SIZES */}
+              {/* ALWAYS-VISIBLE PROMINENT GO TO HOME BUTTON ON TOP NAVBAR */}
               <a
                 href="/"
                 onClick={handleGoHome}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full font-black text-xs shadow-md transition cursor-pointer shrink-0"
+                className="flex items-center gap-1.5 px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full font-black text-xs shadow-md transition cursor-pointer shrink-0"
               >
                 <Home className="w-3.5 h-3.5" />
                 <span>🏠 Home</span>
@@ -167,6 +167,18 @@ export const Navbar = () => {
 
             {/* Desktop Navigation Links */}
             <div className="hidden md:flex items-center space-x-2 text-xs font-bold">
+              {/* Explicit GO BACK TO MAIN HOME BUTTON */}
+              <a
+                href="/"
+                onClick={handleGoHome}
+                className={`px-3 py-2 rounded-xl flex items-center gap-1.5 transition ${
+                  isActive('/') ? 'bg-emerald-50 text-emerald-700 font-extrabold' : 'text-slate-700 hover:text-emerald-700 hover:bg-slate-50'
+                }`}
+              >
+                <Home className="w-4 h-4 text-emerald-600" />
+                <span>Back to Home</span>
+              </a>
+
               <Link
                 to="/services"
                 className={`px-3 py-2 rounded-xl transition ${
@@ -370,6 +382,18 @@ export const Navbar = () => {
           </div>
         )}
       </nav>
+
+      {/* FLOATING QUICK GO TO MAIN HOME BUTTON (ALWAYS VISIBLE AT BOTTOM RIGHT FOR ALL USERS) */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <a
+          href="/"
+          onClick={handleGoHome}
+          className="flex items-center gap-2 px-5 py-3.5 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs rounded-full shadow-2xl border-2 border-white transition transform hover:scale-105 cursor-pointer"
+        >
+          <Home className="w-4 h-4 text-white" />
+          <span>🏠 Return to Main Home Page →</span>
+        </a>
+      </div>
 
       {/* 24/7 INTERACTIVE SUPPORT & TICKET MODAL */}
       {isSupportModalOpen && (
