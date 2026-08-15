@@ -1,6 +1,5 @@
 [build]
-  base = "frontend"
-  command = "npm run build"
+  command = "cd frontend && npm install && npm run build && cp -r dist/* ../dist/ && cp dist/index.html ../index.html"
   publish = "dist"
 
 [[redirects]]
