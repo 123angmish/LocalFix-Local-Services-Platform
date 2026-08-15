@@ -102,6 +102,12 @@ export const Navbar = () => {
     navigate('/');
   };
 
+  const handleGoHome = (e) => {
+    e.preventDefault();
+    navigate('/');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const isActive = (path) => location.pathname === path;
 
   const isVendor = user?.role === 'VENDOR' || user?.role === 'PROVIDER';
@@ -113,17 +119,32 @@ export const Navbar = () => {
       <nav className="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm font-sans">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               {/* Clickable Brand Logo to return to Main Page */}
-              <Link to="/" className="flex items-center gap-2 font-black text-2xl text-emerald-600 tracking-tight hover:opacity-90 transition">
+              <a
+                href="/"
+                onClick={handleGoHome}
+                title="Go to LocalFix Main Landing Page"
+                className="flex items-center gap-2 font-black text-2xl text-emerald-600 tracking-tight hover:opacity-90 transition cursor-pointer"
+              >
                 <div className="p-2 bg-emerald-600 text-white rounded-xl shadow-md shadow-emerald-200">
                   <Wrench className="w-5 h-5" />
                 </div>
                 <span>Local<span className="text-slate-900">Fix</span></span>
-              </Link>
+              </a>
+
+              {/* ALWAYS-VISIBLE PROMINENT GO TO HOME BUTTON ON ALL SCREEN SIZES */}
+              <a
+                href="/"
+                onClick={handleGoHome}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full font-black text-xs shadow-md transition cursor-pointer shrink-0"
+              >
+                <Home className="w-3.5 h-3.5" />
+                <span>🏠 Home</span>
+              </a>
 
               {/* GPS Location Button & Selector */}
-              <div className="hidden sm:flex items-center gap-2">
+              <div className="hidden lg:flex items-center gap-2">
                 <button
                   type="button"
                   onClick={handleDetectLocation}
@@ -146,17 +167,6 @@ export const Navbar = () => {
 
             {/* Desktop Navigation Links */}
             <div className="hidden md:flex items-center space-x-2 text-xs font-bold">
-              {/* Explicit GO BACK TO MAIN SITE Button */}
-              <Link
-                to="/"
-                className={`px-3 py-2 rounded-xl flex items-center gap-1.5 transition ${
-                  isActive('/') ? 'bg-emerald-50 text-emerald-700 font-extrabold' : 'text-slate-700 hover:text-emerald-700 hover:bg-slate-50'
-                }`}
-              >
-                <Home className="w-4 h-4 text-emerald-600" />
-                <span>Go Back to Home</span>
-              </Link>
-
               <Link
                 to="/services"
                 className={`px-3 py-2 rounded-xl transition ${
@@ -295,10 +305,10 @@ export const Navbar = () => {
         {/* Mobile Navigation Drawer */}
         {mobileMenuOpen && (
           <div className="md:hidden border-t border-slate-200 bg-white px-4 pt-2 pb-4 space-y-2 font-bold text-xs">
-            <Link to="/" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-emerald-700 flex items-center gap-1.5">
+            <a href="/" onClick={handleGoHome} className="block py-2 text-emerald-700 flex items-center gap-1.5 font-black text-sm">
               <Home className="w-4 h-4" />
-              <span>Go Back to Main Page</span>
-            </Link>
+              <span>🏠 Go Back to Main Landing Page</span>
+            </a>
 
             <Link to="/services" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-slate-800">
               Find Services
