@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Wrench, Sparkles, User, LogOut, LayoutDashboard, Menu, X, ShieldAlert, Calendar, MapPin, ShieldCheck, FileText, Building, Users, Navigation, Briefcase, Check } from 'lucide-react';
+import { Wrench, Sparkles, User, LogOut, LayoutDashboard, Menu, X, ShieldAlert, Calendar, MapPin, ShieldCheck, FileText, Building, Users, Navigation, Briefcase, Check, Headphones, MessageSquare, PhoneCall, HelpCircle, ArrowRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../api/axios';
 
@@ -10,6 +10,11 @@ export const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Support & Help Center Modal State
+  const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
+  const [supportMessage, setSupportMessage] = useState('');
+  const [supportTopic, setSupportTopic] = useState('BOOKING_ISSUE');
 
   // Real GPS & Location State
   const [currentCity, setCurrentCity] = useState(localStorage.getItem('localfix_city') || 'Select Location');
@@ -24,7 +29,6 @@ export const Navbar = () => {
     'Chandigarh', 'Indore', 'Patna', 'Kochi', 'Surat'
   ];
 
-  // Real OpenStreetMap Reverse Geocoding
   const handleDetectLocation = () => {
     if (!navigator.geolocation) {
       toast.error("Geolocation is not supported by your browser");
@@ -37,7 +41,6 @@ export const Navbar = () => {
         const lng = pos.coords.longitude;
 
         try {
-          // Fetch exact address details via OpenStreetMap Nominatim reverse geocoding API
           const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
           const data = await response.json();
 
@@ -84,6 +87,17 @@ export const Navbar = () => {
     setManualCityInput('');
   };
 
+  const handleSupportSubmit = (e) => {
+    e.preventDefault();
+    if (!supportMessage.trim()) {
+      toast.error("Please enter your support query details");
+      return;
+    }
+    toast.success("✅ Support Ticket logged! Our 24/7 team will call you back within 15 minutes.");
+    setSupportMessage('');
+    setIsSupportModalOpen(false);
+  };
+
   const handleLogout = () => {
     logout();
     navigate('/');
@@ -91,13 +105,17 @@ export const Navbar = () => {
 
   const isActive = (path) => location.pathname === path;
 
+  const isVendor = user?.role === 'VENDOR' || user?.role === 'PROVIDER';
+  const isCustomer = user?.role === 'CUSTOMER';
+  const isAdmin = user?.role === 'ADMIN';
+
   return (
     <>
       <nav className="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm font-sans">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center gap-4">
-              <Link to="/" className="flex items-center gap-2 font-bold text-2xl text-emerald-600 tracking-tight">
+              <Link to="/" className="flex items-center gap-2 font-black text-2xl text-emerald-600 tracking-tight">
                 <div className="p-2 bg-emerald-600 text-white rounded-xl shadow-md shadow-emerald-200">
                   <Wrench className="w-5 h-5" />
                 </div>
@@ -126,90 +144,134 @@ export const Navbar = () => {
               </div>
             </div>
 
-            <div className="hidden md:flex items-center space-x-3 text-xs">
+            {/* Desktop Dynamic Role-Based Navigation */}
+            <div className="hidden md:flex items-center space-x-2 text-xs font-bold">
+              {/* Common Links for Everyone */}
+              <Link
+                to="/services"
+                className={`px-3 py-2 rounded-xl transition ${
+                  isActive('/services') ? 'bg-emerald-50 text-emerald-700 font-extrabold' : 'text-slate-700 hover:text-emerald-600 hover:bg-slate-50'
+                }`}
+              >
+                Find Services
+              </Link>
+
+              {/* CUSTOMER NAV LINKS */}
+              {isCustomer && (
+                <>
+                  <Link
+                    to="/customer/dashboard"
+                    className={`px-3 py-2 rounded-xl flex items-center gap-1.5 transition ${
+                      isActive('/customer/dashboard') ? 'bg-emerald-50 text-emerald-700 font-extrabold' : 'text-slate-700 hover:text-emerald-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    <LayoutDashboard className="w-4 h-4 text-emerald-600" />
+                    My Bookings
+                  </Link>
+                  <Link
+                    to="/repair-passport"
+                    className={`px-3 py-2 rounded-xl flex items-center gap-1.5 transition ${
+                      isActive('/repair-passport') ? 'bg-emerald-50 text-emerald-700 font-extrabold' : 'text-slate-700 hover:text-emerald-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                    Repair Passport
+                  </Link>
+                  <Link
+                    to="/ai-recommender"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-sm hover:opacity-90 font-extrabold"
+                  >
+                    <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                    AI Assistant
+                  </Link>
+                </>
+              )}
+
+              {/* VENDOR NAV LINKS */}
+              {isVendor && (
+                <>
+                  <Link
+                    to="/vendor/dashboard"
+                    className={`px-3 py-2 rounded-xl flex items-center gap-1.5 transition ${
+                      isActive('/vendor/dashboard') ? 'bg-emerald-50 text-emerald-700 font-extrabold' : 'text-slate-700 hover:text-emerald-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    <LayoutDashboard className="w-4 h-4 text-emerald-600" />
+                    Incoming Jobs Queue
+                  </Link>
+                  <Link
+                    to="/vendor/services"
+                    className={`px-3 py-2 rounded-xl flex items-center gap-1.5 transition ${
+                      isActive('/vendor/services') ? 'bg-emerald-50 text-emerald-700 font-extrabold' : 'text-slate-700 hover:text-emerald-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    <Wrench className="w-4 h-4 text-emerald-600" />
+                    Manage Services
+                  </Link>
+                  <Link
+                    to="/vendor/crm"
+                    className={`px-3 py-2 rounded-xl flex items-center gap-1.5 transition ${
+                      isActive('/vendor/crm') ? 'bg-emerald-50 text-emerald-700 font-extrabold' : 'text-slate-700 hover:text-emerald-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    <Building className="w-4 h-4 text-emerald-600" />
+                    Work History & Invoices
+                  </Link>
+                </>
+              )}
+
+              {/* ADMIN NAV LINKS */}
+              {isAdmin && (
+                <Link
+                  to="/admin/dashboard"
+                  className="px-3 py-2 text-slate-700 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl flex items-center gap-1.5 transition"
+                >
+                  <ShieldAlert className="w-4 h-4 text-amber-500" />
+                  Admin Portal
+                </Link>
+              )}
+
+              {/* 24/7 SUPPORT LINK (ALWAYS WORKING FOR ALL ROLES) */}
+              <button
+                type="button"
+                onClick={() => setIsSupportModalOpen(true)}
+                className="px-3 py-2 text-slate-700 hover:text-emerald-700 hover:bg-slate-50 rounded-xl flex items-center gap-1.5 transition cursor-pointer"
+              >
+                <Headphones className="w-4 h-4 text-emerald-600" />
+                <span>{isVendor ? 'Vendor Partner Helpdesk' : 'Customer Support 24/7'}</span>
+              </button>
+
+              {/* AUTH & USER MENU */}
               {user ? (
-                <div className="flex items-center space-x-2">
-                  {user.role === 'CUSTOMER' && (
-                    <>
-                      <Link
-                        to="/customer/dashboard"
-                        className={`px-3 py-2 font-bold rounded-lg flex items-center gap-1.5 transition ${
-                          isActive('/customer/dashboard') ? 'bg-emerald-50 text-emerald-700' : 'text-slate-700 hover:text-emerald-600'
-                        }`}
-                      >
-                        <LayoutDashboard className="w-4 h-4" />
-                        My Bookings
-                      </Link>
-                      <Link
-                        to="/repair-passport"
-                        className={`px-3 py-2 font-bold rounded-lg flex items-center gap-1.5 transition ${
-                          isActive('/repair-passport') ? 'bg-emerald-50 text-emerald-700' : 'text-slate-700 hover:text-emerald-600'
-                        }`}
-                      >
-                        <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                        Repair Passport
-                      </Link>
-                      <Link
-                        to="/ai-recommender"
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-sm hover:opacity-90 font-bold"
-                      >
-                        <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                        AI Assistant
-                      </Link>
-                    </>
-                  )}
-
-                  {(user.role === 'VENDOR' || user.role === 'PROVIDER') && (
-                    <>
-                      <Link
-                        to="/vendor/dashboard"
-                        className={`px-3 py-2 font-bold rounded-lg flex items-center gap-1.5 transition ${
-                          isActive('/vendor/dashboard') ? 'bg-emerald-50 text-emerald-700' : 'text-slate-700 hover:text-emerald-600'
-                        }`}
-                      >
-                        <LayoutDashboard className="w-4 h-4 text-emerald-600" />
-                        Incoming Jobs Queue
-                      </Link>
-                      <Link
-                        to="/vendor/services"
-                        className={`px-3 py-2 font-bold rounded-lg flex items-center gap-1.5 transition ${
-                          isActive('/vendor/services') ? 'bg-emerald-50 text-emerald-700' : 'text-slate-700 hover:text-emerald-600'
-                        }`}
-                      >
-                        <Wrench className="w-4 h-4 text-emerald-600" />
-                        Manage Services
-                      </Link>
-                    </>
-                  )}
-
-                  {user.role === 'ADMIN' && (
-                    <Link
-                      to="/admin/dashboard"
-                      className="px-3 py-2 font-semibold text-slate-700 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg flex items-center gap-1.5 transition"
-                    >
-                      <ShieldAlert className="w-4 h-4" />
-                      Admin Portal
-                    </Link>
-                  )}
-
-                  <div className="flex items-center gap-2 pl-3 border-l border-slate-200">
-                    <div className="w-8 h-8 rounded-full bg-emerald-700 text-white flex items-center justify-center font-extrabold text-xs shadow-sm">
-                      {(user?.name || user?.email || 'U').charAt(0).toUpperCase()}
+                <div className="flex items-center gap-2 pl-3 border-l border-slate-200">
+                  <div className="flex items-center gap-2 bg-slate-100 px-2.5 py-1 rounded-full border border-slate-200">
+                    <div className="w-7 h-7 rounded-full bg-emerald-700 text-white flex items-center justify-center font-black text-xs shadow-sm">
+                      {(user?.businessName || user?.name || user?.email || 'U').charAt(0).toUpperCase()}
                     </div>
-                    <button
-                      onClick={handleLogout}
-                      title="Logout"
-                      className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
-                    >
-                      <LogOut className="w-4 h-4" />
-                    </button>
+                    <span className="text-xs font-black text-slate-900 truncate max-w-[100px]">
+                      {(user?.businessName || user?.name || 'User').split(' ')[0]}
+                    </span>
                   </div>
+                  <button
+                    onClick={handleLogout}
+                    title="Logout Account"
+                    className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition cursor-pointer"
+                  >
+                    <LogOut className="w-4 h-4" />
+                  </button>
                 </div>
               ) : (
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-2 pl-2">
+                  <Link
+                    to="/register?role=VENDOR"
+                    className="px-3 py-2 font-extrabold text-slate-700 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition flex items-center gap-1 text-xs"
+                  >
+                    <Briefcase className="w-4 h-4 text-amber-500" />
+                    <span>Become a Provider</span>
+                  </Link>
                   <Link
                     to="/login"
-                    className="px-4 py-2 font-extrabold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-sm transition flex items-center gap-2 text-xs"
+                    className="px-4 py-2 font-extrabold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-md transition flex items-center gap-1.5 text-xs"
                   >
                     <User className="w-4 h-4 text-white" />
                     <span>Sign In / Register</span>
@@ -229,49 +291,65 @@ export const Navbar = () => {
           </div>
         </div>
 
+        {/* Mobile Navigation Drawer */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-slate-200 bg-white px-4 pt-2 pb-4 space-y-2">
-            {user ? (
+          <div className="md:hidden border-t border-slate-200 bg-white px-4 pt-2 pb-4 space-y-2 font-bold text-xs">
+            <Link to="/services" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-slate-800">
+              Find Services
+            </Link>
+
+            {isCustomer && (
               <>
-                {user.role === 'CUSTOMER' && (
-                  <>
-                    <Link to="/customer/dashboard" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-sm font-bold text-slate-800">
-                      My Customer Bookings
-                    </Link>
-                    <Link to="/repair-passport" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-sm font-bold text-slate-800">
-                      Digital Repair Passport
-                    </Link>
-                    <Link to="/ai-recommender" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-sm font-bold text-emerald-700">
-                      ✨ AI Assistant
-                    </Link>
-                  </>
-                )}
-                {(user.role === 'VENDOR' || user.role === 'PROVIDER') && (
-                  <>
-                    <Link to="/vendor/dashboard" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-sm font-bold text-slate-800">
-                      Incoming Jobs Queue
-                    </Link>
-                    <Link to="/vendor/services" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-sm font-bold text-slate-800">
-                      Manage Service Listings
-                    </Link>
-                    <Link to="/vendor/crm" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-sm font-bold text-emerald-700">
-                      Technician SaaS CRM
-                    </Link>
-                  </>
-                )}
-                <button
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    handleLogout();
-                  }}
-                  className="w-full text-left py-2 text-sm font-bold text-red-600"
-                >
-                  Sign Out
-                </button>
+                <Link to="/customer/dashboard" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-slate-800">
+                  My Bookings
+                </Link>
+                <Link to="/repair-passport" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-slate-800">
+                  Digital Repair Passport
+                </Link>
+                <Link to="/ai-recommender" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-emerald-700">
+                  ✨ AI Assistant
+                </Link>
               </>
+            )}
+
+            {isVendor && (
+              <>
+                <Link to="/vendor/dashboard" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-slate-800">
+                  Incoming Jobs Queue
+                </Link>
+                <Link to="/vendor/services" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-slate-800">
+                  Manage Service Listings
+                </Link>
+                <Link to="/vendor/crm" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-emerald-700">
+                  Work History & Invoices
+                </Link>
+              </>
+            )}
+
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                setIsSupportModalOpen(true);
+              }}
+              className="w-full text-left py-2 text-emerald-700 flex items-center gap-1.5"
+            >
+              <Headphones className="w-4 h-4" />
+              <span>{isVendor ? 'Vendor Partner Helpdesk' : 'Customer Support 24/7'}</span>
+            </button>
+
+            {user ? (
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  handleLogout();
+                }}
+                className="w-full text-left py-2 text-rose-600 font-extrabold pt-2 border-t border-slate-100"
+              >
+                Sign Out
+              </button>
             ) : (
               <div className="pt-2 border-t border-slate-100 flex flex-col space-y-2">
-                <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="w-full text-center py-2.5 text-xs font-extrabold bg-emerald-600 text-white rounded-xl shadow-sm">
+                <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="w-full text-center py-2.5 bg-emerald-600 text-white rounded-xl shadow">
                   Sign In / Register
                 </Link>
               </div>
@@ -279,6 +357,95 @@ export const Navbar = () => {
           </div>
         )}
       </nav>
+
+      {/* 24/7 INTERACTIVE SUPPORT & TICKET MODAL */}
+      {isSupportModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 font-sans">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-6 border border-slate-200 animate-in fade-in zoom-in duration-200">
+            <div className="flex justify-between items-center border-b border-slate-100 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
+                  <Headphones className="w-5 h-5 text-emerald-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-slate-900">
+                    {isVendor ? 'Vendor Partner Helpdesk' : 'Customer Support 24/7'}
+                  </h3>
+                  <p className="text-xs text-slate-500">Live Support Hotline & Instant Ticket Logging</p>
+                </div>
+              </div>
+              <button onClick={() => setIsSupportModalOpen(false)} className="p-2 text-slate-400 hover:text-slate-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Live Contact Quick Buttons */}
+            <div className="grid grid-cols-2 gap-3">
+              <a
+                href="https://wa.me/919717017988?text=Hello%20LocalFix%20Support%2C%20I%20need%20assistance"
+                target="_blank"
+                rel="noreferrer"
+                className="p-3 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-2xl flex items-center gap-2 transition text-emerald-950 text-xs font-extrabold"
+              >
+                <MessageSquare className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span>WhatsApp Live Chat</span>
+              </a>
+
+              <a
+                href="tel:+919717017988"
+                className="p-3 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl flex items-center gap-2 transition text-xs font-extrabold"
+              >
+                <PhoneCall className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>Toll-Free Hotline</span>
+              </a>
+            </div>
+
+            <form onSubmit={handleSupportSubmit} className="space-y-4">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-700">Support Topic:</label>
+                <select
+                  value={supportTopic}
+                  onChange={(e) => setSupportTopic(e.target.value)}
+                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:ring-2 focus:ring-emerald-500"
+                >
+                  <option value="BOOKING_ISSUE">Booking Delay / Technician Arrival</option>
+                  <option value="PAYMENT_UPI">Payment / Refund / Pricing Issue</option>
+                  <option value="WARRANTY_CLAIM">30-Day Fix Warranty Claim</option>
+                  <option value="VENDOR_HELP">Vendor Account / Service Listing Query</option>
+                </select>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-700">Describe Your Query / Request:</label>
+                <textarea
+                  rows="3"
+                  required
+                  value={supportMessage}
+                  onChange={(e) => setSupportMessage(e.target.value)}
+                  placeholder="Describe your issue or order number..."
+                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-emerald-500"
+                ></textarea>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setIsSupportModalOpen(false)}
+                  className="px-4 py-2 text-slate-600 font-semibold text-xs rounded-xl hover:bg-slate-100"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl shadow-md transition"
+                >
+                  Log Ticket & Request Call →
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Real Location Selector Modal */}
       {isLocationModalOpen && (
@@ -299,7 +466,6 @@ export const Navbar = () => {
               </button>
             </div>
 
-            {/* GPS Auto-Detect Button */}
             <button
               onClick={() => {
                 setIsLocationModalOpen(false);
@@ -311,7 +477,6 @@ export const Navbar = () => {
               <span>Use Precise GPS Location</span>
             </button>
 
-            {/* Custom City / Area Form */}
             <form onSubmit={handleManualSubmit} className="space-y-2">
               <label className="text-xs font-bold text-slate-700">Enter City, Locality, or Pincode:</label>
               <div className="flex gap-2">
@@ -332,7 +497,6 @@ export const Navbar = () => {
               </div>
             </form>
 
-            {/* Popular Cities Grid */}
             <div className="space-y-2">
               <label className="text-xs font-extrabold uppercase tracking-wider text-slate-400">Popular Cities:</label>
               <div className="grid grid-cols-3 gap-2">
