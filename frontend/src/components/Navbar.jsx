@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Wrench, Sparkles, User, LogOut, LayoutDashboard, Menu, X, ShieldAlert, Calendar, MapPin, ShieldCheck, FileText, Building, Users, Navigation, Briefcase, Check, Headphones, MessageSquare, PhoneCall, HelpCircle, ArrowRight } from 'lucide-react';
+import { Wrench, Sparkles, User, LogOut, LayoutDashboard, Menu, X, ShieldAlert, MapPin, ShieldCheck, Navigation, Briefcase, Check, Headphones, MessageSquare, PhoneCall, Home } from 'lucide-react';
 import toast from 'react-hot-toast';
-import api from '../api/axios';
 
 export const Navbar = () => {
   const { user, logout } = useAuth();
@@ -115,7 +114,8 @@ export const Navbar = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center gap-4">
-              <Link to="/" className="flex items-center gap-2 font-black text-2xl text-emerald-600 tracking-tight">
+              {/* Clickable Brand Logo to return to Main Page */}
+              <Link to="/" className="flex items-center gap-2 font-black text-2xl text-emerald-600 tracking-tight hover:opacity-90 transition">
                 <div className="p-2 bg-emerald-600 text-white rounded-xl shadow-md shadow-emerald-200">
                   <Wrench className="w-5 h-5" />
                 </div>
@@ -144,9 +144,19 @@ export const Navbar = () => {
               </div>
             </div>
 
-            {/* Desktop Dynamic Role-Based Navigation */}
+            {/* Desktop Navigation Links */}
             <div className="hidden md:flex items-center space-x-2 text-xs font-bold">
-              {/* Common Links for Everyone */}
+              {/* Explicit GO BACK TO MAIN SITE Button */}
+              <Link
+                to="/"
+                className={`px-3 py-2 rounded-xl flex items-center gap-1.5 transition ${
+                  isActive('/') ? 'bg-emerald-50 text-emerald-700 font-extrabold' : 'text-slate-700 hover:text-emerald-700 hover:bg-slate-50'
+                }`}
+              >
+                <Home className="w-4 h-4 text-emerald-600" />
+                <span>Go Back to Home</span>
+              </Link>
+
               <Link
                 to="/services"
                 className={`px-3 py-2 rounded-xl transition ${
@@ -208,15 +218,6 @@ export const Navbar = () => {
                     <Wrench className="w-4 h-4 text-emerald-600" />
                     Manage Services
                   </Link>
-                  <Link
-                    to="/vendor/crm"
-                    className={`px-3 py-2 rounded-xl flex items-center gap-1.5 transition ${
-                      isActive('/vendor/crm') ? 'bg-emerald-50 text-emerald-700 font-extrabold' : 'text-slate-700 hover:text-emerald-600 hover:bg-slate-50'
-                    }`}
-                  >
-                    <Building className="w-4 h-4 text-emerald-600" />
-                    Work History & Invoices
-                  </Link>
                 </>
               )}
 
@@ -231,14 +232,14 @@ export const Navbar = () => {
                 </Link>
               )}
 
-              {/* 24/7 SUPPORT LINK (ALWAYS WORKING FOR ALL ROLES) */}
+              {/* 24/7 SUPPORT LINK */}
               <button
                 type="button"
                 onClick={() => setIsSupportModalOpen(true)}
                 className="px-3 py-2 text-slate-700 hover:text-emerald-700 hover:bg-slate-50 rounded-xl flex items-center gap-1.5 transition cursor-pointer"
               >
                 <Headphones className="w-4 h-4 text-emerald-600" />
-                <span>{isVendor ? 'Vendor Partner Helpdesk' : 'Customer Support 24/7'}</span>
+                <span>{isVendor ? 'Vendor Helpdesk' : 'Support 24/7'}</span>
               </button>
 
               {/* AUTH & USER MENU */}
@@ -294,6 +295,11 @@ export const Navbar = () => {
         {/* Mobile Navigation Drawer */}
         {mobileMenuOpen && (
           <div className="md:hidden border-t border-slate-200 bg-white px-4 pt-2 pb-4 space-y-2 font-bold text-xs">
+            <Link to="/" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-emerald-700 flex items-center gap-1.5">
+              <Home className="w-4 h-4" />
+              <span>Go Back to Main Page</span>
+            </Link>
+
             <Link to="/services" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-slate-800">
               Find Services
             </Link>
@@ -320,9 +326,6 @@ export const Navbar = () => {
                 <Link to="/vendor/services" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-slate-800">
                   Manage Service Listings
                 </Link>
-                <Link to="/vendor/crm" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-emerald-700">
-                  Work History & Invoices
-                </Link>
               </>
             )}
 
@@ -334,7 +337,7 @@ export const Navbar = () => {
               className="w-full text-left py-2 text-emerald-700 flex items-center gap-1.5"
             >
               <Headphones className="w-4 h-4" />
-              <span>{isVendor ? 'Vendor Partner Helpdesk' : 'Customer Support 24/7'}</span>
+              <span>{isVendor ? 'Vendor Helpdesk' : 'Support 24/7'}</span>
             </button>
 
             {user ? (
@@ -379,7 +382,6 @@ export const Navbar = () => {
               </button>
             </div>
 
-            {/* Live Contact Quick Buttons */}
             <div className="grid grid-cols-2 gap-3">
               <a
                 href="https://wa.me/919717017988?text=Hello%20LocalFix%20Support%2C%20I%20need%20assistance"

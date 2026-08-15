@@ -4,7 +4,7 @@ import api from '../api/axios';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
-import { Calendar, Clock, CheckCircle2, IndianRupee, Star, Wrench, Layers, ArrowRight, ShieldCheck, Upload, Edit, X, Building, User, Phone, MapPin, ExternalLink, Filter } from 'lucide-react';
+import { Calendar, Clock, CheckCircle2, IndianRupee, Star, Wrench, Layers, ArrowRight, ShieldCheck, Upload, Edit, X, Building, User, Phone, MapPin, ExternalLink, Filter, Home } from 'lucide-react';
 import { AadhaarKycModal } from '../components/AadhaarKycModal';
 
 export const VendorDashboardPage = () => {
@@ -144,6 +144,13 @@ export const VendorDashboardPage = () => {
         </div>
 
         <div className="flex flex-wrap gap-3">
+          <Link
+            to="/"
+            className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs rounded-xl shadow-md transition flex items-center gap-1.5 cursor-pointer"
+          >
+            <Home className="w-4 h-4" />
+            <span>Go Back to Main Site</span>
+          </Link>
           <button
             onClick={() => setIsEditProfileModalOpen(true)}
             className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center gap-1.5 cursor-pointer border border-slate-700"

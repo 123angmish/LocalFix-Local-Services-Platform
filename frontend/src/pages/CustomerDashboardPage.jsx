@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
-import { Calendar, Clock, CheckCircle2, IndianRupee, ArrowRight, Wrench, Sparkles, ShieldCheck, FileText, AlertTriangle, Building, Tag, ShieldAlert, X, ChevronRight, Check, Plus, Search, MapPin, Star } from 'lucide-react';
+import { Calendar, Clock, CheckCircle2, IndianRupee, ArrowRight, Wrench, Sparkles, ShieldCheck, FileText, AlertTriangle, Building, Tag, ShieldAlert, X, ChevronRight, Check, Plus, Search, MapPin, Star, Home } from 'lucide-react';
 
 export const CustomerDashboardPage = () => {
   const { user } = useAuth();
@@ -80,6 +80,13 @@ export const CustomerDashboardPage = () => {
         </div>
 
         <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+          <Link
+            to="/"
+            className="px-4 py-3 bg-slate-800 hover:bg-slate-700 text-white font-extrabold text-xs rounded-2xl shadow-md flex items-center gap-2 transition border border-slate-700"
+          >
+            <Home className="w-4 h-4 text-emerald-400" />
+            <span>Go Back to Main Site</span>
+          </Link>
           <Link
             to="/ai-recommender"
             className="px-4 py-3 bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-xs rounded-2xl shadow-md flex items-center gap-2 transition"
